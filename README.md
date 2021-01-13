@@ -8,6 +8,6 @@ This repo contains a research experiment for edge computing using the Fastly's C
 - [Rust nightly](https://www.oreilly.com/library/view/rust-programming-by/9781788390637/e07dc768-de29-482e-804b-0274b4bef418.xhtml)
 - A Fastly Compute@Edge account
 
-## How to run it
+## How to build and deploy the service 
 
-`bash deploy.sh <service_id>`
+Run `bash deploy.sh <service_id>`
