@@ -14,6 +14,7 @@ type FUNCTION_NAME = Literal;
 type SKIP = Literal;
 type TAKE = Literal;
 
+#[derive(Debug)]
 struct Arguments {
     file: String,
     function_name: String,
@@ -30,7 +31,6 @@ struct Syntax {
     sep3: Token![,],
     take: LitInt
 }
-
 impl Parse for Arguments {
     fn parse(stream: ParseStream) -> Result<Self>{
 
@@ -53,9 +53,9 @@ impl Parse for Arguments {
         return Ok(
             Arguments{
                 file: syntax.name.value(),
-                function_name: syntax.function_name,
-                skip: syntax.skip,
-                take: syntax.take
+                function_name: syntax.function_name.value(),
+                skip: syntax.skip.base10_parse()?,
+                take: syntax.take.base10_parse()?
             }
         )
     }
@@ -66,7 +66,7 @@ pub fn make_answer(_item: TokenStream) -> TokenStream {
     // validate macro arguments
     // expecting wat_file, function_name, skip instructions in body, take instructions in body
     let arguments = parse_macro_input!(_item as Arguments);
-    let a  = format!("{:?}", arguments.file);
+    let a  = format!("{:?}", arguments);
 
     format!(r#"
     fn answer() -> u32 {{ 
