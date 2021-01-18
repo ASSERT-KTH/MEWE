@@ -1,16 +1,11 @@
 [package]
-name = "wat2mir_macro"
+name = "tests"
 version = "0.1.0"
 authors = ["Jacarte <javierca@kth.se>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[lib]
-proc-macro = true
 
 [dependencies]
-quote = "1.0"
-syn = "1.0.58"
-lazy_static = "1.4.0"
-regex = "1.4.3"
+wat2mir_macro = { path = "../wat2mir_macro" }

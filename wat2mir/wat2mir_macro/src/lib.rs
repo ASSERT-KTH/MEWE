@@ -2,17 +2,14 @@
 
 extern crate proc_macro;
 use proc_macro::*;
-use std::fs;
+use std::{fs, str::Split};
 use std::string::String;
 use syn::*;
 use syn::parse::*;
+use fs::*;
+use regex::Regex;
 
-use quote::*;
 
-type WAT_FILE = Literal;
-type FUNCTION_NAME = Literal;
-type SKIP = Literal;
-type TAKE = Literal;
 
 #[derive(Debug)]
 struct Arguments {
@@ -32,6 +29,7 @@ struct Syntax {
     take: LitInt
 }
 impl Parse for Arguments {
+    // Validate and parse the arguments of the macro
     fn parse(stream: ParseStream) -> Result<Self>{
 
         if stream.is_empty() {
@@ -48,12 +46,20 @@ impl Parse for Arguments {
             take: stream.parse().unwrap(),
         };
 
+        let meta = match fs::metadata(syntax.name.value())  {
+            Err(_) => panic!("File {} does not exist", syntax.name.value()),
+            Ok(m)  => m
+        };
 
+        if ! meta.is_file() {
+            panic!("File {} is not a valid file.", syntax.name.value())
+        }
+        // Validate the existance of the file
 
         return Ok(
             Arguments{
                 file: syntax.name.value(),
-                function_name: syntax.function_name.value(),
+                function_name: syntax.function_name.value().replace("$", "\\$"), // Escape to be able to use in regex
                 skip: syntax.skip.base10_parse()?,
                 take: syntax.take.base10_parse()?
             }
@@ -61,27 +67,29 @@ impl Parse for Arguments {
     }
 }
 
+
 #[proc_macro]
 pub fn make_answer(_item: TokenStream) -> TokenStream {
     // validate macro arguments
     // expecting wat_file, function_name, skip instructions in body, take instructions in body
     let arguments = parse_macro_input!(_item as Arguments);
-    let a  = format!("{:?}", arguments);
 
-    format!(r#"
-    fn answer() -> u32 {{ 
-        {:?};
-        42 
+    let content = fs::read_to_string(arguments.file).expect("Could not read the file!");
+    
+    format!(r##"
+    #[no_mangle]
+    #[cfg(target_arch = "wasm32")]
+    global_asm!(
+        r#"{}"#
+    );
+
+    extern {{
+        fn {}() -> i32;
     }}
-    "#, a).parse().unwrap()
+
+    "##, content, arguments.function_name ).parse().unwrap()
 }
 
-fn load_wat_file(wat_file: String) -> String{
-    match fs::read_to_string(wat_file) {
-        Err(e) => panic!(e), 
-        Ok(x) => x // TODO parse and transform here
-    }
-}
 
 /*
 macro_rules! wat2mir {

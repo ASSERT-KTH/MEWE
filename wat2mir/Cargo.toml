@@ -1,11 +1,10 @@
-[package]
-name = "wat2mir"
-version = "0.1.0"
-authors = ["Jacarte <javierca@kth.se>"]
-edition = "2018"
+[workspace]
+
+members = [
+	"wat2mir_macro",
+    "t2wasm",
+	"tests"
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-
-[dependencies]
-wat2mir_macro = { path = "wat2mir_macro" }

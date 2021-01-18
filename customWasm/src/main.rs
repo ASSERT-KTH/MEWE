@@ -37,14 +37,19 @@ fn main(mut req: Request<Body>) -> Result<impl ResponseExt, Error> {
             .body(Body::from("This method is not allowed"))?);
     }
 
+	let pop = match std::env::var("FASTLY_POP") {
+		Ok(val) => val,
+		Err(_) => "NO_POP".to_string()
+	};
+
     // Pattern match on the request method and path.
     match (req.method(), req.uri().path()) {
         // If request is a `GET` to the `/` path, send a default response.
         (&Method::GET, "/") => Ok(Response::builder()
             .status(StatusCode::OK)
-            .body(Body::from(unsafe {
+            .body(Body::from(format!("POP: {} Result {}", pop, unsafe {
                 template()
-            }.to_string()))?),
+            }.to_string())))?),
         
         // If request is a `GET` to the `/backend` path, send to a named backend.
         (&Method::GET, "/backend") => {
