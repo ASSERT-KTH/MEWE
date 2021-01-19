@@ -51,7 +51,7 @@ pub fn translate2mir(file_name: &str, func_name: &str, as_function: &str, config
     }).collect::<Vec<_>>();
 
     let args = &func.args.iter().map(|t| {
-        format!(" {:?}", local_visitor.usedLocals.get(t))
+        format!(" {:?}", local_visitor.usedLocals.get(t).expect("Local not registered")).to_lowercase()
     }).collect::<Vec<_>>();
 
     let fty = module.types.get(func.ty())
@@ -68,9 +68,9 @@ pub fn translate2mir(file_name: &str, func_name: &str, as_function: &str, config
 
 
 
-    let all_locals = utils::cat(args, locals);
+    //let all_locals = utils::cat(args, locals);
 
-    head.push_str(&all_locals.join(",")); // TODO check if locals and parameters are in the same declaration in the MIR representation
+    head.push_str(&locals.join(",")); // TODO check if locals and parameters are in the same declaration in the MIR representation
     head.push_str("\n");
     // Emit MIR function header
     mir_visitor.local_function = Some(func);
