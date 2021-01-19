@@ -1,7 +1,7 @@
 #![crate_name = "wat2mir"]
 
 use walrus::*;
-use std::{default, env::args, path::PathBuf};
+use std::{default, env::args, path::PathBuf, unimplemented};
 use walrus::ir::*;
 use std::collections::HashMap;
 
@@ -30,32 +30,41 @@ impl MIRVisitor<'_>{
 
     fn emit_mem_kind_store(&mut self, kind: StoreKind){
         match kind {
-            StoreKind::I32 { atomic} => self.ret.push_str(&format!("i32.store ")),
-            StoreKind::I64 { atomic} => self.ret.push_str(&format!("i64.store ")),
-            StoreKind::I32_16 { atomic} => self.ret.push_str(&format!("i32.store16 ")),
-            StoreKind::I32_8 { atomic} => self.ret.push_str(&format!("i32.store8 ")),
-            StoreKind::I64_8 { atomic} => self.ret.push_str(&format!("i64.store8 ")),
-            StoreKind::I64_16 { atomic} => self.ret.push_str(&format!("i64.store16 ")),
-            StoreKind::I64_32 { atomic} => self.ret.push_str(&format!("i64.store32 ")),
-            StoreKind::F32 => self.ret.push_str(&format!("f32.store ")),
-            StoreKind::F64  => self.ret.push_str(&format!("f64.store ")),
+            StoreKind::I32 { atomic} => self.ret.push_str(&format!("i32.store")),
+            StoreKind::I64 { atomic} => self.ret.push_str(&format!("i64.store")),
+            StoreKind::I32_16 { atomic} => self.ret.push_str(&format!("i32.store16")),
+            StoreKind::I32_8 { atomic} => self.ret.push_str(&format!("i32.store8")),
+            StoreKind::I64_8 { atomic} => self.ret.push_str(&format!("i64.store8")),
+            StoreKind::I64_16 { atomic} => self.ret.push_str(&format!("i64.store16")),
+            StoreKind::I64_32 { atomic} => self.ret.push_str(&format!("i64.store32")),
+            StoreKind::F32 => self.ret.push_str(&format!("f32.store")),
+            StoreKind::F64  => self.ret.push_str(&format!("f64.store")),
             _ => unimplemented!("ERROR {:?}", kind)
         }
     }
 
     fn emit_mem_kind_load(&mut self, kind: LoadKind){
         match kind {
-            LoadKind::I32 {atomic} => self.ret.push_str(&format!("i32.load ")),
-            LoadKind::I32_8 { kind} => self.ret.push_str(&format!("i32.load8_u ")),
-            LoadKind::I64 { atomic} => self.ret.push_str(&format!("i64.load ")),
-            LoadKind::F64 => self.ret.push_str(&format!("f64.load ")),
-            LoadKind::I64_32 { kind: ZeroExtend } => self.ret.push_str(&format!("i64.load32_u ")),
+            LoadKind::I32 {atomic} => self.ret.push_str(&format!("i32.load")),
+            LoadKind::I32_8 { kind} => self.ret.push_str(&format!("i32.load8_u")),
+            LoadKind::I64 { atomic} => self.ret.push_str(&format!("i64.load")),
+            LoadKind::F64 => self.ret.push_str(&format!("f64.load")),
+            LoadKind::I64_32 { kind: ZeroExtend } => self.ret.push_str(&format!("i64.load32_u")),
             _ => panic!("ERROR {:?}", kind)
         }
     }
 
     fn emit_mem_arg(&mut self, arg: MemArg){
-        self.ret.push_str(&format!("offset={} align={}", arg.offset, arg.align));
+
+        match arg.offset {
+            0 => (),
+            _ => self.ret.push_str(&format!(" offset={}", arg.offset))
+        }
+        match arg.align {
+            1 => (),
+            _ => self.ret.push_str(&format!("a lign={}", arg.align))
+        }
+        self.ret.push_str("\n")
     }
 }
 /// check for the index to start the local operations. To emit the MIR code then, local.idx - minLocal
@@ -71,7 +80,7 @@ impl LocalGatheringVisitor<'_>{
 
     pub fn getMin(&mut self) -> i32
     {
-        self.minLocal + self.argsCount
+        self.minLocal // + self.argsCount
     }
 
     fn setUsedLocal(&mut self, idx: LocalId){
@@ -113,6 +122,13 @@ impl Visitor<'_> for LocalGatheringVisitor<'_> {
         self.setUsedLocal(instr.local);
     }
 
+    fn visit_local_tee(&mut self, instr: &walrus::ir::LocalTee)
+    {   
+        if self.minLocal > instr.local.index() as i32 {
+            self.minLocal = instr.local.index() as i32;
+        };
+        self.setUsedLocal(instr.local);
+    }
     
 }
 
@@ -122,7 +138,7 @@ impl Visitor<'_> for MIRVisitor<'_> {
         //self.ret.push_str(&format!("{:?}\n", instr))
     }
     
-    fn visit_local_id(&mut self, instr: &LocalId){ 
+    fn visit_local_id(&mut self, instr: &LocalId){         
         self.ret.push_str(& format!("{}\n", (instr.index() as i32) - self.minLocal));
     }
 
@@ -130,7 +146,7 @@ impl Visitor<'_> for MIRVisitor<'_> {
         // TODO assume that memoryId is always 0
         // Check ffmpeg example to check
         //unimplemented!("Not implemented visit_memory_id {}", self.ret) 
-        self.ret.push_str(&format!("\n"))
+        //self.ret.push_str(&format!("\n"))
     }
 
     fn visit_table_id(&mut self, instr: &TableId){ unimplemented!("Not implemented visit_table_id {}", self.ret) }
@@ -167,13 +183,104 @@ impl Visitor<'_> for MIRVisitor<'_> {
     }
         
     fn visit_binop(&mut self, instr: &Binop){ 
-        //TODO
-        self.ret.push_str(&format!("{:?}\n", instr.op))
+
+        //TODO Finish
+
+        let op = match instr.op {
+            // I32
+            BinaryOp::I32Sub => "i32.sub",
+            BinaryOp::I32Add => "i32.add",
+            BinaryOp::I32And => "i32.and",
+            BinaryOp::I32Or => "i32.or",
+            BinaryOp::I32Xor => "i32.xor",
+            BinaryOp::I32GtS => "i32.gt_s",
+            BinaryOp::I32Ne => "i32.ne",
+            BinaryOp::I32Eq => "i32.eq",
+            BinaryOp::I32LeU => "i32.le_u",
+            BinaryOp::I32LeS => "i32.le_s",
+            BinaryOp::I32GtU => "i32.gt_u",
+            BinaryOp::I32Shl => "i32.shl",
+            BinaryOp::I32ShrS => "i32.shr_s",
+            BinaryOp::I32ShrU => "i32.shr_u",
+            BinaryOp::I32GeU => "i32.ge_u",
+            BinaryOp::I32GeS => "i32.ge_s",
+            BinaryOp::I32Mul => "i32.mul",
+            BinaryOp::I32LtU => "i32.lt_u",
+            BinaryOp::I32LtS => "i32.lt_s",
+            BinaryOp::I32DivU => "i32.div_u",
+            BinaryOp::I32DivS => "i32.div_s",
+            BinaryOp::I32RemS => "i32.rem_s",
+            BinaryOp::I32RemU => "i32.rem_u",
+            // I64
+            BinaryOp::I64Sub =>  "i64.sub",
+            BinaryOp::I64Add =>  "i64.add",
+            BinaryOp::I64And =>  "i64.and",
+            BinaryOp::I64Or =>   "i64.or",
+            BinaryOp::I64Xor =>  "i64.xor",
+            BinaryOp::I64GtS =>  "i64.gt_s",
+            BinaryOp::I64Ne =>   "i64.ne",
+            BinaryOp::I64GeS => "i64.ge_s",
+            BinaryOp::I64Eq =>   "i64.eq",
+            BinaryOp::I64LeU =>  "i64.le_u",
+            BinaryOp::I64LeS =>  "i64.le_s",
+            BinaryOp::I64GtU =>  "i64.gt_u",
+            BinaryOp::I64Shl =>  "i64.shl",
+            BinaryOp::I64ShrS => "i64.shr_s",
+            BinaryOp::I64ShrU => "i64.shr_u",
+            BinaryOp::I64GeU =>  "i64.ge_u",
+            BinaryOp::I64Mul =>  "i64.mul",
+            BinaryOp::I64LtU =>  "i64.lt_u",
+            BinaryOp::I64LtS =>  "i64.lt_s",
+            BinaryOp::I64DivU => "i64.div_u",
+            BinaryOp::I64DivS => "i64.div_s",
+            BinaryOp::I64RemS => "i64.rem_s",
+            BinaryOp::I64RemU => "i64.rem_u",
+            // F32
+            BinaryOp::F32Add =>  "f32.add",
+            BinaryOp::F32Sub =>  "f32.sub",
+            BinaryOp::F32Ne =>   "f32.ne",
+            BinaryOp::F32Eq =>   "f32.eq",
+            BinaryOp::F32Mul =>  "f32.mul",
+            BinaryOp::F32Le =>  "f32.le",
+            BinaryOp::F32Lt =>  "f32.lt",
+            BinaryOp::F32Gt =>  "f32.gt",
+            BinaryOp::F32Ge =>  "f32.ge",
+            // F64
+            BinaryOp::F64Add =>  "f64.add",
+            BinaryOp::F64Sub =>  "f64.sub",
+            BinaryOp::F64Ne =>   "f64.ne",
+            BinaryOp::F64Eq =>   "f64.eq",
+            BinaryOp::F64Mul =>  "f64.mul",
+            BinaryOp::F64Le =>  "f64.le",
+            BinaryOp::F64Lt =>  "f64.lt",
+            BinaryOp::F64Gt =>  "f64.gt",
+            BinaryOp::F64Ge =>  "f64.ge",
+            _ => unimplemented!("Binop not implemented {:?}", instr)
+        };
+
+        self.ret.push_str(&format!("{}\n", op))
     }
 
     fn visit_unop(&mut self, instr: &Unop){ 
-        //TODO
-        self.ret.push_str(&format!("{:?}\n", instr.op))
+        
+        //TODO Finish
+
+        match instr.op {
+            UnaryOp::I32Eqz => self.ret.push_str("i32.eqz"),
+            UnaryOp::I64ExtendSI32 => self.ret.push_str("i64.extend_i32_s"),
+            UnaryOp::I64Eqz => self.ret.push_str("i64.eqz"),
+            UnaryOp::I32WrapI64 => self.ret.push_str("i32.wrap_i64"),
+            UnaryOp::I64ReinterpretF64 => self.ret.push_str("i64.reinterpret_f64"),
+            UnaryOp::F64Neg => self.ret.push_str("f64.neg"),
+            UnaryOp::F64Abs => self.ret.push_str("f64.abs"),
+            UnaryOp::I32TruncSF64 => self.ret.push_str("i32.trunc_f64_s"),
+            UnaryOp::I32TruncUF64 => self.ret.push_str("i32.trunc_f64_u"),
+            UnaryOp::F64ConvertSI32 => self.ret.push_str("f64.convert_i32_s"),
+            UnaryOp::F64ConvertUI32 => self.ret.push_str("f64.convert_i32_u"),
+            UnaryOp::I64ExtendUI32 => self.ret.push_str("i64.extend_i32_u"),
+            _ => unimplemented!("Unary op not implemented {:?}", instr)
+        }
+        self.ret.push_str("\n")
     }
 
     fn visit_select(&mut self, instr: &Select){ 
@@ -333,11 +440,12 @@ fn cat<T: Clone>(a: &[T], b: &[T]) -> Vec<T> {
 }
 
 /// translate wasm function to LLVM MIR format
-pub fn translate2mir(file_name: &str, func_name: &str, as_function: &str) -> String {
+pub fn translate2mir(file_name: &str, func_name: &str, as_function: &str) -> (String, String, String) {
 
 
    let module = walrus::Module::from_file(format!("{}", file_name)).unwrap();
     
+   let mut head = String::new();
    let mirVisitor = &mut MIRVisitor{ 
        blockHash:HashMap::new(), 
         localFunction: None,
@@ -363,6 +471,8 @@ pub fn translate2mir(file_name: &str, func_name: &str, as_function: &str) -> Str
             usedLocals: HashMap::new(),
             argsCount: item.args.len() as i32};
         
+            println!("{}", localVisitor.argsCount);
+
         localVisitor.initArgs(item, &module.locals);
         walrus::ir::dfs_in_order(localVisitor, item, item.entry_block());
 
@@ -379,30 +489,32 @@ pub fn translate2mir(file_name: &str, func_name: &str, as_function: &str) -> Str
             format!("{:?}", v).to_lowercase()
         }).collect::<Vec<_>>().join(","); 
 
-        mirVisitor.ret.push_str(&format!(".type {},@function\n", as_function));
-        mirVisitor.ret.push_str(&format!("{}:\n", as_function));
-        mirVisitor.ret.push_str(&format!(".functype {} ({}) -> ({})\n", as_function,
+        head.push_str(&format!(".type {},@function\n", as_function));
+        head.push_str(&format!("{}:\n", as_function));
+        head.push_str(&format!(".functype {} ({}) -> ({})\n", as_function,
             args.join(","), fty
         )); 
-        mirVisitor.ret.push_str(".local\t");
+        head.push_str(".local\t");
 
         
         
         let all_locals = cat(args, locals);
 
-        mirVisitor.ret.push_str(&all_locals.join(",")); // TODO check if locals and parameters are in the same declaration in the MIR representation
-        mirVisitor.ret.push_str("\n");
+        head.push_str(&all_locals.join(",")); // TODO check if locals and parameters are in the same declaration in the MIR representation
+        head.push_str("\n");
         // Emit MIR function header
         mirVisitor.localFunction = Some(item);
         mirVisitor.minLocal = localVisitor.getMin();
+        mirVisitor.ret = String::new();
+
         walrus::ir::dfs_in_order(mirVisitor, item, item.entry_block());
 
-        mirVisitor.ret.push_str("end_function\n");
+        // head.push_str("end_function\n");
         // Emit function body
 
         // Emit function closing
        }
    });
 
-   mirVisitor.ret.clone()
+   (head, mirVisitor.ret.clone(), String::from("end_function"))
 }
