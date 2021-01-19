@@ -11,6 +11,10 @@ enum BLOCKTPE {
     IF
 }
 
+pub struct Wat2MirConfig {
+   pub convert_end_to_mir: bool
+}
+
 struct MIRVisitor<'a> {
     minLocal: i32,
     module: &'a walrus::Module,
@@ -18,7 +22,8 @@ struct MIRVisitor<'a> {
     blockHash: HashMap<usize, BLOCKTPE>,
     ret: String,
     blockDepth: Vec<(InstrSeqId, i32)>,
-    depth: i32
+    depth: i32,
+    config: Wat2MirConfig
 }
 
 impl MIRVisitor<'_>{
@@ -43,13 +48,28 @@ impl MIRVisitor<'_>{
         }
     }
 
+    fn get_sign_tail(&mut self,kind: ExtendedLoad){
+        match kind {
+            ExtendedLoad::ZeroExtend => self.ret.push_str(&"u"),
+            ExtendedLoad::SignExtend => self.ret.push_str(&"s"),
+            _ => unimplemented!("Extended load type {:?}", kind)
+        }
+    }
+
     fn emit_mem_kind_load(&mut self, kind: LoadKind){
         match kind {
             LoadKind::I32 {atomic} => self.ret.push_str(&format!("i32.load")),
-            LoadKind::I32_8 { kind} => self.ret.push_str(&format!("i32.load8_u")),
+            LoadKind::I32_8 { kind} => {
+                self.ret.push_str(&format!("i32.load8_"));
+                self.get_sign_tail(kind)
+            },
             LoadKind::I64 { atomic} => self.ret.push_str(&format!("i64.load")),
             LoadKind::F64 => self.ret.push_str(&format!("f64.load")),
-            LoadKind::I64_32 { kind: ZeroExtend } => self.ret.push_str(&format!("i64.load32_u")),
+            LoadKind::I64_32 { kind } => 
+            {
+                self.ret.push_str(&format!("i64.load32_"));
+                self.get_sign_tail(kind)
+            },
             _ => panic!("ERROR {:?}", kind)
         }
     }
@@ -61,8 +81,13 @@ impl MIRVisitor<'_>{
             _ => self.ret.push_str(&format!(" offset={}", arg.offset))
         }
         match arg.align {
+            // TODO check
             1 => (),
-            _ => self.ret.push_str(&format!("a lign={}", arg.align))
+            2 => (),
+            4 => (),
+            8 => (),
+            16 => (),
+            _ => self.ret.push_str(&format!(" align={}", arg.align))
         }
         self.ret.push_str("\n")
     }
@@ -156,7 +181,7 @@ impl Visitor<'_> for MIRVisitor<'_> {
     }
 
     fn visit_function_id(&mut self, instr: &FunctionId){ 
-        self.ret.push_str(&format!("{:?} \n", instr))
+        self.ret.push_str(&format!("{:?}\n", instr.index()))
     }
 
     fn visit_data_id(&mut self, instr: &DataId){ 
@@ -284,11 +309,11 @@ impl Visitor<'_> for MIRVisitor<'_> {
     }
 
     fn visit_select(&mut self, instr: &Select){ 
-        self.ret.push_str("select")
+        self.ret.push_str("select\n")
     }
 
     fn visit_unreachable(&mut self, instr: &Unreachable){ 
-        self.ret.push_str("unreachable")
+        self.ret.push_str("unreachable\n")
     }
 
     fn visit_br(&mut self, instr: &Br){ 
@@ -308,7 +333,7 @@ impl Visitor<'_> for MIRVisitor<'_> {
     fn visit_br_table(&mut self, instr: &BrTable){ 
         let id1= self.get_depth(instr.default);
 
-        let remaining = instr.blocks.iter().map(|&s| {format!(" {:?}", self.get_depth(s))})
+        let remaining = instr.blocks.iter().map(|&s| {format!("{:?}", self.get_depth(s))})
         .collect::<Vec<_>>().join(" ");
 
         self.ret.push_str(&format!("br_table {} {}\n", remaining, id1))
@@ -388,6 +413,8 @@ impl Visitor<'_> for MIRVisitor<'_> {
 
     fn visit_const(&mut self, instr: &walrus::ir::Const){
         
+        // TODO check format 0x1p+31 (;=2.14748e+09;)
+
         match instr.value {
             walrus::ir::Value::I32(val) => self.ret.push_str(&format!("i32.const {}\n", val)) ,
             walrus::ir::Value::I64(val) => self.ret.push_str(&format!("i64.const {}\n", val)),
@@ -421,13 +448,17 @@ impl Visitor<'_> for MIRVisitor<'_> {
     {
         let tpe = self.blockHash.get(&instr_seq.id().index());
 
+        if self.config.convert_end_to_mir {
         match tpe {
             None => println!("Non registered block"),
             Some(x) => match x {
-                BLOCKTPE::LOOP => self.ret.push_str("end_loop\n"),
+                BLOCKTPE::LOOP => self.ret.push_str( "end_loop\n"),
                 BLOCKTPE::BLOCK => self.ret.push_str("end_block\n"),
                 _ => println!("Unknown")
             }
+        } }
+        else {
+            self.ret.push_str( "end\n")
         }
         let id = instr_seq.id();
         self.depth -= 1;
@@ -440,7 +471,7 @@ fn cat<T: Clone>(a: &[T], b: &[T]) -> Vec<T> {
 }
 
 /// translate wasm function to LLVM MIR format
-pub fn translate2mir(file_name: &str, func_name: &str, as_function: &str) -> (String, String, String) {
+pub fn translate2mir(file_name: &str, func_name: &str, as_function: &str, config: Wat2MirConfig) -> (String, String, String) {
 
 
    let module = walrus::Module::from_file(format!("{}", file_name)).unwrap();
@@ -451,6 +482,7 @@ pub fn translate2mir(file_name: &str, func_name: &str, as_function: &str) -> (St
         localFunction: None,
         depth: 0,
         blockDepth:vec![],
+        config,
         module: &module, minLocal: 0, ret:  String::from("") };
 
    module.funcs.iter_local().for_each(|(fromFuncId, item )| {

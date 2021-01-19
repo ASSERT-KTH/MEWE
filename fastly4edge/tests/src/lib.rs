@@ -1,6 +1,6 @@
 use std::{fs::read_to_string, path::PathBuf};
 
-use wat2mir::translate2mir;
+use wat2mir::{Wat2MirConfig, translate2mir};
 
 #[test]
 fn testCFG() {
@@ -11,7 +11,9 @@ fn testCFG() {
     let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 	d.push("resources/babbage.wasm");
 
-	let (_, body, _) = translate2mir(d.into_os_string().to_str().expect("Not valid str"), "printf_core", "babbage");
+	let (_, body, _) = translate2mir(d.into_os_string().to_str().expect("Not valid str"), "printf_core", "babbage", Wat2MirConfig{
+		convert_end_to_mir: false
+	});
 
 	let lines1 = body.split("\n");
 	let lines2 = read_to_string(d2).expect("msg");
