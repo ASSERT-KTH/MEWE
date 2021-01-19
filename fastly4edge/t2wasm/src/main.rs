@@ -4,9 +4,9 @@
 #![feature(global_asm)]
 
 extern crate wat2mir_macro;
-use wat2mir_macro::make_answer;
+use wat2mir_macro::inject_mir4wasm;
 
-make_answer!("/Users/javierca/Documents/Develop/fastly4edge/wat2mir/resources/babbage_main.wat", // relative to Cargo.toml
+inject_mir4wasm!("tests/resources/babbage_main.wat", // relative to Cargo.toml
 "babbage1", 3, 20);
 
 fn main() {

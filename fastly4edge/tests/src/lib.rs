@@ -1,9 +1,8 @@
 use std::{fs::read_to_string, path::PathBuf};
-
 use wat2mir::{translate2mir, dto::Wat2MirConfig};
 
 #[test]
-fn testCFG() {
+fn test_cfg() {
 
 	let mut d2 = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 	d2.push("resources/body1.wat");
@@ -20,7 +19,6 @@ fn testCFG() {
 	let lines2 = read_to_string(d2).expect("msg");
 
 	lines1.zip(lines2.split("\n")).for_each(|(l1, l2)|{
-		println!("{:?} {:?}", l1, l2);
 		assert_eq!(l1, l2)
 	});
 

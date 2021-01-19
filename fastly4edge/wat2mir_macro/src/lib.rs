@@ -69,7 +69,7 @@ impl Parse for Arguments {
 
 
 #[proc_macro]
-pub fn make_answer(_item: TokenStream) -> TokenStream {
+pub fn inject_mir4wasm(_item: TokenStream) -> TokenStream {
     // validate macro arguments
     // expecting wat_file, function_name, skip instructions in body, take instructions in body
     let arguments = parse_macro_input!(_item as Arguments);
