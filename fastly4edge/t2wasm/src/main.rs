@@ -6,12 +6,12 @@
 extern crate wat2mir_macro;
 use wat2mir_macro::make_answer;
 
-make_answer!("tests/resources/babbage_main.wat", // relative to Cargo.toml
-"babbage", 3, 20);
+make_answer!("/Users/javierca/Documents/Develop/fastly4edge/wat2mir/resources/babbage_main.wat", // relative to Cargo.toml
+"babbage1", 3, 20);
 
 fn main() {
 	unsafe{
-		babbage();
+		babbage1();
 	}
 }
 

@@ -3,7 +3,8 @@
 members = [
 	"wat2mir_macro",
     "t2wasm",
-	"tests"
+	"tests",
+	"wat2mir"
 ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

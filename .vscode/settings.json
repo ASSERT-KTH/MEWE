@@ -1,0 +1,5 @@
+{ 
+	"rust-analyzer.updates.askBeforeDownload": false,
+	"rust-analyzer.updates.channel": "nightly",
+	"rust-analyzer.procMacro.enable": true
+}
