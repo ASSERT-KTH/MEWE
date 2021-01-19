@@ -2,6 +2,7 @@
 
 extern crate proc_macro;
 use proc_macro::*;
+use wat2mir::{dto::Wat2MirConfig, translate2mir};
 use std::{fs, str::Split};
 use std::string::String;
 use syn::*;
@@ -12,23 +13,40 @@ use regex::Regex;
 
 
 #[derive(Debug)]
-struct Arguments {
+struct ArgumentsMir4Wasm {
     file: String,
-    function_name: String,
-    skip: i32,
-    take: i32
+    function_name: String
 }
 
-struct Syntax {
+#[derive(Debug)]
+struct ArgumentsMirFromWasm {
+    file: String,
+    function_name: String,
+    as_function: String,
+    skip: u32,
+    leave: u32
+}
+
+
+struct SyntaxMirFromWasm {
     name: LitStr,
     sep1: Token![,],
     function_name: LitStr,
+    sep4: Token![,],
+    as_function: LitStr,
     sep2: Token![,],
     skip: LitInt,
     sep3: Token![,],
-    take: LitInt
+    leave: LitInt
 }
-impl Parse for Arguments {
+
+struct SyntaxMir4Wasm {
+    name: LitStr,
+    sep1: Token![,],
+    function_name: LitStr
+}
+
+impl Parse for ArgumentsMir4Wasm {
     // Validate and parse the arguments of the macro
     fn parse(stream: ParseStream) -> Result<Self>{
 
@@ -36,14 +54,10 @@ impl Parse for Arguments {
             panic!("You should provide the correct arguments. wat_file, function_name, skip instructions in body, take instructions in body")
         }
 
-        let syntax = Syntax {
+        let syntax = SyntaxMir4Wasm {
             name: stream.parse().unwrap(),
             sep1: stream.parse().unwrap(),
-            function_name: stream.parse().unwrap(),
-            sep2: stream.parse().unwrap(),
-            skip: stream.parse().unwrap(),            
-            sep3: stream.parse().unwrap(),       
-            take: stream.parse().unwrap(),
+            function_name: stream.parse().unwrap()
         };
 
         let meta = match fs::metadata(syntax.name.value())  {
@@ -57,11 +71,9 @@ impl Parse for Arguments {
         // Validate the existance of the file
 
         return Ok(
-            Arguments{
+            ArgumentsMir4Wasm{
                 file: syntax.name.value(),
-                function_name: syntax.function_name.value().replace("$", "\\$"), // Escape to be able to use in regex
-                skip: syntax.skip.base10_parse()?,
-                take: syntax.take.base10_parse()?
+                function_name: syntax.function_name.value().replace("$", "\\$")
             }
         )
     }
@@ -69,10 +81,10 @@ impl Parse for Arguments {
 
 
 #[proc_macro]
-pub fn inject_mir4wasm(_item: TokenStream) -> TokenStream {
+pub fn inject_mir_as_wasm(_item: TokenStream) -> TokenStream {
     // validate macro arguments
     // expecting wat_file, function_name, skip instructions in body, take instructions in body
-    let arguments = parse_macro_input!(_item as Arguments);
+    let arguments = parse_macro_input!(_item as ArgumentsMir4Wasm);
 
     let content = fs::read_to_string(arguments.file).expect("Could not read the file!");
     
@@ -91,25 +103,77 @@ pub fn inject_mir4wasm(_item: TokenStream) -> TokenStream {
 }
 
 
-/*
-macro_rules! wat2mir {
-    
-}*/
 
-/*
+impl Parse for ArgumentsMirFromWasm {
+    // Validate and parse the arguments of the macro
+    fn parse(stream: ParseStream) -> Result<Self>{
 
-TODO
+        if stream.is_empty() {
+            panic!("You should provide the correct arguments. wat_file, function_name, skip instructions in body, take instructions in body")
+        }
 
-- Load wat file
-- Remove comments
-- Find function by name
-- Genereate function header
-- Replace end by LLVM MIR end functions
-- Generate the external export functions
+        let syntax = SyntaxMirFromWasm {
+            name: stream.parse().unwrap(),
+            sep1: stream.parse().unwrap(),
+            function_name: stream.parse().unwrap(),
+            sep4: stream.parse().unwrap(),
+            as_function: stream.parse().unwrap(),
+            sep2: stream.parse().unwrap(),
+            skip: stream.parse().unwrap(),
+            sep3: stream.parse().unwrap(),
+            leave: stream.parse().unwrap()
+        };
 
-TODO
+        let meta = match fs::metadata(syntax.name.value())  {
+            Err(_) => panic!("File {} does not exist", syntax.name.value()),
+            Ok(m)  => m
+        };
 
-Add a folder instead with all variants
-- Generate huge switch case
+        if ! meta.is_file() {
+            panic!("File {} is not a valid file.", syntax.name.value())
+        }
+        // Validate the existance of the file
 
-*/
+        return Ok(
+            ArgumentsMirFromWasm{
+                file: syntax.name.value(),
+                function_name: syntax.function_name.value(),
+                as_function: syntax.as_function.value(),
+                skip: syntax.skip.base10_parse().expect("The skip parameter (3rd) is not a valid base 10 number"),
+                leave: syntax.leave.base10_parse().expect("The leave parameter (4rd) is not a valid base 10 number"),
+            }
+        )
+    }
+}
+
+
+#[proc_macro]
+pub fn inject_mir_from_wasm(_item: TokenStream) -> TokenStream {
+    // validate macro arguments
+    // expecting wat_file, function_name, skip instructions in body, take instructions in body
+    let arguments = parse_macro_input!(_item as ArgumentsMirFromWasm);
+
+	let (head, body, tail) = translate2mir(&arguments.file, 
+        &arguments.function_name, &arguments.as_function , Wat2MirConfig{
+		convert_end_to_mir: true, skip: arguments.skip, leave: arguments.leave
+	});
+    eprintln!("Injected function\n{}", body);
+
+    format!(r##"
+    #[no_mangle]
+    #[cfg(target_arch = "wasm32")]
+    global_asm!(
+        r#"
+        {}
+        {}
+        {}
+        "#
+    );
+
+
+    extern {{
+        fn {}() -> i32;
+    }}
+
+    "##, head, body, tail, arguments.as_function ).parse().unwrap()
+}

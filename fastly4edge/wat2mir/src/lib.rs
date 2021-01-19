@@ -41,7 +41,7 @@ pub fn translate2mir(file_name: &str, func_name: &str, as_function: &str, config
     usedLocals: HashMap::new(),
     argsCount: func.args.len() as i32};
 
-    println!("{}", local_visitor.argsCount);
+    //println!("{}", local_visitor.argsCount);
 
     local_visitor.initArgs(func, &module.locals);
     walrus::ir::dfs_in_order(local_visitor, func, func.entry_block());
@@ -79,7 +79,13 @@ pub fn translate2mir(file_name: &str, func_name: &str, as_function: &str, config
 
     walrus::ir::dfs_in_order(mir_visitor, func, func.entry_block());
 
-    println!("{:?}", mir_visitor.ret);
+    //println!("{:?}", mir_visitor.ret);
 
-   (head, mir_visitor.ret.clone(), String::from("end_function"))
+    let lines = mir_visitor.ret.split("\n");
+    let chunk = lines.clone().take(lines.count() - (config.leave as usize))
+    .skip(config.skip as usize)
+    .collect::<Vec<_>>();
+
+   (head, chunk.join("\n") + "\n", 
+    String::from("end_function"))
 }

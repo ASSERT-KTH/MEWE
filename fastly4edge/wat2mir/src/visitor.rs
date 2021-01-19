@@ -32,39 +32,39 @@ impl MIRVisitor<'_>{
 
     fn emit_mem_kind_store(&mut self, kind: StoreKind){
         match kind {
-            StoreKind::I32 { atomic} => self.ret.push_str(&format!("i32.store")),
-            StoreKind::I64 { atomic} => self.ret.push_str(&format!("i64.store")),
-            StoreKind::I32_16 { atomic} => self.ret.push_str(&format!("i32.store16")),
-            StoreKind::I32_8 { atomic} => self.ret.push_str(&format!("i32.store8")),
-            StoreKind::I64_8 { atomic} => self.ret.push_str(&format!("i64.store8")),
-            StoreKind::I64_16 { atomic} => self.ret.push_str(&format!("i64.store16")),
-            StoreKind::I64_32 { atomic} => self.ret.push_str(&format!("i64.store32")),
-            StoreKind::F32 => self.ret.push_str(&format!("f32.store")),
-            StoreKind::F64  => self.ret.push_str(&format!("f64.store")),
+            StoreKind::I32 { atomic} => self.emit_instr(&format!("i32.store")),
+            StoreKind::I64 { atomic} => self.emit_instr(&format!("i64.store")),
+            StoreKind::I32_16 { atomic} => self.emit_instr(&format!("i32.store16")),
+            StoreKind::I32_8 { atomic} => self.emit_instr(&format!("i32.store8")),
+            StoreKind::I64_8 { atomic} => self.emit_instr(&format!("i64.store8")),
+            StoreKind::I64_16 { atomic} => self.emit_instr(&format!("i64.store16")),
+            StoreKind::I64_32 { atomic} => self.emit_instr(&format!("i64.store32")),
+            StoreKind::F32 => self.emit_instr(&format!("f32.store")),
+            StoreKind::F64  => self.emit_instr(&format!("f64.store")),
             _ => unimplemented!("ERROR {:?}", kind)
         }
     }
 
     fn get_sign_tail(&mut self,kind: ExtendedLoad){
         match kind {
-            ExtendedLoad::ZeroExtend => self.ret.push_str(&"u"),
-            ExtendedLoad::SignExtend => self.ret.push_str(&"s"),
+            ExtendedLoad::ZeroExtend => self.emit_instr(&"u"),
+            ExtendedLoad::SignExtend => self.emit_instr(&"s"),
             _ => unimplemented!("Extended load type {:?}", kind)
         }
     }
 
     fn emit_mem_kind_load(&mut self, kind: LoadKind){
         match kind {
-            LoadKind::I32 {atomic} => self.ret.push_str(&format!("i32.load")),
+            LoadKind::I32 {atomic} => self.emit_instr(&format!("i32.load")),
             LoadKind::I32_8 { kind} => {
-                self.ret.push_str(&format!("i32.load8_"));
+                self.emit_instr(&format!("i32.load8_"));
                 self.get_sign_tail(kind)
             },
-            LoadKind::I64 { atomic} => self.ret.push_str(&format!("i64.load")),
-            LoadKind::F64 => self.ret.push_str(&format!("f64.load")),
+            LoadKind::I64 { atomic} => self.emit_instr(&format!("i64.load")),
+            LoadKind::F64 => self.emit_instr(&format!("f64.load")),
             LoadKind::I64_32 { kind } => 
             {
-                self.ret.push_str(&format!("i64.load32_"));
+                self.emit_instr(&format!("i64.load32_"));
                 self.get_sign_tail(kind)
             },
             _ => panic!("ERROR {:?}", kind)
@@ -75,7 +75,7 @@ impl MIRVisitor<'_>{
 
         match arg.offset {
             0 => (),
-            _ => self.ret.push_str(&format!(" offset={}", arg.offset))
+            _ => self.emit_instr(&format!(" offset={}", arg.offset))
         }
         match arg.align {
             // TODO check
@@ -84,10 +84,14 @@ impl MIRVisitor<'_>{
             4 => (),
             8 => (),
             16 => (),
-            _ => self.ret.push_str(&format!(" align={}", arg.align))
+            _ => self.emit_instr(&format!(" align={}", arg.align))
         }
-        self.ret.push_str("\n")
-    }
+        self.emit_instr("\n")
+	}
+	
+	fn emit_instr(&mut self, instr: &str){
+		self.ret.push_str(instr)
+	}
 }
 
 
@@ -157,30 +161,30 @@ impl Visitor<'_> for LocalGatheringVisitor<'_> {
 }
 
 impl Visitor<'_> for MIRVisitor<'_> {
-    
+	
     fn visit_instr_seq_id(&mut self, instr: &InstrSeqId){ 
-        //self.ret.push_str(&format!("{:?}\n", instr))
+        //self.emit_instr(&format!("{:?}\n", instr))
     }
     
     fn visit_local_id(&mut self, instr: &LocalId){         
-        self.ret.push_str(& format!("{}\n", (instr.index() as i32) - self.min_local));
+        self.emit_instr(& format!("{}\n", (instr.index() as i32) - self.min_local));
     }
 
     fn visit_memory_id(&mut self, instr: &MemoryId){ 
         // TODO assume that memoryId is always 0
         // Check ffmpeg example to check
         //unimplemented!("Not implemented visit_memory_id {}", self.ret) 
-        //self.ret.push_str(&format!("\n"))
+        //self.emit_instr(&format!("\n"))
     }
 
     fn visit_table_id(&mut self, instr: &TableId){ unimplemented!("Not implemented visit_table_id {}", self.ret) }
 
     fn visit_global_id(&mut self, instr: &GlobalId){ 
-        self.ret.push_str(& format!("{:?}\n", self.module.globals.get(*instr).id().index()))
+        self.emit_instr(& format!("{:?}\n", self.module.globals.get(*instr).id().index()))
     }
 
     fn visit_function_id(&mut self, instr: &FunctionId){ 
-        self.ret.push_str(&format!("{:?}\n", instr.index()))
+        self.emit_instr(&format!("{:?}\n", instr.index()))
     }
 
     fn visit_data_id(&mut self, instr: &DataId){ 
@@ -192,18 +196,18 @@ impl Visitor<'_> for MIRVisitor<'_> {
     //fn visit_value(&mut self, instr: &Value){ unimplemented!("Not implemented visit_value {}", self.ret) }
 
     fn visit_call(&mut self, instr: &Call){ 
-        self.ret.push_str(&format!("call "))
+        self.emit_instr(&format!("call "))
     }
 
     fn visit_call_indirect(&mut self, instr: &CallIndirect){ unimplemented!("Not implemented visit_call_indirect {}", self.ret) }
 
     fn visit_local_tee(&mut self, instr: &LocalTee){ 
 
-        self.ret.push_str(&format!("local.tee "))
+        self.emit_instr(&format!("local.tee "))
     }
         
     fn visit_global_set(&mut self, instr: &GlobalSet){ 
-        self.ret.push_str(&format!("global.set "))
+        self.emit_instr(&format!("global.set "))
     }
         
     fn visit_binop(&mut self, instr: &Binop){ 
@@ -282,7 +286,7 @@ impl Visitor<'_> for MIRVisitor<'_> {
             _ => unimplemented!("Binop not implemented {:?}", instr)
         };
 
-        self.ret.push_str(&format!("{}\n", op))
+        self.emit_instr(&format!("{}\n", op))
     }
 
     fn visit_unop(&mut self, instr: &Unop){ 
@@ -290,29 +294,29 @@ impl Visitor<'_> for MIRVisitor<'_> {
         //TODO Finish
 
         match instr.op {
-            UnaryOp::I32Eqz => self.ret.push_str("i32.eqz"),
-            UnaryOp::I64ExtendSI32 => self.ret.push_str("i64.extend_i32_s"),
-            UnaryOp::I64Eqz => self.ret.push_str("i64.eqz"),
-            UnaryOp::I32WrapI64 => self.ret.push_str("i32.wrap_i64"),
-            UnaryOp::I64ReinterpretF64 => self.ret.push_str("i64.reinterpret_f64"),
-            UnaryOp::F64Neg => self.ret.push_str("f64.neg"),
-            UnaryOp::F64Abs => self.ret.push_str("f64.abs"),
-            UnaryOp::I32TruncSF64 => self.ret.push_str("i32.trunc_f64_s"),
-            UnaryOp::I32TruncUF64 => self.ret.push_str("i32.trunc_f64_u"),
-            UnaryOp::F64ConvertSI32 => self.ret.push_str("f64.convert_i32_s"),
-            UnaryOp::F64ConvertUI32 => self.ret.push_str("f64.convert_i32_u"),
-            UnaryOp::I64ExtendUI32 => self.ret.push_str("i64.extend_i32_u"),
+            UnaryOp::I32Eqz => self.emit_instr("i32.eqz"),
+            UnaryOp::I64ExtendSI32 => self.emit_instr("i64.extend_i32_s"),
+            UnaryOp::I64Eqz => self.emit_instr("i64.eqz"),
+            UnaryOp::I32WrapI64 => self.emit_instr("i32.wrap_i64"),
+            UnaryOp::I64ReinterpretF64 => self.emit_instr("i64.reinterpret_f64"),
+            UnaryOp::F64Neg => self.emit_instr("f64.neg"),
+            UnaryOp::F64Abs => self.emit_instr("f64.abs"),
+            UnaryOp::I32TruncSF64 => self.emit_instr("i32.trunc_f64_s"),
+            UnaryOp::I32TruncUF64 => self.emit_instr("i32.trunc_f64_u"),
+            UnaryOp::F64ConvertSI32 => self.emit_instr("f64.convert_i32_s"),
+            UnaryOp::F64ConvertUI32 => self.emit_instr("f64.convert_i32_u"),
+            UnaryOp::I64ExtendUI32 => self.emit_instr("i64.extend_i32_u"),
             _ => unimplemented!("Unary op not implemented {:?}", instr)
         }
-        self.ret.push_str("\n")
+        self.emit_instr("\n")
     }
 
     fn visit_select(&mut self, instr: &Select){ 
-        self.ret.push_str("select\n")
+        self.emit_instr("select\n")
     }
 
     fn visit_unreachable(&mut self, instr: &Unreachable){ 
-        self.ret.push_str("unreachable\n")
+        self.emit_instr("unreachable\n")
     }
 
     fn visit_br(&mut self, instr: &Br){ 
@@ -320,13 +324,13 @@ impl Visitor<'_> for MIRVisitor<'_> {
 
         let depth = self.block_depth.len() as i32 - self.block_depth.iter()
         .find(|(r, _)| r == &blockid).expect("Error in DFS traveling").1;
-        self.ret.push_str(&format!("br {:?}\n", depth))
+        self.emit_instr(&format!("br {:?}\n", depth))
     }
 
     fn visit_br_if(&mut self, instr: &BrIf){ 
         let blockid = instr.block;
         let depth = self.get_depth(blockid);
-        self.ret.push_str(&format!("br_if {:?}\n", depth))
+        self.emit_instr(&format!("br_if {:?}\n", depth))
     }
         
     fn visit_br_table(&mut self, instr: &BrTable){ 
@@ -335,11 +339,11 @@ impl Visitor<'_> for MIRVisitor<'_> {
         let remaining = instr.blocks.iter().map(|&s| {format!("{:?}", self.get_depth(s))})
         .collect::<Vec<_>>().join(" ");
 
-        self.ret.push_str(&format!("br_table {} {}\n", remaining, id1))
+        self.emit_instr(&format!("br_table {} {}\n", remaining, id1))
     }
 
     fn visit_drop(&mut self, instr: &Drop){ 
-        self.ret.push_str("drop\n")
+        self.emit_instr("drop\n")
     }
 
     fn visit_return(&mut self, instr: &Return){ unimplemented!("Not implemented visit_return {}", self.ret) }
@@ -395,18 +399,18 @@ impl Visitor<'_> for MIRVisitor<'_> {
 
     fn visit_local_get(&mut self, instr: &walrus::ir::LocalGet)
     {   
-        self.ret.push_str(& format!("local.get "));
+        self.emit_instr(& format!("local.get "));
     }
 
 
     fn visit_global_get(&mut self, instr: &walrus::ir::GlobalGet)
     {   
-        self.ret.push_str(& format!("global.get "));
+        self.emit_instr(& format!("global.get "));
     }
 
     fn visit_local_set(&mut self, instr: &walrus::ir::LocalSet)
     {  
-        self.ret.push_str(& format!("local.set "));
+        self.emit_instr(& format!("local.set "));
     }
 
 
@@ -415,26 +419,26 @@ impl Visitor<'_> for MIRVisitor<'_> {
         // TODO check format 0x1p+31 (;=2.14748e+09;)
 
         match instr.value {
-            walrus::ir::Value::I32(val) => self.ret.push_str(&format!("i32.const {}\n", val)) ,
-            walrus::ir::Value::I64(val) => self.ret.push_str(&format!("i64.const {}\n", val)),
-            walrus::ir::Value::F32(val) => self.ret.push_str(&format!("f32.const {}\n", val)),
-            walrus::ir::Value::F64(val) => self.ret.push_str(&format!("f64.const {}\n", val)),
+            walrus::ir::Value::I32(val) => self.emit_instr(&format!("i32.const {}\n", val)) ,
+            walrus::ir::Value::I64(val) => self.emit_instr(&format!("i64.const {}\n", val)),
+            walrus::ir::Value::F32(val) => self.emit_instr(&format!("f32.const {}\n", val)),
+            walrus::ir::Value::F64(val) => self.emit_instr(&format!("f64.const {}\n", val)),
             _ => panic!("Not recognized const")
         }
 
     }
 
     fn visit_loop(&mut self, instr: &Loop){
-        self.ret.push_str("loop\n");
+        self.emit_instr("loop\n");
         self.block_hash.insert(instr.seq.index(), BLOCKTPE::LOOP);
     }
     fn visit_block(&mut self, instr: &Block){
-        self.ret.push_str("block\n");
+        self.emit_instr("block\n");
         self.block_hash.insert(instr.seq.index(), BLOCKTPE::BLOCK);
     }
 
     fn visit_if_else(&mut self, instr: &IfElse){
-        self.ret.push_str("if\n");
+        self.emit_instr("if\n");
     }
 
     fn start_instr_seq(&mut self, instr_seq: &InstrSeq)
@@ -449,15 +453,15 @@ impl Visitor<'_> for MIRVisitor<'_> {
 
         if self.config.convert_end_to_mir {
         match tpe {
-            None => println!("Non registered block"),
+            None => (),
             Some(x) => match x {
-                BLOCKTPE::LOOP => self.ret.push_str( "end_loop\n"),
-                BLOCKTPE::BLOCK => self.ret.push_str("end_block\n"),
-                _ => println!("Unknown")
+                BLOCKTPE::LOOP => self.emit_instr( "end_loop\n"),
+                BLOCKTPE::BLOCK => self.emit_instr("end_block\n"),
+                _ => panic!("Unknown")
             }
         } }
         else {
-            self.ret.push_str( "end\n")
+            self.emit_instr( "end\n")
         }
         self.depth -= 1;
         self.block_depth.pop();

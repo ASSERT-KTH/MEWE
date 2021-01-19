@@ -34,11 +34,11 @@ fn test_translation_with_skip() {
 
 	let (head, body, tail) = translate2mir(d.into_os_string().to_str().expect("Not valid str"), 
 	"__original_main", "babbage", Wat2MirConfig{
-		convert_end_to_mir: true, skip: 3, .. Wat2MirConfig::new()
+		convert_end_to_mir: true,  skip: 5, leave: 11
 	});
 
 
-	println!("{}\n{}\n{}", head, body, tail)
+	println!("{}{}{}", head, body, tail)
 }
 
 
@@ -50,7 +50,7 @@ fn test_translation_with_head_parameters() {
 
 	let (head, _, _) = translate2mir(d.into_os_string().to_str().expect("Not valid str"), 
 	"printf_core", "babbage", Wat2MirConfig{
-		convert_end_to_mir: true, skip: 3, .. Wat2MirConfig::new()
+		convert_end_to_mir: true, skip: 5, leave: 11
 	});
 
 
