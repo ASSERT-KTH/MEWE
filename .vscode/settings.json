@@ -1,5 +1,6 @@
 { 
 	"rust-analyzer.updates.askBeforeDownload": false,
 	"rust-analyzer.updates.channel": "nightly",
-	"rust-analyzer.procMacro.enable": true
+	"rust-analyzer.procMacro.enable": true,
+	"terminal.integrated.scrollback": 100000
 }
