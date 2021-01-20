@@ -4,7 +4,7 @@
 
 This package contains two procedural macros in order to inject Wasm assembly code in the Rust package at compilation time. 
 
-- [`inject_mir_as_wasm`](https://github.com/Jacarte/fastly4edge/blob/5ce6e88894158d573d2c17766ce0ba1680f7aa80/wiversify/wat2mir_macro/src/lib.rs#L19): Inject Wasm assemnbly instructions as function. How to use it:
+- [`inject_mir_as_wasm`](https://github.com/Jacarte/fastly4edge/blob/5ce6e88894158d573d2c17766ce0ba1680f7aa80/wiversify/wat2mir_macro/src/lib.rs#L19): Inject Wasm assemnbly instructions as function during compilation. How to use it:
 
 	```rs
 	inject_mir_as_wasm!("<mir_wat_file>", // relative to Cargo.toml
