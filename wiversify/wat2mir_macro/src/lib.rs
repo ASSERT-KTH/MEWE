@@ -7,7 +7,7 @@ mod rs2rs;
 use mir_as_wasm::ArgumentsMir4Wasm;
 use mir_from_wasm::ArgumentsMirFromWasm;
 use proc_macro::*;
-use rs2rs::ArgumentsDynamicDiversification;
+use rs2rs::{ArgumentsDynamicDiversification, ArgumentsStaticDiversification};
 use wat2mir::{dto::Wat2MirConfig, translate2mir};
 use std::{fs};
 use syn::*;
@@ -78,17 +78,18 @@ pub fn inject_mir_from_wasm(_item: TokenStream) -> TokenStream {
 pub fn static_diversification(_item: TokenStream) -> TokenStream {
     // validate macro arguments
     //let arguments = parse_macro_input!(_item as ArgumentsStaticDiversification);
+    let arguments = parse_macro_input!(_item as ArgumentsStaticDiversification);
 
-    let tokens = _item.clone().into_iter();
-    let mut rand = rand::thread_rng().next_u32();
+    let tokens = arguments.exprs.clone().into_iter();
+    let rand = rand::thread_rng().next_u32();
 
     let to_skip = rand % (tokens.count() as u32);
 
 
     eprintln!("Selected static branch {:?}",to_skip);
 
-    _item.into_iter().skip(to_skip as usize) // random skip x elements
-    .take(1).collect::<TokenStream>()
+    arguments.exprs.into_iter().skip(to_skip as usize) // random skip x elements
+    .next().unwrap().parse().unwrap()
 }
 
 

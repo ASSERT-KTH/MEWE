@@ -16,7 +16,7 @@ dynamic_diversification!((unsafe{babbage1()}, unsafe{babbage2()}, 1, 2) -> i32, 
 
 fn main() {
 	unsafe{
-		static_diversification!(babbage1 babbage2)();
+		static_diversification!(babbage1(), babbage2());
 	};
 
 	let dis = 2;

@@ -28,6 +28,44 @@ struct SyntaxDynamicDiversification {
 	as_function: LitStr,
 }
 
+#[derive(Debug)]
+pub struct ArgumentsStaticDiversification {
+	pub exprs: Vec<String>
+}
+
+
+struct SyntaxStaticDiversification {
+	calls: Punctuated<Expr, Token![,]>,
+}
+
+
+/// Creates a match pattern for the given arguments
+impl Parse for ArgumentsStaticDiversification {
+	// Validate and parse the arguments of the macro
+	fn parse(stream: ParseStream) -> Result<Self>{
+
+		eprintln!("{:}", stream.clone());
+		if stream.is_empty() {
+            panic!("Write full function signature.");
+		}
+		
+        let syntax = SyntaxStaticDiversification {
+			calls: stream.parse_terminated(Expr::parse).unwrap(),
+		};
+
+		// TODO validate the same type for all arguments
+
+		return Ok(
+			ArgumentsStaticDiversification{
+				exprs: syntax.calls.iter()
+				.enumerate()
+				.map(|(i, e)| format!("{}", return_str_expr_from(e)))
+				.collect::<Vec<_>>()
+			}
+		)
+	}
+}
+
 
 fn return_str_expr_from(expr: &Expr) -> String{
 	let tokens = quote!{#expr};
