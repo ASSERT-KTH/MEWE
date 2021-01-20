@@ -109,6 +109,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "diversifier"
+version = "0.1.0"
+dependencies = [
+ "lazy_static",
+ "quote",
+ "rand",
+ "regex",
+ "syn",
+]
+
+[[package]]
 name = "either"
 version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -370,6 +381,7 @@ dependencies = [
 name = "t2wasm"
 version = "0.1.0"
 dependencies = [
+ "diversifier",
  "wat2mir_macro",
 ]
 
