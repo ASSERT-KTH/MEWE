@@ -4,7 +4,7 @@
 
 This package contains two procedural macros in order to inject Wasm assembly code in the Rust package at compilation time. 
 
-- `inject_mir_as_wasm`: Inject Wasm assemnbly instructions as function. How to use it:
+- [`inject_mir_as_wasm`](https://github.com/Jacarte/fastly4edge/blob/5ce6e88894158d573d2c17766ce0ba1680f7aa80/wiversify/wat2mir_macro/src/lib.rs#L19): Inject Wasm assemnbly instructions as function. How to use it:
 
 	```rs
 	inject_mir_as_wasm!("<mir_wat_file>", // relative to Cargo.toml
@@ -15,7 +15,7 @@ This package contains two procedural macros in order to inject Wasm assembly cod
 	```
 
 
-- `inject_mir_from_wasm`: This macro is a little bit different from the first one. It receives a valid Wasm binary to extract the function from it. To do so, we use `walrus`, a crate able to parse, transform and emit Wasm code. We extract the function using its name, notice that the provided Wasm needs to have the `name` custom section to be valid to us. Then, the body and the declaration of the function is translated to the MIR LLVM syntax. How to use it
+- [`inject_mir_from_wasm`](https://github.com/Jacarte/fastly4edge/blob/5ce6e88894158d573d2c17766ce0ba1680f7aa80/wiversify/wat2mir_macro/src/lib.rs#L44): This macro is a little bit different from the first one. It receives a valid Wasm binary to extract the function from it. To do so, we use `walrus`, a crate able to parse, transform and emit Wasm code. We extract the function using its name, notice that the provided Wasm needs to have the `name` custom section to be valid to us. Then, the body and the declaration of the function is translated to the MIR LLVM syntax. How to use it
 
 
 	```rs

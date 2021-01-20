@@ -4,7 +4,7 @@
 
 We create two main procedural macros in order to provide diversification in Rust code.
 
-- Static diversifier: This macro receive several expressions separated by comma. At compilation time a random expression will be choose and injected in the final code. Next, how to use it
+- [Static diversifier](https://github.com/Jacarte/fastly4edge/blob/5ce6e88894158d573d2c17766ce0ba1680f7aa80/wiversify/diversifier/src/lib.rs#L15): This macro receive several expressions separated by comma. At compilation time a random expression will be choose and injected in the final code. Next, how to use it
 
 	```rs
 	use diversifier::{static_diversification};
@@ -15,7 +15,7 @@ We create two main procedural macros in order to provide diversification in Rust
 
 You can run `cargo expand` to see which expression is injected at compilation time.
 
-- Dynamic diversifier: This macro receive several expressions separated by comma. At compilation time a huge switch case (Rust `match` construction) template is created containing all the cases. The template operates on a `dis` (discrimator variable), ideally coming from a random call. Following an example of usage.
+- [Dynamic diversifier](https://github.com/Jacarte/fastly4edge/blob/5ce6e88894158d573d2c17766ce0ba1680f7aa80/wiversify/diversifier/src/lib.rs#L35): This macro receive several expressions separated by comma. At compilation time a huge switch case (Rust `match` construction) template is created containing all the cases. The template operates on a `dis` (discrimator variable), ideally coming from a random call. Following an example of usage.
 
 	```rs
 	use diversifier::{dynamic_diversification};
