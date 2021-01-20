@@ -18,7 +18,7 @@ Run `bash deploy.sh <service_id>`
 
 The `wiversify` folder contains the procedural macros that we implemented in order to provide static and dynamic diversity in Rust code at compilation time. Besides, it contains the needed code to translate Wasm binary functions to LLVM MIR syntax. The folder contains the following packages
 
-- [diversifier](/diversifier): Implementation for the diversification procedural macros
-- [t2wasm](/t2wasm): Working example of the diversifier macros and the injection of Wasm functions at compilation time
-- [wat2mir](/wat2mir): Translation from Wasm binary to LLVM MIR format.
-- [wat2mir_macro](/wat2mir_macro): Procedural macros for the compiling time injection of LLVM MIR code extracted from a Wasm binary.
+- [diversifier](https://github.com/Jacarte/fastly4edge/tree/main/wiversify/diversifier): Implementation for the diversification procedural macros
+- [t2wasm](https://github.com/Jacarte/fastly4edge/tree/main/wiversify/t2wasm): Working example of the diversifier macros and the injection of Wasm functions at compilation time
+- [wat2mir](https://github.com/Jacarte/fastly4edge/tree/main/wiversify/wat2mir): Translation from Wasm binary to LLVM MIR format.
+- [wat2mir_macro](https://github.com/Jacarte/fastly4edge/tree/main/wiversify/wat2mir_macro): Procedural macros for the compiling time injection of LLVM MIR code extracted from a Wasm binary.
