@@ -15,7 +15,7 @@ We create two main procedural macros in order to provide diversification in Rust
 
 You can run `cargo expand` to see which expression is injected at compilation time.
 
-- [Dynamic diversifier](https://github.com/Jacarte/fastly4edge/blob/5ce6e88894158d573d2c17766ce0ba1680f7aa80/wiversify/diversifier/src/lib.rs#L35): This macro receive several expressions separated by comma. This macro creates a huge switch case (Rust `match` construction) template at compilation time. The injected code contains all the cases declared as arguments in the macro. The template operates on a `dis` (discrimator variable), ideally coming from a random call. Following an example of usage.
+- [Dynamic diversifier](https://github.com/Jacarte/fastly4edge/blob/5ce6e88894158d573d2c17766ce0ba1680f7aa80/wiversify/diversifier/src/lib.rs#L35): This macro receive several expressions separated by comma. This macro creates a huge switch case (Rust `match` construction) template at compilation time. The injected code contains all the cases declared as arguments in the macro. The template operates on the `dis` variable (which is the discriminator), ideally coming from a random call. Following an example of usage.
 
 	```rs
 	use diversifier::{dynamic_diversification};
