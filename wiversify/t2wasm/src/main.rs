@@ -12,11 +12,13 @@ inject_mir_as_wasm!("tests/resources/babbage_main.wat", // relative to Cargo.tom
 inject_mir_from_wasm!("tests/resources/babbage.wasm", // relative to Cargo.toml
 "__original_main", "babbage2", 5, 12);
 
+dynamic_diversification!((unsafe{babbage1()}, unsafe{babbage2()}, 1, 2) -> i32);
+
 fn main() {
 	unsafe{
 		static_diversification!(babbage1 babbage2)();
 	}
+
+	dynamic_function()
 }
 
-
-dynamic_diversification!((babbage1(), babbage2(), 1, 2) -> i32);
