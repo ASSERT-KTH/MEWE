@@ -1,5 +1,6 @@
 ## Examples about how to use wiversifier proc-macros
 
+Full code [here](https://github.com/Jacarte/fastly4edge/blob/main/wiversify/t2wasm/src/main.rs)
 
 1. Inject two Wasm functions at compilation time
 
