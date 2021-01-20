@@ -26,7 +26,7 @@
 			static_diversification!(babbage1(), babbage2());
 		};
 
-		myfunction(rand::thread_rng().next_u32());
+		myfunction(rand::thread_rng().next_u32() % 2);
 	}
 
 
