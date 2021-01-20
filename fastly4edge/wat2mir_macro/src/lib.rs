@@ -2,15 +2,18 @@ extern crate proc_macro;
 
 mod mir_as_wasm;
 mod mir_from_wasm;
+mod rs2rs;
+
 use mir_as_wasm::ArgumentsMir4Wasm;
 use mir_from_wasm::ArgumentsMirFromWasm;
 use proc_macro::*;
+use rs2rs::ArgumentsDynamicDiversification;
 use wat2mir::{dto::Wat2MirConfig, translate2mir};
 use std::{fs};
 use syn::*;
 use syn::parse::*;
 use rand::{RngCore, seq::SliceRandom};
-
+use quote::quote;
 
 
 
@@ -89,3 +92,19 @@ pub fn static_diversification(_item: TokenStream) -> TokenStream {
 }
 
 
+
+#[proc_macro]
+pub fn dynamic_diversification(_item: TokenStream) -> TokenStream {
+    // validate macro arguments
+    let arguments = parse_macro_input!(_item as ArgumentsDynamicDiversification);
+
+    let tokens = format!(r#"
+        fn dynamic_function(dis: u32) -> {}{{
+            match dis {{
+                {}
+                _ => panic!("Dont know what to do with the current discriminator value {{}}", dis)
+            }}
+        }}"#, arguments.return_ty, arguments.exprs.join("\n"));
+    
+    tokens.parse().unwrap()
+}
