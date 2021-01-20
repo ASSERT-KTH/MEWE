@@ -3,7 +3,7 @@ extern crate proc_macro;
 use proc_macro::*;
 use std::{fs, str::Split};
 use std::string::String;
-use syn::{Expr, ExprCall, Token, parenthesized, punctuated::Punctuated, Type, token};
+use syn::{Expr, ExprCall, LitStr, Token, Type, parenthesized, punctuated::Punctuated, token};
 use syn::parse::*;
 use fs::*;
 use regex::Regex;
@@ -14,7 +14,8 @@ use quote::quote;
 #[derive(Debug)]
 pub struct ArgumentsDynamicDiversification {
 	pub exprs: Vec<String>,
-	pub return_ty: String
+	pub return_ty: String,
+	pub as_function: String,
 }
 
 
@@ -23,6 +24,8 @@ struct SyntaxDynamicDiversification {
 	calls: Punctuated<Expr, Token![,]>,
 	_rarrow_token: Token![->], 
 	return_t: Type,
+	_comma: Token![,],
+	as_function: LitStr,
 }
 
 
@@ -47,7 +50,9 @@ impl Parse for ArgumentsDynamicDiversification {
 			_paren_token: parenthesized!(calls in stream),
 			calls: calls.parse_terminated(Expr::parse).unwrap(),
 			_rarrow_token: stream.parse().unwrap(),
-			return_t: stream.parse().expect("Fail to parse return type")
+			return_t: stream.parse().expect("Fail to parse return type"),
+			_comma: stream.parse().unwrap(),
+			as_function: stream.parse().expect("Provide the name of the new function")
 		};
 		
 		let r = syntax.return_t;
@@ -61,7 +66,8 @@ impl Parse for ArgumentsDynamicDiversification {
 				.enumerate()
 				.map(|(i, e)| format!("{} => {},", i, return_str_expr_from(e)))
 				.collect::<Vec<_>>(),
-				return_ty : return_token.to_string()
+				return_ty : return_token.to_string(),
+				as_function: syntax.as_function.value()
 			}
 		)
 	}

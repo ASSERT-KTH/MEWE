@@ -99,12 +99,30 @@ pub fn dynamic_diversification(_item: TokenStream) -> TokenStream {
     let arguments = parse_macro_input!(_item as ArgumentsDynamicDiversification);
 
     let tokens = format!(r#"
-        fn dynamic_function(dis: u32) -> {}{{
+        #[no_mangle]
+        fn {}(dis: u32) -> {}{{
             match dis {{
                 {}
                 _ => panic!("Dont know what to do with the current discriminator value {{}}", dis)
             }}
-        }}"#, arguments.return_ty, arguments.exprs.join("\n"));
+        }}"#, arguments.as_function,  arguments.return_ty, arguments.exprs.join("\n"));
+    
+    tokens.parse().unwrap()
+}
+
+
+
+#[proc_macro]
+pub fn dynamic_diversification_body(_item: TokenStream) -> TokenStream {
+    // validate macro arguments
+    let arguments = parse_macro_input!(_item as ArgumentsDynamicDiversification);
+
+    let tokens = format!(r#"
+            // {}
+            match dis {{
+                {}
+                _ => panic!("Dont know what to do with the current discriminator value {{}}", dis)
+            }}"#, arguments.as_function, arguments.exprs.join("\n"));
     
     tokens.parse().unwrap()
 }
