@@ -10,7 +10,7 @@ fn test_translation1() {
     let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 	d.push("resources/babbage.wasm");
 
-	let (head, body, _) = translate2mir(d.into_os_string().to_str().expect("Not valid str"), 
+	let (head, body, _, _) = translate2mir(d.into_os_string().to_str().expect("Not valid str"), 
 	"printf_core", "babbage", Wat2MirConfig{
 		convert_end_to_mir: false, .. Wat2MirConfig::new()
 	});
@@ -32,7 +32,7 @@ fn test_translation_with_skip() {
     let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 	d.push("resources/babbage.wasm");
 
-	let (head, body, tail) = translate2mir(d.into_os_string().to_str().expect("Not valid str"), 
+	let (head, body, tail, _) = translate2mir(d.into_os_string().to_str().expect("Not valid str"), 
 	"__original_main", "babbage", Wat2MirConfig{
 		convert_end_to_mir: true,  skip: 5, leave: 11
 	});
@@ -48,11 +48,28 @@ fn test_translation_with_head_parameters() {
     let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 	d.push("resources/babbage.wasm");
 
-	let (head, _, _) = translate2mir(d.into_os_string().to_str().expect("Not valid str"), 
+	let (head, _, _, _) = translate2mir(d.into_os_string().to_str().expect("Not valid str"), 
 	"printf_core", "babbage", Wat2MirConfig{
 		convert_end_to_mir: true, skip: 5, leave: 11
 	});
 
 
 	println!("{}", head)
+}
+
+
+
+#[test]
+fn test_translation_rust_type() {
+
+    let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+	d.push("resources/babbage.wasm");
+
+	let (_, _, _, ty) = translate2mir(d.into_os_string().to_str().expect("Not valid str"), 
+	"printf_core", "babbage", Wat2MirConfig{
+		convert_end_to_mir: true, skip: 5, leave: 11
+	});
+
+
+	println!("{}", ty)
 }

@@ -6,7 +6,8 @@ pub mod visitor;
 use std::collections::HashMap;
 
 /// translate wasm function to LLVM MIR format
-pub fn translate2mir(file_name: &str, func_name: &str, as_function: &str, config: crate::dto::Wat2MirConfig) -> (String, String, String) {
+/// Returns, function MIR header, Function body, function MIR tail and the Rust function type
+pub fn translate2mir(file_name: &str, func_name: &str, as_function: &str, config: crate::dto::Wat2MirConfig) -> (String, String, String, String) {
 
 
    let module = walrus::Module::from_file(format!("{}", file_name)).unwrap();
@@ -87,5 +88,6 @@ pub fn translate2mir(file_name: &str, func_name: &str, as_function: &str, config
     .collect::<Vec<_>>();
 
    (head, chunk.join("\n") + "\n", 
-    String::from("end_function"))
+    String::from("end_function"), format!("({}) -> ({})", 
+    args.iter().enumerate().map(|(i, item)| { format!("p{}:{}", i, item) }).collect::<Vec<_>>().join(","), fty))
 }

@@ -153,7 +153,7 @@ pub fn inject_mir_from_wasm(_item: TokenStream) -> TokenStream {
     // expecting wat_file, function_name, skip instructions in body, take instructions in body
     let arguments = parse_macro_input!(_item as ArgumentsMirFromWasm);
 
-	let (head, body, tail) = translate2mir(&arguments.file, 
+	let (head, body, tail, fty) = translate2mir(&arguments.file, 
         &arguments.function_name, &arguments.as_function , Wat2MirConfig{
 		convert_end_to_mir: true, skip: arguments.skip, leave: arguments.leave
 	});
@@ -172,8 +172,8 @@ pub fn inject_mir_from_wasm(_item: TokenStream) -> TokenStream {
 
 
     extern {{
-        fn {}() -> i32;
+        fn {}{};
     }}
 
-    "##, head, body, tail, arguments.as_function ).parse().unwrap()
+    "##, head, body, tail, arguments.as_function, fty ).parse().unwrap()
 }
