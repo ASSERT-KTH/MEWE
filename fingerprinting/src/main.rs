@@ -11,10 +11,10 @@ use fastly::{Body, Error, Request, RequestExt, Response, ResponseExt};
 ///
 /// This should be changed to match the name of your own backend. See the the `Hosts` section of
 /// the Fastly WASM service UI for more information.
-const BACKEND_NAME: &str = "hosts.secretcdn.net";
+const BACKEND_NAME: &str = "backend_name";
 
 /// The name of a second backend associated with this service.
-const OTHER_BACKEND_NAME: &str = "hosts.secretcdn.net";
+const OTHER_BACKEND_NAME: &str = "other_backend_name";
 
 /// The entry point for your application.
 ///
@@ -48,7 +48,7 @@ fn main(mut req: Request<Body>) -> Result<impl ResponseExt, Error> {
         (&Method::GET, "/") => Ok(Response::builder()
             .status(StatusCode::OK)
             .body(Body::from(format!("POP: {} Result {}", pop, unsafe {
-                template()
+                different()
             }.to_string())))?),
         
         // If request is a `GET` to the `/backend` path, send to a named backend.
@@ -75,7 +75,7 @@ fn main(mut req: Request<Body>) -> Result<impl ResponseExt, Error> {
 }
 
 extern {
-    fn template() -> i32;
+    fn different() -> i32;
 }
 
 
@@ -83,36 +83,15 @@ extern {
 #[cfg(target_arch = "wasm32")]
 global_asm!(
     r#"
-	.type	template,@function
-    template:
-    .functype	template () -> (i32)
-    .local  	i32, i32, i32, i32
-        i32.const -1
-        local.set 1
-        block 
-          loop  
-            local.get 1
-            i32.const 1
-            i32.add
-            local.tee 1
-            local.get 1
-            i32.mul
-            local.tee 2
-            i32.const 1000000
-            i32.rem_u
-            local.set 3
-            local.get 2
-            i32.const 2147483647
-            i32.eq
-            br_if 1
-            local.get 3
-            i32.const 269696
-            i32.ne
-            br_if 0
-          end_loop
-        end_block
-        local.get 1 
+	.type	different,@function
+    different:
+    .functype	different () -> (i32)
+    .local  	i32
+        i32.const -29
+        f32.reinterpret_i32
+        f32.const 0x1.68p-144
+        f32.max
+        i32.reinterpret_f32
     end_function
     "#
 );
-

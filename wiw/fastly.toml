@@ -1,5 +1,5 @@
-version = 74
-name = "customWasm"
+version = 71
+name = "wiw"
 description = "Deploying custom wasm as a Fastly service"
 authors = [""]
 language = "rust"

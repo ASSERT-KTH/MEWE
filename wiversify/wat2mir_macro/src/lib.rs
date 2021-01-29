@@ -23,6 +23,8 @@ pub fn inject_mir_as_wasm(_item: TokenStream) -> TokenStream {
 
     let content = fs::read_to_string(arguments.file).expect("Could not read the file!");
     
+    eprintln!("Injected function\n {}", content.clone());
+
     format!(r##"
     #[no_mangle]
     #[cfg(target_arch = "wasm32")]

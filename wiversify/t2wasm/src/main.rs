@@ -20,7 +20,8 @@ fn main() {
 		static_diversification!(babbage1(), babbage2());
 	};
 
-	let dis = 2;
+	let dis = rand::thread_rng().next_u32() % 2;
+
 	dynamic_diversification_body!((unsafe{babbage1()}, unsafe{babbage2()}, 1, 2) -> i32, "myfunction");
 
 	myfunction(1);

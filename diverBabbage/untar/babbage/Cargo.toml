@@ -1,0 +1,13 @@
+[package]
+name = "babbage"
+version = "0.1.0"
+authors = []
+edition = "2018"
+
+
+
+[dependencies]
+fastly = "^0.5.0"
+wat2mir_macro = { path = "../wiversify/wat2mir_macro" }
+diversifier = { path = "../wiversify/diversifier" }
+rand = "0.7.2"
