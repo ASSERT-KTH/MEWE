@@ -113,7 +113,14 @@ def get_pop_valid_interval(pop_name='bma', workers=1, start_at=1, end_at=1000, s
 
 	return result_dict
 
+def get_pop_names():
+	content = open(f"{OUT_FOLDER}/pops.json", "r").read()
+	pops = json.loads(content)
+	print("POPs",len(pops))
+	return [p["code"].lower() for p in pops]
+
 if __name__ == "__main__":
-	pops=["bma", "sea", "vie", "bog"]
+	pops=get_pop_names()
+	print(pops)
 	for p in pops:
 		get_pop_valid_interval(pop_name=p, start_at=0, end_at=20000, save_reaching_errors=False, workers=50)
