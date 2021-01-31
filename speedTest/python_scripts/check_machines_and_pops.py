@@ -5,7 +5,7 @@ import json
 
 
 def print_pop_latex_row(pop_file):
-    print(f"Printing {pop_file}")
+    #print(f"Printing {pop_file}")
 
     data = json.loads(open(pop_file, "r").read())
     POP = data["pop_name"].upper()
@@ -16,7 +16,7 @@ def print_pop_latex_row(pop_file):
     return len(ns)
 
 def check_pop(pop_name):
-    print(f"Checking {pop_name}")
+    #print(f"Checking {pop_name}")
 
     data = json.loads(open(pop_name, "r").read())
 
