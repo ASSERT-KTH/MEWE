@@ -8,4 +8,6 @@ SERVICE_ADDRESS=os.environ.get("SERVICE_ADDRESS", None)
 HIT_TIMEOUT=os.environ.get("TIMEOUT", 1)
 RES_TIMEOUT=os.environ.get("RES_TIMEOUT", 3)
 RETRY=os.environ.get("RETRY_COUNT", 1)
+PRINT_LATEX=bool(os.environ.get("PRINT_LATEX", False))
+
 retries = Retry(total=RETRY, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])

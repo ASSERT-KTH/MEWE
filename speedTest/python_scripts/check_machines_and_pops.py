@@ -11,7 +11,8 @@ def print_pop_latex_row(pop_file):
     POP = data["pop_name"].upper()
     ns = [d["at"].__str__() for d in data["valid"]]
     range_numbers = ", ".join(ns)
-    print(f"{POP} & {range_numbers} & {len(ns)} \\\\ \\hline")
+    if PRINT_LATEX:
+        print(f"{POP} & {range_numbers} & {len(ns)} \\\\ \\hline")
 
     return len(ns)
 
@@ -21,11 +22,11 @@ def check_pop(pop_name):
     data = json.loads(open(pop_name, "r").read())
 
     if len(data["valid"]) == 0:
-        print("ERROR: not valide machine in the range")
+        print(f"{pop_name} ERROR: not valide machine in the range")
         return False
     
     if data["valid"][-1]["at"] == data["range"][-1]:
-        print("Maximum range number reached. You should check for a larger range")
+        print(f"{pop_name} Maximum range number reached. You should check for a larger range")
         return False
 
     return True
