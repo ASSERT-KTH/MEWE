@@ -49,3 +49,4 @@ if __name__ == "__main__":
 
         if valid:
             total += print_pop_latex_row(pop_file)
+    print(total)
