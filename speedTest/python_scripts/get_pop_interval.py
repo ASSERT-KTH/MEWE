@@ -5,14 +5,7 @@ from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED
 import  sys
-
-FASTLY_TOKEN=os.environ.get("FASTLY_API_TOKEN", None)
-OUT_FOLDER=os.environ.get("OUT_FOLDER", "out")
-SERVICE_ADDRESS=os.environ.get("SERVICE_ADDRESS", None)	
-HIT_TIMEOUT=os.environ.get("TIMEOUT", 1)
-RES_TIMEOUT=os.environ.get("RES_TIMEOUT", 3)
-RETRY=os.environ.get("RETRY_COUNT", 1)
-retries = Retry(total=RETRY, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
+from common import *
 
 
 STOP=False
@@ -120,7 +113,7 @@ def get_pop_names():
 	return [p["code"].lower() for p in pops]
 
 if __name__ == "__main__":
-	pops=get_pop_names()
+	pops=["bma"]#get_pop_names()
 	print(pops)
 	for p in pops:
-		get_pop_valid_interval(pop_name=p, start_at=0, end_at=20000, save_reaching_errors=False, workers=50)
+		get_pop_valid_interval(pop_name=p, start_at=1000, end_at=2000, save_reaching_errors=False, workers=50)

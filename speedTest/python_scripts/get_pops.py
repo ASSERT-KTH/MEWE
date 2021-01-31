@@ -2,6 +2,7 @@ import json
 import os
 import requests
 
+from common import *
 
 def get_pops():
 	FASTLY_TOKEN=os.environ.get("FASTLY_API_TOKEN", None)
