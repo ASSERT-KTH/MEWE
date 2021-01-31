@@ -21,13 +21,17 @@ def check_pop(pop_name):
 
     data = json.loads(open(pop_name, "r").read())
 
-    if len(data["valid"]) == 0 and not PRINT_LATEX:
-        print(f"{pop_name} ERROR: not valide machine in the range")
-        return False
-    
-    if data["valid"][-1]["at"] == data["range"][-1]  and not PRINT_LATEX:
-        print(f"{pop_name} Maximum range number reached. You should check for a larger range")
-        return False
+    try:
+        if len(data["valid"]) == 0 and not PRINT_LATEX:
+            print(f"{pop_name} ERROR: not valide machine in the range")
+            return False
+        
+        if data["valid"][-1]["at"] == data["range"][-1]  and not PRINT_LATEX:
+            print(f"{pop_name} Maximum range number reached. You should check for a larger range")
+            return False
+    except Exception as e:
+        print(pop_name)
+        raise e
 
     return True
     
