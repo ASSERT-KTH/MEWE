@@ -80,11 +80,11 @@ if __name__ == "__main__":
     tr = threading.Thread(target=test_subscriber)
     tr.start()
 
-    time.sleep(5)
-    publisher = Publisher()
-    for i in range(1):
-        publisher.publish(EXCHANGE_PROCESS_ID, dict(
-            event_type="DEPLOYMENT_DONE"
-        ))
+    #time.sleep(5)
+    #publisher = Publisher()
+    #for i in range(1):
+    #    publisher.publish(EXCHANGE_PROCESS_ID, dict(
+    #        event_type="DEPLOYMENT_DONE"
+    #    ))
 
     tr.join()

@@ -12,7 +12,7 @@ def print_pop_latex_row(pop_file):
     ns = [d["at"].__str__() for d in data["valid"]]
     range_numbers = ", ".join(ns)
     if PRINT_LATEX:
-        print(f"{POP} & {range_numbers} & {len(ns)} \\\\ \\hline")
+        print(f"{POP} & TODO & {len(ns)} \\\\ \\hline")
 
     return len(ns)
 
