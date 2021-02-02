@@ -1,2 +1,6 @@
 fastly4edge/
 out/
+basemap.tar.gz
+basemap-*
+basemap*
+common_secret.py

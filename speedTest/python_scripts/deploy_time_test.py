@@ -12,17 +12,18 @@ import time
 from threading import Thread
 import urllib3
 from event_manager import Publisher, Subscriber
+from event_recorder import deploy_subscriber
 
 urllib3.disable_warnings()
 
 def deploy_version(number):
-	
+    
     if PACKAGE_FOLDER is None:
         raise Exception("PACKAGE_FOLDER env variable not found")
-	
+    
     if DEPLOYMENT_SCRIPT is None:
         raise Exception("DEPLOYMENT_SCRIPT env variable not found")
-	
+    
     if FASTLY_TOKEN is None:
         raise Exception("FASTLY_TOKEN env variable not found")
 
@@ -74,65 +75,70 @@ def get_pop_range(pop_name):
     
     return []
 
-def forever_deploy(publisher, start_at, mx):
+def forever_deploy(publisher, start_at, NOW = 0):
     try:
-        while mx > 0:
+        while True:
+
+            if time.time() - NOW >= MAX_TIME:
+                break
+
             publisher.publish(EXCHANGE_PROCESS_ID, dict(
                 event_type = "DEPLOYMENT_START",
-                time = time.time()
+                time = time.time() - NOW
             ))
 
             deploy_version(f"{start_at}")
 
+            delta = time.time() - NOW
+
             publisher.publish(EXCHANGE_PROCESS_ID, dict(
                 event_type = "DEPLOYMENT_END",
-                time = time.time()
+                time = delta
             ))
 
             time.sleep(DEPLOY_INTERVAL)
-            mx -= 1
             start_at += 1
+        print(f"Finishing deployment thread. Ending version {start_at} ")
     except KeyboardInterrupt as e:
         return
 
-def forever_check(publisher, pop_names, mx):
+def forever_check(publisher, pop_name, ranges, NOW = 0):
     try:
-        while mx > 0:
-            for pop_name in pop_names:
+        while True:
+            for r in ranges:
+                try:
 
-                ranges = get_pop_range(pop_name)
-                if POP_MACHINE_STRATEGY == 0: # random pop machine
-                    ranges = [random.choice(ranges)]
-
-                for r in ranges:
+                    if time.time() - NOW >= MAX_TIME:
+                        break
+                    
                     publisher.publish(EXCHANGE_PROCESS_ID, dict(
                         event_type = "POP_START_CHECK",
-                        time = time.time(),
+                        time = time.time() - NOW,
                         pop = pop_name
                     ))
+                
                     body = check_version(pop_name, r)
+                    delta = time.time() - NOW
+
                     publisher.publish(EXCHANGE_PROCESS_ID, dict(
                         event_type = "POP_END_CHECK",
-                        time = time.time(),
+                        time = delta,
                         pop = pop_name,
                         response = body
                     ))
+                except Exception as e:
+                    print(pop_name, e)
+                        
             time.sleep(CHECK_INTERVAL)
-            mx -= 1
+        print(f"Finishing checking thread {pop_name} {ranges}")
     except KeyboardInterrupt as e:
         return
 
-
-def deploy_subscriber():
-
-    key = EXCHANGE_PROCESS_ID
-    subscriber = Subscriber(1, EXCHANGE_QUEUE, key, 3049, lambda x: print(x))
-    subscriber.setup()
 
 
 if __name__ == "__main__":
 
-    version_start_at = 200
+    version_start_at = int(time.time())
 
     # setup publisher
     publisher = Publisher()
@@ -140,14 +146,32 @@ if __name__ == "__main__":
     subscriberT = Thread(target=deploy_subscriber)
     subscriberT.start()
 
-    deploy_thread = Thread(target=forever_deploy, args=(publisher, version_start_at, 10))
+    NOW = time.time()
+
+    deploy_thread = Thread(target=forever_deploy, args=(publisher, version_start_at, NOW))
     deploy_thread.start()
 
+    pop_names = ["bma", "sea", "bog", "osl", "view"]
 
-    check_thread = Thread(target=forever_check, args=(publisher,  ["sea", "bog"], 500))
-    check_thread.start()
+    if DYNAMICALLY_LOAD_POP_NAMES:
+        from get_pops import get_pops
+
+        pop_names = [d['code'].lower() for d in get_pops()]
+        print(f"Loading pop_names dynamically {pop_names}")
+
+    for pop_name in pop_names:
+        ranges = get_pop_range(pop_name)
+
+        if len(ranges) == 0:
+            print(f"WARNING no valid machine in pop {pop_name}")
+        else:
+            if POP_MACHINE_STRATEGY == 0: # random pop machine
+                ranges = [random.choice(ranges)]
+            print(f"Enabling {pop_name}")
+            check_thread = Thread(target=forever_check, args=(publisher,  pop_name, ranges, NOW))
+            check_thread.start()
 
 
     deploy_thread.join()
-    check_thread.join()
     subscriberT.join()
+

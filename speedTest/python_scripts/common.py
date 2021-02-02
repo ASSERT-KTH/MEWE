@@ -15,8 +15,11 @@ DEPLOYMENT_SCRIPT=os.environ.get("DEPLOYMENT_SCRIPT", None)
 DEPLOYMENT_SERVICE_ID=os.environ.get("DEPLOYMENT_SERVICE_ID", None)
 
 POP_MACHINE_STRATEGY = int(os.environ.get("POP_MACHINE_STRATEGY", 0)) # 0 means random, 1 for all
-CHECK_INTERVAL = int(os.environ.get("CHECK_INTERVAL", 0.1)) # 10 seconds
-DEPLOY_INTERVAL = int(os.environ.get("DEPLOY_INTERVAL", 60)) # 60 seconds, every 1 min
+CHECK_INTERVAL = int(os.environ.get("CHECK_INTERVAL", 0.1)) # 10ms seconds
+DEPLOY_INTERVAL = int(os.environ.get("DEPLOY_INTERVAL", 600)) # 60 seconds, every 1 min
+MAX_TIME = int(os.environ.get("MAX_TIME", 3600)) 
+DYNAMICALLY_LOAD_POP_NAMES = bool(os.environ.get("DYNAMICALLY_LOAD_POP_NAMES", True)) 
+MAX_THREADS_PER_TIME = int(os.environ.get("MAX_THREADS_PER_TIME", 10)) 
 
 
 EXCHANGE=os.environ.get("EXCHANGE", "deploy")
@@ -26,10 +29,19 @@ EXCHANGE_TYPE=os.environ.get("EXCHANGE_TYPE", "topic")
 EXCHANGE_PROCESS_ID=os.environ.get("EXCHANGE_PROCESS_ID", "generate.variant")
 EXCHANGE_QUEUE=os.environ.get("EXCHANGE_QUEUE", "timing_test")
 
+CREATE_VIDEO_FROM_EVENTS=bool(os.environ.get("CREATE_VIDEO_FROM_EVENTS", False)) 
 
-retries = Retry(total=RETRY, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
+MONGO_USER=os.environ.get("MONGO_USER", None)
+MONGO_PASS=os.environ.get("MONGO_PASS", None)
+
 
 try:
     from common_secret import *
 except Exception as e:
     print(e)
+
+MONGO_DB=os.environ.get("MONGO_DB", "fastly4edge_1h2")
+MONGO_URI=os.environ.get("MONGO_URI", f"mongodb://{MONGO_USER}:{MONGO_PASS}@127.0.0.1:27017/{MONGO_DB}?authSource=admin")
+
+
+retries = Retry(total=RETRY, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])

@@ -17,7 +17,7 @@ class Publisher:
         channel.exchange_declare(exchange=EXCHANGE, exchange_type=EXCHANGE_TYPE)
         #Publishes message to the exchange with the given routing key
         channel.basic_publish(exchange=EXCHANGE, routing_key=routing_key, body=json.dumps(message))
-        print("[x] Sent message")
+        #print("[x] Sent message")
         #LOGGER.info("events","[x] Sent message %r for %r" % (message,routing_key))
 
   # Create new connection
@@ -51,7 +51,7 @@ class Subscriber:
 
         self.callback(data)
 
-        print(f"id:{self.id} received new message")
+        #print(f"id:{self.id} received new message")
 
     def setup(self):
         channel = self.connection.channel()
@@ -61,7 +61,7 @@ class Subscriber:
         # Binds the queue to the specified exchang
         channel.queue_bind(queue=self.queueName,exchange=EXCHANGE,routing_key=self.bindingKey)
         channel.basic_consume(queue=self.queueName, on_message_callback=self.on_message_callback, auto_ack=True)
-        print(f'id:{self.id} [*] Waiting for data for ' + self.queueName + '. To exit press CTRL+C')
+        #print(f'id:{self.id} [*] Waiting for data for ' + self.queueName + '. To exit press CTRL+C')
 
         try:
             channel.start_consuming()
