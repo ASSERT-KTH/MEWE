@@ -129,6 +129,6 @@ def get_pop_names():
 		return [p["code"] for p in get_pops()]
 
 if __name__ == "__main__":
-	pops=["bma"] #get_pop_names()
+	pops=get_pop_names()
 	for p in pops:
-		get_pop_valid_interval(pop_name=p, start_at=0, end_at=500000, save_reaching_errors=False, workers=50)
+		get_pop_valid_interval(pop_name=p, start_at=0, end_at=500000, save_reaching_errors=False, workers=100)
