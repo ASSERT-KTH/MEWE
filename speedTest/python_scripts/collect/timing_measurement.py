@@ -15,9 +15,6 @@ PLOT_DISTRIBUTIONS=bool(os.environ.get("PLOT_DISTRIBUTIONS", True))
 
 pool = ThreadPool(processes=1)
 
-print(MONGO_USER, MONGO_PASS, MONGO_URI)
-client = MongoClient(MONGO_URI)
-db = client[MONGO_DB]
 
 def record_request(uris, pop_name, pop_machine, pop_ip, times=5000, do_diff=True):
 
@@ -84,4 +81,4 @@ if __name__ == "__main__":
 
     # ""
     #record_request(["/"], pop_name, ranges[0])
-    record_request(["/","/reallylongkeythatmaytakesometimetoprocessbeacuseisquitelargeandcomplex"], pop_name, ranges[0]["at"], ranges[0]["ip"], times=2000)
+    record_request(["/","/reallylongkeythatmaytakesometimetoprocessbeacuseisquitelargeandcomplex"], pop_name, ranges[0]["at"], ranges[0]["ip"], times=100)

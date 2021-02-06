@@ -56,6 +56,10 @@ MONGO_URI=os.environ.get("MONGO_URI", f"mongodb://{MONGO_USER}:{MONGO_PASS}@127.
 retries = Retry(total=RETRY, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
 
 
+print(MONGO_USER, MONGO_PASS, MONGO_URI)
+client = MongoClient(MONGO_URI)
+db = client[MONGO_DB]
+
 def get_pop_range(pop_name):
 
     if os.path.exists(f"{OUT_FOLDER}/range_{pop_name}.json"):
