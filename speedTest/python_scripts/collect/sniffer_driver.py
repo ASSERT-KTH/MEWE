@@ -1,5 +1,5 @@
 import time
-from common import *
+from common.common import *
 from threading import Thread
 from subprocess import Popen, PIPE, check_output, STDOUT
 import sys

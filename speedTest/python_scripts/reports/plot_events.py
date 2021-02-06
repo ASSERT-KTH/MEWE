@@ -1,4 +1,4 @@
-from common import *
+from common.common import *
 import matplotlib.pyplot as plt
 from pymongo import MongoClient
 import numpy as np
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     pop_names = ["bma", "sea", "bog", "osl"]
 
     if DYNAMICALLY_LOAD_POP_NAMES:
-        from get_pops import get_pops
+        from collect.get_pops import get_pops
 
         pop_names = [d['code'].lower() for d in get_pops()]
         print(f"Loading pop_names dynamically {pop_names}")

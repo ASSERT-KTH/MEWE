@@ -1,5 +1,5 @@
 
-from common import *
+from common.common import *
 from event_manager import Subscriber
 from pymongo import MongoClient
 import time

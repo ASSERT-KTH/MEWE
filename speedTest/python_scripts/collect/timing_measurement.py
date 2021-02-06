@@ -1,12 +1,11 @@
-from common import *
-
+from common.common import *
 import random
 import time
 import numpy as np
 from sniffer_driver import UserSpaceSniffer, WireSharkSniffer
 import threading
 from pymongo import MongoClient
-
+import os
 
 import urllib3
 urllib3.disable_warnings()

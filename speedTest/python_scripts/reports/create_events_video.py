@@ -1,4 +1,4 @@
-from common import *
+from common.common import *
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 import numpy as np

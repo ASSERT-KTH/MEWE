@@ -1,4 +1,4 @@
-from common import *
+from common.common import *
 import pika
 import sys
 import json

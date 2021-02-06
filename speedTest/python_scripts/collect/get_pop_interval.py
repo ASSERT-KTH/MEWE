@@ -5,7 +5,7 @@ from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED
 import  sys
-from common import *
+from common.common import *
 from get_pops import get_pops
 
 import urllib3

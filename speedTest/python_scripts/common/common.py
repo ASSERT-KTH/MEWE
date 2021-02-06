@@ -45,7 +45,7 @@ SELF_IP=os.environ.get("SELF_IP", "127.0.0.1")
 
 
 try:
-    from common_secret import *
+    from common.common_secret import *
 except Exception as e:
     print(e)
 

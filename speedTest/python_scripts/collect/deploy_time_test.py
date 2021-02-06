@@ -1,4 +1,4 @@
-from common import *
+from common.common import *
 from subprocess import Popen, PIPE, check_output, STDOUT
 import os
 

@@ -1,11 +1,13 @@
-basemap==1.2.1
+basemap @ file:///Users/javierca/Documents/Develop/fastly4edge/speedTest/python_scripts/basemap.zip
 certifi==2020.12.5
 chardet==4.0.0
 cycler==0.10.0
+-e git+https://github.com/Jacarte/fastly4edge.git@fd5f600decb7619eec4d14bc9a3f60c7655910ab#egg=fastly4edge&subdirectory=speedTest/python_scripts
 idna==2.10
 kiwisolver==1.3.1
 matplotlib==3.3.4
 numpy==1.20.0
+pandas==1.2.1
 pika==1.1.0
 Pillow==8.1.0
 pymongo==3.11.2
@@ -13,6 +15,7 @@ pyparsing==2.4.7
 pyproj==3.0.0.post1
 pyshp==2.1.3
 python-dateutil==2.8.1
+pytz==2021.1
 requests==2.25.1
 six==1.15.0
 urllib3==1.26.3
