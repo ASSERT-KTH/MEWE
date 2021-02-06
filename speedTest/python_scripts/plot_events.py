@@ -1,6 +1,7 @@
 from common import *
 import matplotlib.pyplot as plt
 from pymongo import MongoClient
+import numpy as np
 
 print(MONGO_USER, MONGO_PASS, MONGO_URI)
 client = MongoClient(MONGO_URI)
@@ -82,13 +83,14 @@ def plot_events(pop_names=[], filter_out=True, filter_first=True, filter_last=Tr
                     #if buffer[0] > deployments_end[0]:
                     #    plt.text(buffer[0], y + 2, f"{last_response}", fontsize=8)
                     plt.plot(buffer, [y]*len(buffer), f"{symbol}", color=c, alpha=0.1)
+                    print(pop, len(buffer), end=",")
 
                 last_switch = last_time
                 count += 1
                 buffer = []
             last_response = current_response
                 
-        
+        print()
         tmp_filter = filter_first
 
         deltas = deltas[1:]
@@ -98,7 +100,8 @@ def plot_events(pop_names=[], filter_out=True, filter_first=True, filter_last=Tr
             for f, t in deltas[:-1]:
                 plt.plot([f, t], [y, y], color='C5')
                 plt.text(f, y + 1, f"{t-f:.2f}s")
-        print(pop, deltas)
+
+        print(pop, np.mean([d[1] - d[0] for d in deltas]))
         #plt.plot(check_versions_end, [10 + i*10]*len(check_versions_end), 'o', color='C3') 
 
 
@@ -108,7 +111,7 @@ def plot_events(pop_names=[], filter_out=True, filter_first=True, filter_last=Tr
 
 if __name__ == "__main__":
 
-    pop_names = ["bma", "sea", "bog", "osl", "view"]
+    pop_names = ["bma", "sea", "bog", "osl"]
 
     if DYNAMICALLY_LOAD_POP_NAMES:
         from get_pops import get_pops

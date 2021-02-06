@@ -51,7 +51,9 @@ def draw_events(pop_names=[]):
     print(total)
     fig = plt.figure()
 
-    for i in range(0, len(overall), 1000): # skip every 10
+    SKIP = 1
+
+    for i in range(0, len(overall)): # skip every 10
         event = overall[i]
         print(f"{i}/{total}")
 
@@ -74,19 +76,20 @@ def draw_events(pop_names=[]):
             'color': colors
         })
         
-        # A basic map
-        fig.clf()
-        m=Basemap(llcrnrlon=-160, llcrnrlat=-75,urcrnrlon=160,urcrnrlat=80)
-        m.drawmapboundary(fill_color='#FFFFFF', linewidth=0)
-        m.fillcontinents(color='gray', alpha=0.7, lake_color='black')
-        m.drawcoastlines(linewidth=0.1, color="black")
-        
-        # Add a marker per city of the data frame!
-        m.scatter(data['lat'], data['lon'], marker="o", s=size, c=data['color'], zorder=2, alpha=0.8)
-        eventTime = event["time"]
-        plt.text(-160,-80, f"T: {eventTime:.2f}s", fontsize=8)
-        t = int(time.time())
-        plt.savefig(f"{OUT_FOLDER}/video/{t}.png", dpi=400)
+        if i % SKIP == 0 or i == len(overall) - 1: # Add always last frame
+         # A basic map
+            fig.clf()
+            m=Basemap(llcrnrlon=-160, llcrnrlat=-75,urcrnrlon=160,urcrnrlat=80)
+            m.drawmapboundary(fill_color='#FFFFFF', linewidth=0)
+            m.fillcontinents(color='gray', alpha=0.7, lake_color='black')
+            m.drawcoastlines(linewidth=0.1, color="black")
+            
+            # Add a marker per city of the data frame!
+            m.scatter(data['lat'], data['lon'], marker="o", s=size, c=data['color'], zorder=2, alpha=0.8)
+            eventTime = event["time"]
+            plt.text(-160,-80, f"T: {eventTime:.2f}s", fontsize=8)
+            t = int(time.time())
+            plt.savefig(f"{OUT_FOLDER}/video/{t}.png", dpi=400)
 
 
 

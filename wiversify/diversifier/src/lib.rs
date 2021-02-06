@@ -2,8 +2,8 @@ extern crate proc_macro;
 mod rs2rs;
 
 use proc_macro::*;
-use rs2rs::{ArgumentsDynamicDiversification, ArgumentsStaticDiversification};
-use std::{fs};
+use rs2rs::{ArgumentsDynamicDiversification, ArgumentsStaticDiversification, StaticArgumentsMetadata};
+use std::{env, fs};
 use syn::*;
 use syn::parse::*;
 use rand::{RngCore, seq::SliceRandom};
@@ -30,6 +30,21 @@ pub fn static_diversification(_item: TokenStream) -> TokenStream {
 }
 
 
+#[proc_macro]
+pub fn static_version_metadata(_item: TokenStream) -> TokenStream {
+    // validate macro arguments
+    //let arguments = parse_macro_input!(_item as ArgumentsStaticDiversification);
+    let arguments = parse_macro_input!(_item as StaticArgumentsMetadata);
+    
+	let version = match std::env::var("SERVICE_VERSION") {
+		Ok(val) => val,
+		Err(_) => panic!("SERVICE_VERSION environment variable not set")
+	};
+
+    eprintln!("Service version {:?}",version);
+
+    version.parse().unwrap()
+}
 
 #[proc_macro]
 pub fn dynamic_diversification(_item: TokenStream) -> TokenStream {

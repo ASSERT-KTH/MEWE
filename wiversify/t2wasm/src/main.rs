@@ -4,6 +4,7 @@
 #![feature(global_asm)]
 
 extern crate wat2mir_macro;
+use rand::RngCore;
 use wat2mir_macro::{inject_mir_as_wasm, inject_mir_from_wasm};
 use diversifier::{static_diversification,dynamic_diversification_body,  dynamic_diversification};
 

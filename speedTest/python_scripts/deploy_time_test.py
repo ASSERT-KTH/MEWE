@@ -2,9 +2,6 @@ from common import *
 from subprocess import Popen, PIPE, check_output, STDOUT
 import os
 
-import requests
-from requests.packages.urllib3.util.retry import Retry
-from requests.adapters import HTTPAdapter
 from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED
 import random
 import json
@@ -34,46 +31,6 @@ def deploy_version(number):
     os.environ["FASTLY_API_TOKEN"] = FASTLY_TOKEN
     result = check_output(f"bash {DEPLOYMENT_SCRIPT} {DEPLOYMENT_SERVICE_ID}", shell=True, cwd=PACKAGE_FOLDER)
 
-def check_version(pop_name, pop_at):
-
-    adapter = HTTPAdapter(max_retries=retries)
-    http = requests.Session()
-    try:
-        http.mount("https://", adapter)
-
-        if pop_at  % 100  == 0:
-            print(f"Hitting {pop_name} at {pop_at}")
-        #pops_request = requests.get(, , timeout=HIT_TIMEOUT, max_retries=retries )
-
-        result = http.get(f"https://cache-{pop_name}{pop_at}.hosts.secretcdn.net",headers = {
-            "X-Pass": "1",
-            "X-Origin": "https_teamc_origin",
-            "Host": SERVICE_ADDRESS
-        },timeout=HIT_TIMEOUT, verify=False)
-        
-        status_code = result.status_code
-        response_body = result.content
-
-        if status_code != 200:
-            raise Exception("Not valid return status")
-        
-        headers = [(k, v) for k, v in result.headers.items()]
-
-        return response_body.decode()
-
-    except Exception as e:
-        raise e
-
-def get_pop_range(pop_name):
-
-    if os.path.exists(f"{OUT_FOLDER}/range_{pop_name}.json"):
-
-        pop_detail = open(f"{OUT_FOLDER}/range_{pop_name}.json", 'r').read()
-        pop_detail = json.loads(pop_detail)
-
-        return [p["at"] for p in pop_detail["valid"]]
-    
-    return []
 
 def forever_deploy(publisher, start_at, NOW = 0):
     try:
@@ -148,8 +105,11 @@ if __name__ == "__main__":
 
     NOW = time.time()
 
-    deploy_thread = Thread(target=forever_deploy, args=(publisher, version_start_at, NOW))
-    deploy_thread.start()
+    if LAUNCH_REDEPLOY_THREAD:
+        deploy_thread = Thread(target=forever_deploy, args=(publisher, version_start_at, NOW))
+        deploy_thread.start()
+
+    time.sleep(DEPLOY_INTERVAL) # Wait for clearance of the first version
 
     pop_names = ["bma", "sea", "bog", "osl", "view"]
 

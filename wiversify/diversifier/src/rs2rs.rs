@@ -34,6 +34,36 @@ pub struct ArgumentsStaticDiversification {
 }
 
 
+#[derive(Debug)]
+pub struct StaticArgumentsMetadata {
+
+}
+
+
+
+struct SyntaxArgumentsMetadata {
+
+}
+/// Creates a match pattern for the given arguments
+impl Parse for StaticArgumentsMetadata {
+	// Validate and parse the arguments of the macro
+	fn parse(stream: ParseStream) -> Result<Self>{
+
+        let syntax = SyntaxArgumentsMetadata {
+
+		};
+
+		// TODO validate the same type for all arguments
+
+		return Ok(
+			StaticArgumentsMetadata{
+				
+			}
+		)
+	}
+}
+
+
 struct SyntaxStaticDiversification {
 	calls: Punctuated<Expr, Token![,]>,
 }

@@ -4,3 +4,9 @@ basemap.tar.gz
 basemap-*
 basemap*
 common_secret.py
+wavefront*
+a.out
+nanown/
+untar/
+__pycache__/
+*.wasm

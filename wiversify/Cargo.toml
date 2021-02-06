@@ -5,7 +5,8 @@ members = [
     "t2wasm",
 	"tests",
 	"wat2mir",
-	"diversifier"
+	"diversifier",
+	"simple_version_retriever"
 ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
