@@ -10,3 +10,6 @@ nanown/
 untar/
 __pycache__/
 *.wasm
+dist/
+build/
+fastly4edge.egg-info

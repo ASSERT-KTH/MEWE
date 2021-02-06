@@ -23,4 +23,6 @@ if [[ ! -f basemap.zip ]]; then
     wget -O basemap.zip https://github.com/matplotlib/basemap/archive/v1.2.2rel.zip
 fi
 
-pip3 install --user --upgrade basemap.zip
+pip3 install numpy
+pip3 install --upgrade basemap.zip
+pip3 install -r requirements.txt
