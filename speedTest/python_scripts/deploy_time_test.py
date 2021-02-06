@@ -128,7 +128,7 @@ if __name__ == "__main__":
             if POP_MACHINE_STRATEGY == 0: # random pop machine
                 ranges = [random.choice(ranges)]
             print(f"Enabling {pop_name}")
-            check_thread = Thread(target=forever_check, args=(publisher,  pop_name, ranges, NOW))
+            check_thread = Thread(target=forever_check, args=(publisher,  pop_name, [r["at"] for r in  ranges], NOW))
             check_thread.start()
 
 

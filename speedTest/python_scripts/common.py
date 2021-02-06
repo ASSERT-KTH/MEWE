@@ -63,7 +63,7 @@ def get_pop_range(pop_name):
         pop_detail = open(f"{OUT_FOLDER}/range_{pop_name}.json", 'r').read()
         pop_detail = json.loads(pop_detail)
 
-        return [p["at"] for p in pop_detail["valid"]]
+        return pop_detail["valid"]
     
     return []
 

@@ -29,8 +29,8 @@ class UserSpaceSniffer(object):
 class WireSharkSniffer(object):
 
     def __init__(self, filtered_ports=[80, 443],
-    src_filter=["192.168.10.168"],
-    dst_filter=["157.52.95.25"], timeout=0):
+    src_filter=[],
+    dst_filter=[], timeout=0):
         self.filtered_ports = filtered_ports
         self.src_filter = src_filter
         self.dst_filter = dst_filter
@@ -211,7 +211,7 @@ if __name__ == "__main__":
     shark = WireSharkSniffer(timeout=delta*N*0.000001 + 1)
     future = pool.apply_async(shark.capture_packages)
     time.sleep(2) # give time to dump
-    
+
      #reallylongkeythatmaytakesometimetoprocessbeacuseisquitelargeandcomplex
 
     for i in range(N): #4480
