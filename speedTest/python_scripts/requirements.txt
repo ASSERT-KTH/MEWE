@@ -1,8 +1,6 @@
-basemap @ file:///Users/javierca/Documents/Develop/fastly4edge/speedTest/python_scripts/basemap.zip
 certifi==2020.12.5
 chardet==4.0.0
 cycler==0.10.0
--e git+https://github.com/Jacarte/fastly4edge.git@fd5f600decb7619eec4d14bc9a3f60c7655910ab#egg=fastly4edge&subdirectory=speedTest/python_scripts
 idna==2.10
 kiwisolver==1.3.1
 matplotlib==3.3.4

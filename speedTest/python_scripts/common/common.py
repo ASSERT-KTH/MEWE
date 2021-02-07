@@ -6,6 +6,7 @@ from requests.adapters import HTTPAdapter
 import time
 from subprocess import Popen, PIPE, check_output, STDOUT
 import re
+from pymongo import MongoClient
 
 FASTLY_TOKEN=os.environ.get("FASTLY_API_TOKEN", None)
 OUT_FOLDER=os.environ.get("OUT_FOLDER", "out")

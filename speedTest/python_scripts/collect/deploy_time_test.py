@@ -10,6 +10,7 @@ from threading import Thread
 import urllib3
 from event_manager import Publisher, Subscriber
 from event_recorder import deploy_subscriber
+from collect.get_pops import get_pops
 
 urllib3.disable_warnings()
 
@@ -111,7 +112,7 @@ if __name__ == "__main__":
 
     time.sleep(DEPLOY_INTERVAL) # Wait for clearance of the first version
 
-    pop_names = ["bma", "sea", "bog", "osl", "view"]
+    pop_names = get_pops()
 
     if DYNAMICALLY_LOAD_POP_NAMES:
         from get_pops import get_pops
@@ -120,7 +121,7 @@ if __name__ == "__main__":
         print(f"Loading pop_names dynamically {pop_names}")
 
     for pop_name in pop_names:
-        ranges = get_pop_range(pop_name)
+        ranges = [p["code"] for p in get_pop_range(pop_name)]
 
         if len(ranges) == 0:
             print(f"WARNING no valid machine in pop {pop_name}")

@@ -20,7 +20,7 @@ def record_request(uris, pop_name, pop_machine, pop_ip, times=5000, do_diff=True
 
 
     BACKOFF=60
-    for uri in uris:
+    for uri, name in uris:
         user_space_deltas = []
         _, delta = check_version(pop_name, pop_machine, "/", True, None)
         sniffer = WireSharkSniffer(timeout=delta*times*0.000001 + 5) # in seconds
@@ -62,6 +62,8 @@ def record_request(uris, pop_name, pop_machine, pop_ip, times=5000, do_diff=True
             user_space=user_space_deltas, 
             tcp_rtts = rtts[0],
             uri=uri,
+            test_name=name,
+            events=events,
             tcp_timestamp = rtts[1]
         ))
 
@@ -81,4 +83,7 @@ if __name__ == "__main__":
 
     # ""
     #record_request(["/"], pop_name, ranges[0])
-    record_request(["/","/reallylongkeythatmaytakesometimetoprocessbeacuseisquitelargeandcomplex"], pop_name, ranges[0]["at"], ranges[0]["ip"], times=100)
+    record_request(
+        [("/", "HOME"),
+        ("/reallylongkeythatmaytakesometimetoprocessbeacuseisquitelargeandcomplex", "REGEX_MATCH1")], 
+        pop_name, ranges[0]["at"], ranges[0]["ip"], times=100)
