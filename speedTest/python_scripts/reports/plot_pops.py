@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import json
 import os
+from math import *
 
 def get_pop_size(pop_name):
 
@@ -47,5 +48,36 @@ def plot_pops():
 
     plt.show()
 
+def plot_pops_radial(start_at):
+    R = 6373.0 # Earth radious in KM
+
+    print("Ploting...")
+
+    pops = open(f"{OUT_FOLDER}/pops.json", 'r').read()
+    pops = json.loads(pops)
+
+    ds = []
+    fig, ax = plt.subplots() # note we must use plt.subplots, not plt.subplot
+
+    for p in pops:
+        lat1, lon1 = start_at
+        lat2 = p["coordinates"]["latitude"]
+        lon2 = p["coordinates"]["longitude"]
+        dlat = lat2 - lat1
+        dlon = lon2 - lon1
+
+        a = (sin(dlat/2))**2 + cos(lat1) * cos(lat2) * (sin(dlon/2))**2
+        c = 2 * atan2(sqrt(a), sqrt(1-a))
+        distance = R * c
+        
+        print(p["code"], distance)
+        #circle=plt.Circle((0,0), distance, alpha=0.1, linewidth=1, fill=False)
+        #ax.add_patch(circle)
+        ax.scatter(distance, 10, color="C1")
+    fig.tight_layout()
+
+    plt.show()
+
 if __name__ == "__main__":
-	plot_pops()
+	#plot_pops()
+    plot_pops_radial((59.354372, 17.94165))

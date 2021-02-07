@@ -40,109 +40,94 @@ class WireSharkSniffer(object):
 
         #self.event_parser = re.compile(r'^(?P<id>\d+) +(?P<date>\d+\.\d+) (?P<src_ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) → (?P<dst_ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) (?P<protocol>\w+) (?P<process>\d+) (?P<src_port>\d+) → (?P<dst_port>\d+) (?P<actions>\[( ?\w+,?)+\])(?P<arguments>( ?\w+=\d+)+)')
 
-    def check_and_filter_events_order(self, events, src="", dst=""):
+    def check_and_filter_events_order(self, events):
 
-        last = 0
-        filtered = []
-
-        port_pairs = dict()
-
+        interactions = []
+        buffer = []
         for event in events:
             #print(event)
-            if "TSval" in event["arguments"]:
-                time = event["arguments"]["TSval"]
-                time = int(time)
-                event["arguments"]["TSval"] = time
-                fromP = event["src_port"]
-                toP = event["dst_port"]
-                port_pair=int(fromP)*int(toP)
+            layers = event["_source"]["layers"]
+            ip_layer = layers["ip"]
+            if "tcp" in layers:
+                tcp_layer = layers["tcp"]
 
-                if port_pair not in port_pairs:
-                    port_pairs[port_pair] = []
+                src_port = tcp_layer["tcp.srcport"]
+                dst_port = tcp_layer["tcp.dstport"]
 
-                if time < last:
-                    pass
-                    #print(filtered)
-                    #print(event, last)
-                    #raise Exception("Invalid time order")
+                if "tcp.options_tree" in tcp_layer:
+                    tcp_options = tcp_layer["tcp.options_tree"]
 
-                last = time
-                port_pairs[port_pair].append(event)
-        print(f"Pairs {len(port_pairs)}")
-        # Remove interaction without 0 TSrec in the first event
+                    tsval=tcp_options["tcp.options.timestamp_tree"]["tcp.options.timestamp.tsval"]
+                    tsecr=tcp_options["tcp.options.timestamp_tree"]["tcp.options.timestamp.tsecr"]
 
-        tvals = [] # TODO Check time unit
-        tdates = []
-        for interaction in list(port_pairs.values())[:-2]: # Always discard last package
-            if interaction[0]["arguments"]["TSecr"] == 0:
-                print("Interaction has no first package")
-                continue
-            first_TSval = 0
-            date = datetime.datetime.now()
-            delta = 0
+                    if tsecr == "0": # start of a new communication
+                        if len(buffer) > 0:
+                            interactions.append(buffer)
+                        #print(buffer)
+                        buffer = [event]
+                    else:
+                        buffer.append(event)
 
-            for event in interaction:
-                fr, to, actions, arguments, ts, tec = event["src_ip"], event["dst_ip"], event["actions"], event["arguments"], event["arguments"]["TSval"], event["arguments"]["TSecr"]
+        if len(buffer) > 0:
+            first = buffer[0]
 
-                if fr == dst:
-                    #print(event)
-                    date = datetime.datetime.strptime("%s %s"%(event["date"], event["time"]), '%Y-%m-%d %H:%M:%S.%f')
-                    if first_TSval == 0:
-                        first_TSval = ts
+            if first["_source"]["layers"]["tcp"]["tcp.options_tree"]["tcp.options.timestamp_tree"]["tcp.options.timestamp.tsecr"] == "0":
+                interactions.append(buffer)
 
-                        first_date = date
-                    delta = ts - first_TSval
 
-                    print(f"{fr} {to} {actions} {ts} {tec}")
-            #print(delta)
-            tvals.append(delta)
-            tdates.append((date - first_date).microseconds)
-        #print(len(port_pairs.keys()))
-        return tvals, tdates
+        return interactions
 
-    def filter_packages(self, content, src, dst, only_tcp=True):
-        packages = content.split("\n")
+    def get_rtts_from_tcp(self, interactions, src_ip):
+        result = []
+        for interaction in interactions:
+            first = 0
+            s = 0
+            for event in interaction: # Patch since for some reason the delay between requests is added to the interaction
+                ip_layer = event["_source"]["layers"]["ip"]
 
-        events = []
-        parser = self.event_parser
-        argument_parser=re.compile(r" (?P<name>\w+)=(?P<value>\d+)")
+                if ip_layer["ip.src"] == src_ip:
+                    tcp_layer = event["_source"]["layers"]["tcp"]
+                    if "tcp.options_tree" in tcp_layer:
+                        tsval = tcp_layer["tcp.options_tree"]["tcp.options.timestamp_tree"]["tcp.options.timestamp.tsval"]
+                        
+                        if first == 0:
+                            first += float(tsval)
+                        else:
+                            print(tsval, float(tsval) - first)
+                            s += float(tsval) - first
+                            first = float(tsval)
+            result.append(s)
+            #print(s)
+        #print(result)
+        return result
 
-        for p in packages:
-            sanitized=p.strip()
-            m = parser.search(sanitized)
+    def estimate_freq(self, interactions, discard_tail=0):
+        #TODO
+        pass
+    def get_rtts_from_frame(self, interactions):
+        result = []
+        for interaction in interactions:
+            #print(f"Events {len(interaction)}")
+            first = 0
+            s = 0
+            for event in interaction: # Discard last package
+                tcp_layer = event["_source"]["layers"]["tcp"]
+                frame_layer = event["_source"]["layers"]["frame"]
+                if first == 0:
+                    first += float(frame_layer["frame.time_epoch"])
+                if first < 0: # discard x first packages
+                    first += 1
 
-            if m:
-                #print(m.group("id"), m.group("date"), m.group("time"), m.group("src_ip"), m.group("dst_ip"), m.group("protocol"), m.group("src_port"), m.group("dst_port"), m.group("actions"), m.group("arguments"))
+                s = float(frame_layer["frame.time_epoch"]) - first
+                #print(json.dumps(tcp_layer, indent=4))
 
-                event = dict()
-                event["id"] = m.group("id")
-                event["date"] = m.group("date")
-                event["time"] = m.group("time")
-                event["src_ip"] = m.group("src_ip")
-                event["dst_ip"] = m.group("dst_ip")
-                event["protocol"] = m.group("protocol")
-                event["src_port"] = m.group("src_port")
-                event["dst_port"] = m.group("dst_port")
-                #event["tail"] = m.group("tail")
-                event["actions"] = [t.strip() for t in m.group("actions")[1:-1].split(",")]
-                event["arguments"] = dict()
+                #if "tcp.analysis" in tcp_layer:
+                  #  s += float(tcp_layer["tcp.analysis"][])
+            #print(s)
+            result.append(s)
+        return result
 
-                for argmatch in argument_parser.finditer(m.group("arguments")):
-                    event["arguments"][argmatch.group("name")] = argmatch.group("value")
-
-                if only_tcp and event["protocol"] != "TCP":
-                    continue
-
-                #print(event["src_ip"], event["dst_ip"])
-                if (event["src_ip"] == src and event["dst_ip"] == dst) or (event["src_ip"] == dst and event["dst_ip"] == src):
-                    print(p)
-                    events.append(event)
-            
-        # 1 2021-02-05 16:01:27.659706 192.168.10.168 → 157.52.95.25 TCP 78 59973 → 443 [SYN] Seq=0 Win=65535 Len=0 MSS=1460 WS=64 TSval=524707847 TSecr=0 SACK_PERM=1
-        print(len(events))
-        return events
-
-    def capture_packages(self):
+    def capture_packages(self, src, dst):
         possible_paths = []
         process_name = "tshark"
         os_path = os.getenv(
@@ -170,60 +155,60 @@ class WireSharkSniffer(object):
             f"-i{SNIFF_INTERFACE}",
             f"-aduration:{timeout}" ,
             f"-tad",
+            f"-Tjson",
+            f"-dtcp.port==443,http",
+            f"-dtcp.port==80,http"
         ], executable=f"{path}", stdout=PIPE, stderr=PIPE, stdin=PIPE)
 
 
         std, err = process.communicate()
         #print(err.decode(), std.decode())
-        return std.decode()
-
-        if err:
-            print(f"Stopping {err.decode()}")
 
         data = json.loads(std)
+        events = []
         for p in data:
             # Filtering IP host and dst
             
             layers = p["_source"]["layers"]
-            frame_time_stamp = layers["frame"]["frame.time"]
+            #frame_time_stamp = layers["frame"]["frame.time"]
+            #if "tcp" not in layers: ## If no tcp layer is present, then packages are filtered
+            #    continue 
             if "ip" in layers:
                 ip_layer = layers['ip']
                 src_ip = ip_layer["ip.src"]
                 dst_ip = ip_layer["ip.dst"]
-                
-                if "tcp" in layers and "tcp.options_tree" in layers["tcp"]:
-                    tvsal = layers["tcp"]["tcp.options_tree"]["tcp.options.timestamp_tree"]["tcp.options.timestamp.tsval"]
 
-                    if (src_ip in options.src_filter and dst_ip in options.dst_filter) or (src_ip in options.dst_filter and dst_ip in options.src_filter):
-                        print(json.dumps(p))
-                        print(src_ip, dst_ip, frame_time_stamp, tvsal)
+                if (src_ip == src and dst_ip == dst) or (src_ip == dst and dst_ip == src):
+                    events.append(p)
+                
+        return events
+
     def wrap_function(self, fn, *args, **kwargs):
     
         r = fn(*args, **kwargs)
         
 if __name__ == "__main__":
-    N=20000
+    N=20
     pop = "bma"
     port=1625
     _, delta = check_version(pop, port, "/", True, None)
 
     shark = WireSharkSniffer(timeout=delta*N*0.000001 + 1)
-    future = pool.apply_async(shark.capture_packages)
+    future = pool.apply_async(shark.capture_packages, args=("192.168.10.168", "157.52.95.25"))
     time.sleep(2) # give time to dump
 
      #reallylongkeythatmaytakesometimetoprocessbeacuseisquitelargeandcomplex
 
     for i in range(N): #4480
+        #time.sleep(1)
         check_version(pop, port, "/reallylongkeythatmaytakesometimetoprocessbeacuseisquitelargeandcomplex", True, None)
         printProgressBar(i, N - 1)
 
     time.sleep(1)
     content=future.get()
-    events=shark.filter_packages(content, "192.168.10.168", "157.52.95.25")
-    #print(events)
-    rtts, dates = shark.check_and_filter_events_order(events, "192.168.10.168", "157.52.95.25")
-    print(rtts, dates, np.mean(dates))
+    #print(content)
+    filtered=shark.check_and_filter_events_order(content)
 
-    import matplotlib.pyplot as plt
-    plt.hist(dates, bins=(len(set(dates))))
-    plt.show()
+    print(len(filtered))
+    #print(json.dumps(content, indent=4))
+    
