@@ -1,4 +1,4 @@
-version = 317
+version = 318
 name = "fingerprinting"
 description = "Deploying custom wasm as a Fastly service"
 authors = [""]

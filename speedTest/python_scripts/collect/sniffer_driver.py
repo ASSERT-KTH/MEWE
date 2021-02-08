@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 from multiprocessing.pool import ThreadPool
 import datetime
 import numpy as np
+from scipy import stats
+import os
 
 
 import urllib3
@@ -79,31 +81,84 @@ class WireSharkSniffer(object):
 
     def get_rtts_from_tcp(self, interactions, src_ip):
         result = []
+        slopes = []
         for interaction in interactions:
             first = 0
+            first_frame = 0
+            sframe = 0
             s = 0
+
+            deltas_tcp = []
+            deltas_frame = []
+
             for event in interaction: # Patch since for some reason the delay between requests is added to the interaction
                 ip_layer = event["_source"]["layers"]["ip"]
+                frame_layer = event["_source"]["layers"]["frame"]
 
                 if ip_layer["ip.src"] == src_ip:
                     tcp_layer = event["_source"]["layers"]["tcp"]
+
+                    if first_frame == 0:
+                        first_frame = float(frame_layer["frame.time_epoch"])
+                    else:
+                        frame_delta = float(frame_layer["frame.time_epoch"]) - first_frame
+                        sframe += frame_delta 
+                        deltas_frame.append(frame_delta)
+                        first_frame = float(frame_layer["frame.time_epoch"])
+
+                    sframe = float(frame_layer["frame.time_epoch"]) - first_frame
                     if "tcp.options_tree" in tcp_layer:
                         tsval = tcp_layer["tcp.options_tree"]["tcp.options.timestamp_tree"]["tcp.options.timestamp.tsval"]
                         
                         if first == 0:
                             first += float(tsval)
                         else:
-                            print(tsval, float(tsval) - first)
-                            s += float(tsval) - first
+                            #print(tsval, float(tsval) - first)
+                            tcp_delta = float(tsval) - first
+                            s += tcp_delta
+                            deltas_tcp.append(tcp_delta)
                             first = float(tsval)
+            #doing linear regression
+
+            if len(deltas_frame) != len(deltas_tcp):
+                print("WARNING delta collections are different in size")
+                raise Exception("Invalid deltas")
+            slope, intercept, r_value, p_value, std_err = stats.linregress(deltas_frame, deltas_tcp)
+
+            pck_stats = dict(slope=slope, intercept=intercept, r_value=r_value, p_value =p_value, std_err=std_err, 
+            samples_frame=deltas_frame, samples_tcp=deltas_tcp)
+
+            #print(f"Slope {slope}, intercept: {intercept:.2f}")
             result.append(s)
+            slopes.append(pck_stats)
             #print(s)
         #print(result)
-        return result
 
-    def estimate_freq(self, interactions, discard_tail=0):
+        # linear regression to get slope
+
+        return result, slopes
+
+    def get_linear_regression(self, interactions, report_outliers=False):
         #TODO
         pass
+
+    def project_package_info(self, package):
+        
+        result = dict()
+        #print(json.dumps(package, indent=4))
+
+
+
+        tcp_layer = package["_source"]["layers"]["tcp"]
+        frame_layer = package["_source"]["layers"]["frame"]
+
+        result["frame"] = dict(time_epoch=frame_layer["frame.time_epoch"], time=frame_layer["frame.time"])
+        result["ip"] = package["_source"]["layers"]["ip"] # Full ip layer
+
+        if "tcp.options_tree" in tcp_layer and "tcp.options.timestamp_tree" in tcp_layer["tcp.options_tree"]:
+            result["tcp"] = dict(timestamp=tcp_layer["tcp.options_tree"]["tcp.options.timestamp_tree"])
+
+        return result
     def get_rtts_from_frame(self, interactions):
         result = []
         for interaction in interactions:
@@ -126,6 +181,32 @@ class WireSharkSniffer(object):
             #print(s)
             result.append(s)
         return result
+
+    def stop_and_collect(self, src, dst):
+        print("Stopping tshark collection")
+        #print(r)
+        self.process.terminate()
+        std, err = self.process.communicate()
+        #print(err.decode(), std.decode())
+
+        data = json.loads(std)
+        events = []
+        for p in data:
+            # Filtering IP host and dst
+            
+            layers = p["_source"]["layers"]
+            #frame_time_stamp = layers["frame"]["frame.time"]
+            #if "tcp" not in layers: ## If no tcp layer is present, then packages are filtered
+            #    continue 
+            if "ip" in layers:
+                ip_layer = layers['ip']
+                src_ip = ip_layer["ip.src"]
+                dst_ip = ip_layer["ip.dst"]
+
+                if (src_ip == src and dst_ip == dst) or (src_ip == dst and dst_ip == src):
+                    events.append(p)
+                
+        return events
 
     def capture_packages(self, src, dst):
         possible_paths = []
@@ -151,37 +232,13 @@ class WireSharkSniffer(object):
         print("Launching tshark")  
         timeout=self.timeout
         OUT_FILE=os.path.abspath(f"{OUT_FOLDER}/capture.cap")
-        process = Popen([
+        self.process = Popen([
             f"-i{SNIFF_INTERFACE}",
-            f"-aduration:{timeout}" ,
+            #f"-aduration:{timeout}" ,
             f"-tad",
-            f"-Tjson",
-            f"-dtcp.port==443,http",
-            f"-dtcp.port==80,http"
-        ], executable=f"{path}", stdout=PIPE, stderr=PIPE, stdin=PIPE)
+            f"-Tjson"
+        ],executable=f"{path}", stdout=PIPE, stderr=PIPE, stdin=PIPE)
 
-
-        std, err = process.communicate()
-        #print(err.decode(), std.decode())
-
-        data = json.loads(std)
-        events = []
-        for p in data:
-            # Filtering IP host and dst
-            
-            layers = p["_source"]["layers"]
-            #frame_time_stamp = layers["frame"]["frame.time"]
-            #if "tcp" not in layers: ## If no tcp layer is present, then packages are filtered
-            #    continue 
-            if "ip" in layers:
-                ip_layer = layers['ip']
-                src_ip = ip_layer["ip.src"]
-                dst_ip = ip_layer["ip.dst"]
-
-                if (src_ip == src and dst_ip == dst) or (src_ip == dst and dst_ip == src):
-                    events.append(p)
-                
-        return events
 
     def wrap_function(self, fn, *args, **kwargs):
     

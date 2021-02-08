@@ -96,9 +96,6 @@ def check_version(pop_name, pop_at, uri="", return_full_response=False, sniffer=
 
         status_code = result.status_code
         response_body = result.content
-
-        if status_code != 200:
-            raise Exception("Not valid return status")
         
         headers = [(k, v) for k, v in result.headers.items()]
 
