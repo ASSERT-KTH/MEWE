@@ -31,35 +31,11 @@ fn main(mut req: Request<Body>) -> Result<impl ResponseExt, Error> {
             .body(Body::from(format!("Regular OK")))?),
         
         // If request is a `GET` to the `/backend` path, send to a named backend.
-        (&Method::GET, "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa") => 
+        (&Method::GET, "/call") => 
         {
             Ok(Response::builder()
             .status(StatusCode::OK)
             .body(Body::from(format!("Gotcha 30")))?)
-        },
-        (&Method::GET, "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa") => 
-        {
-            Ok(Response::builder()
-            .status(StatusCode::OK)
-            .body(Body::from(format!("Gotcha 60")))?)
-        },
-        (&Method::GET, "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa") => 
-        {
-            Ok(Response::builder()
-            .status(StatusCode::OK)
-            .body(Body::from(format!("Gotcha 90")))?)
-        },
-        (&Method::GET, "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa") => 
-        {
-            Ok(Response::builder()
-            .status(StatusCode::OK)
-            .body(Body::from(format!("Gotcha 90")))?)
-        },
-        // If request is a `GET` to a path starting with `/other/`.
-        (&Method::GET, path) if path.starts_with("/other/") => {
-            // Send request to a different backend and don't cache response.
-            *req.cache_override_mut() = CacheOverride::Pass;
-            Ok(req.send(OTHER_BACKEND_NAME)?)
         }
 
         // Catch all other requests and return a 404.
@@ -68,3 +44,4 @@ fn main(mut req: Request<Body>) -> Result<impl ResponseExt, Error> {
             .body(Body::from("The page you requested could not be found"))?),
     }
 }
+
