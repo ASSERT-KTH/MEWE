@@ -1,4 +1,4 @@
-version = 74
+version = 349
 name = "customWasm"
 description = "Deploying custom wasm as a Fastly service"
 authors = [""]

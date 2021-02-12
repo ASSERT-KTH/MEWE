@@ -11,8 +11,8 @@ from pymongo import MongoClient
 FASTLY_TOKEN=os.environ.get("FASTLY_API_TOKEN", None)
 OUT_FOLDER=os.environ.get("OUT_FOLDER", "out")
 SERVICE_ADDRESS=os.environ.get("SERVICE_ADDRESS", None)	
-HIT_TIMEOUT=int(os.environ.get("TIMEOUT", 1))
-RES_TIMEOUT=int(os.environ.get("RES_TIMEOUT", 3))
+HIT_TIMEOUT=int(os.environ.get("TIMEOUT", 30))
+RES_TIMEOUT=int(os.environ.get("RES_TIMEOUT", 30))
 RETRY=int(os.environ.get("RETRY_COUNT", 1))
 PRINT_LATEX=bool(os.environ.get("PRINT_LATEX", False))
 
@@ -38,28 +38,17 @@ EXCHANGE_QUEUE=os.environ.get("EXCHANGE_QUEUE", "timing_test")
 
 CREATE_VIDEO_FROM_EVENTS=bool(os.environ.get("CREATE_VIDEO_FROM_EVENTS", False)) 
 
-MONGO_USER=os.environ.get("MONGO_USER", None)
-MONGO_PASS=os.environ.get("MONGO_PASS", None)
-
 SNIFF_INTERFACE=os.environ.get("SNIFF_INTERFACE", "en0")
 SELF_IP=os.environ.get("SELF_IP", "127.0.0.1")
 
+REMOVE_DB_AT_FIRST=bool(os.environ.get("REMOVE_DB_AT_FIRST", True)) 
 
 try:
     from common.common_secret import *
 except Exception as e:
     print(e)
 
-MONGO_DB=os.environ.get("MONGO_DB", "fastly4edge_fingerprint")
-MONGO_URI=os.environ.get("MONGO_URI", f"mongodb://{MONGO_USER}:{MONGO_PASS}@127.0.0.1:27017/{MONGO_DB}?authSource=admin")
-
-
 retries = Retry(total=RETRY, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
-
-
-print(MONGO_USER, MONGO_PASS, MONGO_URI)
-client = MongoClient(MONGO_URI)
-db = client[MONGO_DB]
 
 def get_pop_range(pop_name):
 
@@ -73,7 +62,7 @@ def get_pop_range(pop_name):
     return []
 
 
-def check_version(pop_name, pop_at, uri="", return_full_response=False, sniffer=None):
+def check_version(pop_name, pop_at, uri="", return_full_response=False, sniffer=None, print_response=False, timeHeader=None):
 
     adapter = HTTPAdapter(max_retries=retries)
     http = requests.Session()
@@ -85,9 +74,9 @@ def check_version(pop_name, pop_at, uri="", return_full_response=False, sniffer=
             print(f"Hitting {pop_name} at {pop_at}")
         #pops_request = requests.get(, , timeout=HIT_TIMEOUT, max_retries=retries )
 
-
+        
         result = http.get(f"https://cache-{pop_name}{pop_at}.hosts.secretcdn.net{uri}",headers = {
-            "X-Pass": "1",
+            "X-Pass": "2",
             "X-Origin": "https_teamc_origin",
             "Host": URI
         },timeout=HIT_TIMEOUT, verify=False)
@@ -96,6 +85,9 @@ def check_version(pop_name, pop_at, uri="", return_full_response=False, sniffer=
 
         status_code = result.status_code
         response_body = result.content
+
+        if print_response:
+            print(response_body)
         
         headers = [(k, v) for k, v in result.headers.items()]
 
@@ -105,6 +97,11 @@ def check_version(pop_name, pop_at, uri="", return_full_response=False, sniffer=
             return_tuple.append(result)
         else:
             return_tuple.append(response_body.decode())
+
+        if timeHeader is not None and timeHeader in result.headers:
+            return_tuple.append(int(result.headers[timeHeader]))
+        else:
+            return_tuple.append(-1)
 
         return_tuple.append(delta)
 
@@ -151,6 +148,15 @@ def get_ip_from_host(host):
 
 
 
+if REMOVE_DB_AT_FIRST:
+    print("REMOVING DB")
+    try:
+        os.remove(f"{OUT_FOLDER}/fastly4edge.db")
+    except:
+        pass
+
+    from orm.models import create_db
+    create_db()
 
 if __name__ == "__main__":
     print(get_ip_from_host("google.com"))

@@ -35,10 +35,9 @@ class WireSharkSniffer(object):
         self.filtered_ports = filtered_ports
         self.src_filter = src_filter
         self.dst_filter = dst_filter
-        self.event_parser = re.compile(r'^(?P<id>\d+) (?P<date>\d\d\d\d-\d\d-\d\d) (?P<time>\d\d:\d\d:\d\d\.\d+) (?P<src_ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) → (?P<dst_ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) (?P<protocol>\w+) (?P<process>\d+) (?P<src_port>\d+) → (?P<dst_port>\d+) (?P<actions>\[( ?\w+,?)+\])(?P<arguments>( ?\w+=\d+)+)')
         self.timeout=timeout
 
-        print(f"Timeout {timeout}")
+        #print(f"Timeout {timeout}")
 
         #self.event_parser = re.compile(r'^(?P<id>\d+) +(?P<date>\d+\.\d+) (?P<src_ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) → (?P<dst_ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) (?P<protocol>\w+) (?P<process>\d+) (?P<src_port>\d+) → (?P<dst_port>\d+) (?P<actions>\[( ?\w+,?)+\])(?P<arguments>( ?\w+=\d+)+)')
 
@@ -79,7 +78,7 @@ class WireSharkSniffer(object):
 
         return interactions
 
-    def get_rtts_from_tcp(self, interactions, src_ip):
+    def get_rtts_from_tcp(self, interactions, src_ip, discard_first_n=0):
         result = []
         slopes = []
         for interaction in interactions:
@@ -91,7 +90,7 @@ class WireSharkSniffer(object):
             deltas_tcp = []
             deltas_frame = []
 
-            for event in interaction: # Patch since for some reason the delay between requests is added to the interaction
+            for event in interaction[discard_first_n:]: # Patch since for some reason the delay between requests is added to the interaction
                 ip_layer = event["_source"]["layers"]["ip"]
                 frame_layer = event["_source"]["layers"]["frame"]
 
@@ -123,14 +122,16 @@ class WireSharkSniffer(object):
             if len(deltas_frame) != len(deltas_tcp):
                 print("WARNING delta collections are different in size")
                 raise Exception("Invalid deltas")
-            slope, intercept, r_value, p_value, std_err = stats.linregress(deltas_frame, deltas_tcp)
 
-            pck_stats = dict(slope=slope, intercept=intercept, r_value=r_value, p_value =p_value, std_err=std_err, 
-            samples_frame=deltas_frame, samples_tcp=deltas_tcp)
+            if len(deltas_tcp) > 0:
+                slope, intercept, r_value, p_value, std_err = stats.linregress(deltas_frame, deltas_tcp)
 
-            #print(f"Slope {slope}, intercept: {intercept:.2f}")
-            result.append(s)
-            slopes.append(pck_stats)
+                pck_stats = dict(slope=slope, intercept=intercept, r_value=r_value, p_value =p_value, std_err=std_err, 
+                samples_frame=deltas_frame, samples_tcp=deltas_tcp)
+
+                #print(f"Slope {slope}, intercept: {intercept:.2f}")
+                result.append(s)
+                slopes.append(pck_stats)
             #print(s)
         #print(result)
 
@@ -206,6 +207,7 @@ class WireSharkSniffer(object):
                 if (src_ip == src and dst_ip == dst) or (src_ip == dst and dst_ip == src):
                     events.append(p)
                 
+        print(f"{len(events)} collected packages")
         return events
 
     def capture_packages(self, src, dst):
