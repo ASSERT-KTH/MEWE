@@ -48,7 +48,7 @@ fn main(mut req: Request<Body>) -> Result<impl ResponseExt, Error> {
 	};
 
     let to_encode = CString::new("HelloWorld!").expect("CString::new failed");
-    let size = 11 as usize;
+    let size = 20 as usize;
     let to_encode_ptr = to_encode.as_ptr() as *mut u8;
 
     // Pop discriminator
@@ -62,8 +62,8 @@ fn main(mut req: Request<Body>) -> Result<impl ResponseExt, Error> {
         // If request is a `GET` to the `/` path, send a default response.
         (&Method::GET, "/") => Ok(Response::builder()
             .status(StatusCode::OK)
-            .body(Body::from(format!("POP: {} {} Result {:?} ", pop, DIS,
-            sodium_bin2base64_wrapper(DIS, 30, to_encode_ptr, size))))?),
+            .body(Body::from(format!("POP: {} {:?} Result {:?} ", pop, DIS,
+            sodium_bin2base64_wrapper(DIS, 50, to_encode_ptr, size))))?),
         
         // If request is a `GET` to the `/backend` path, send to a named backend.
         (&Method::GET, "/backend") => {
@@ -87,19 +87,6 @@ fn main(mut req: Request<Body>) -> Result<impl ResponseExt, Error> {
             .body(Body::from("The page you requested could not be found"))?),
     }
 }
-
-// 	int crypto_sign(unsigned char *sm, unsigned long long *smlen_p,
-//    const unsigned char *m, unsigned long long mlen,
-//    const unsigned char *sk) __attribute__ ((nonnull(1, 5)));
-/*extern "C" {
-    pub fn crypto_sign(
-        sm: *mut libc::c_uchar,
-        smlen_p: *mut libc::c_ulonglong,
-        m: *const libc::c_uchar,
-        mlen: libc::c_ulonglong,
-        sk: *const libc::c_uchar,
-    ) -> libc::c_int;
-}*/
 
 
 extern "C" {
@@ -159,17 +146,17 @@ extern "C" {
 
 pub fn sodium_bin2base64_wrapper(dis: u32, size: usize, bin: *const libc::c_uchar, bin_len: usize) -> CString{
     unsafe {
-        let mut buf = vec![0i8; size].as_mut_ptr();
-        //let r = sodium_bin2base64(buf, size, bin, bin_len, 1 );
+        let mut buf =  libc::malloc(size) as *mut libc::c_char;
+        //let r = sodium_bin2base64(buf, size, bin, bin_len, 5 ); // 5 for url safe
         let r = match dis {
             0 => sodium_bin2base64(buf, size, bin, bin_len, 1 ),
             1 => sodium_bin2base64_3_(buf, size, bin, bin_len, 1 ),
             2 => sodium_bin2base64_4_(buf, size, bin, bin_len, 1 ),
-            2 => sodium_bin2base64_5_(buf, size, bin, bin_len, 1 ),
-            2 => sodium_bin2base64_6_(buf, size, bin, bin_len, 1 ),
+            3 => sodium_bin2base64_5_(buf, size, bin, bin_len, 1 ),
+            4 => sodium_bin2base64_6_(buf, size, bin, bin_len, 1 ),
             _ => panic!("I dont what to do with {}", dis)
         };
-        CString::from_raw(r)
+        CString::from_raw(buf)
     }
 }
 
@@ -216,47 +203,3 @@ sodium_bin2base64_41_
 sodium_bin2base64_42_
 sodium_bin2base64_43_
 */
-
-/*
-extern "C" {
-    #[link_name = "tt5"]
-    pub fn tt(buf: *mut libc::c_void, size: usize);
-}
-
-
-pub fn randombytes(size: usize) -> Vec<u8> {
-    unsafe {
-        let mut buf = vec![0u8; size];
-        let pbuf = buf.as_mut_ptr() as *mut libc::c_void;
-        tt(pbuf, pbuf, 0 ,0);
-        tt1(pbuf, pbuf, 0 ,0);
-        tt2(pbuf, pbuf, 0 ,0);
-        tt3(pbuf, pbuf, 0 ,0);
-        buf
-    }
-}
-extern "C" {
-    #[link_name = "randombytes_buf"]
-    pub fn tt4(buf: *mut libc::c_void, size: usize);
-}
-
-
-
-pub fn randombytes(size: usize) -> Vec<u8> {
-    unsafe {
-        let mut buf = vec![0u8; size];
-        let pbuf = buf.as_mut_ptr() as *mut libc::c_void;
-        tt(pbuf, size);
-        buf
-    }
-}
-
-
-pub fn randombytes2(size: usize) -> Vec<u8> {
-    unsafe {
-        let mut buf = vec![0u8; size];
-        let pbuf = buf.as_mut_ptr() as *mut libc::c_void;
-        tt4(pbuf, size);
-        buf
-    }
-}*/
