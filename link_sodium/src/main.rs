@@ -1,14 +1,15 @@
 //! Default Compute@Edge template program.
-#![feature(asm)]
+// #![feature(asm)]
 //#![feature(naked_functions)]
-#![feature(global_asm)]
+// #![feature(global_asm)]
 
 use fastly::http::{HeaderValue, Method, StatusCode};
 use fastly::request::CacheOverride;
 use fastly::{Body, Error, Request, RequestExt, Response, ResponseExt};
 use std::ffi::CString;
+use rand::RngCore;
 
-use wat2mir_macro::{inject_mir_as_wasm, inject_mir_from_wasm};
+//use wat2mir_macro::{inject_mir_as_wasm, inject_mir_from_wasm};
 use diversifier::{static_diversification,dynamic_diversification_body,  dynamic_diversification};
 
 /// The name of a backend server associated with this service.
@@ -50,13 +51,19 @@ fn main(mut req: Request<Body>) -> Result<impl ResponseExt, Error> {
     let size = 11 as usize;
     let to_encode_ptr = to_encode.as_ptr() as *mut u8;
 
+    // Pop discriminator
+
+	let DIS = rand::thread_rng().next_u32() % 4;
+	//let now = Instant::now();
+	//let lapse = now.elapsed().as_nanos();
+
     // Pattern match on the request method and path.
     match (req.method(), req.uri().path()) {
         // If request is a `GET` to the `/` path, send a default response.
         (&Method::GET, "/") => Ok(Response::builder()
             .status(StatusCode::OK)
-            .body(Body::from(format!("POP: {} Result {}", pop, 
-            sodium_bin2base64_1(30, to_encode_ptr, size))))?),
+            .body(Body::from(format!("POP: {} {} Result {:?} ", pop, DIS,
+            sodium_bin2base64_wrapper(DIS, 30, to_encode_ptr, size))))?),
         
         // If request is a `GET` to the `/backend` path, send to a named backend.
         (&Method::GET, "/backend") => {
@@ -106,11 +113,62 @@ extern "C" {
 }
 
 
+extern "C" {
+    pub fn sodium_bin2base64_3_(
+        b64: *mut libc::c_char,
+        b64_maxlen: usize,
+        bin: *const libc::c_uchar,
+        bin_len: usize,
+        variant: libc::c_int,
+    ) -> *mut libc::c_char;
+}
 
-pub fn sodium_bin2base64_1(size: usize, bin: *const libc::c_uchar, bin_len: usize) -> CString{
+
+extern "C" {
+    pub fn sodium_bin2base64_4_(
+        b64: *mut libc::c_char,
+        b64_maxlen: usize,
+        bin: *const libc::c_uchar,
+        bin_len: usize,
+        variant: libc::c_int,
+    ) -> *mut libc::c_char;
+}
+
+
+extern "C" {
+    pub fn sodium_bin2base64_5_(
+        b64: *mut libc::c_char,
+        b64_maxlen: usize,
+        bin: *const libc::c_uchar,
+        bin_len: usize,
+        variant: libc::c_int,
+    ) -> *mut libc::c_char;
+}
+
+
+extern "C" {
+    pub fn sodium_bin2base64_6_(
+        b64: *mut libc::c_char,
+        b64_maxlen: usize,
+        bin: *const libc::c_uchar,
+        bin_len: usize,
+        variant: libc::c_int,
+    ) -> *mut libc::c_char;
+}
+
+
+pub fn sodium_bin2base64_wrapper(dis: u32, size: usize, bin: *const libc::c_uchar, bin_len: usize) -> CString{
     unsafe {
         let mut buf = vec![0i8; size].as_mut_ptr();
-        let r = sodium_bin2base64(buf, size, bin, bin_len, 1 );
+        //let r = sodium_bin2base64(buf, size, bin, bin_len, 1 );
+        let r = match dis {
+            0 => sodium_bin2base64(buf, size, bin, bin_len, 1 ),
+            1 => sodium_bin2base64_3_(buf, size, bin, bin_len, 1 ),
+            2 => sodium_bin2base64_4_(buf, size, bin, bin_len, 1 ),
+            2 => sodium_bin2base64_5_(buf, size, bin, bin_len, 1 ),
+            2 => sodium_bin2base64_6_(buf, size, bin, bin_len, 1 ),
+            _ => panic!("I dont what to do with {}", dis)
+        };
         CString::from_raw(r)
     }
 }
