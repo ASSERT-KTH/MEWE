@@ -827,6 +827,28 @@ pub fn sodium_add_wrapper(dis: u32) -> () {
     };
 }
 
+
+
+multiple_import!(
+    (   n: *mut libc::c_char) -> (), 
+    (
+        sodium_free,
+    )
+);
+
+
+
+pub fn sodium_free_wrapper(dis: u32) -> () {
+   
+    let to_encode = CString::new("HelloWorld!").expect("CString::new failed");
+    
+    unsafe {
+        dynamic_diversification_body!(
+            sodium_free(to_encode),
+        )
+    };
+}
+
 // Return result, elapsed
 pub fn main_sodium_increment(hashValue: u64) -> (u32, u128, u32){
 
