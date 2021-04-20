@@ -14,7 +14,7 @@
 FASTLY_NAME="multivariant.wasm"
 WORKDIR=untar
 PROJECT_NAME="multivariant"
-LINK_ALL=$(find /Users/javierca/Documents/Develop/fastly4edge/sodium2 -name "*.bc" -exec bash -c "echo -n ' -C' link-arg={}" \; )
+LINK_ALL=$(find ../sodium2 -name "*.bc" -exec bash -c "echo -n ' -C' link-arg={}" \; )
 
 export RUSTFLAGS="$LINK_ALL"
 
@@ -47,5 +47,5 @@ fastly compute deploy --verbose --path $WORKDIR/$PROJECT_NAME.tar.gz --service-i
 cd ..
 
 sleep 60s
-curl -o out.txt https://totally-in-deer.edgecompute.app
+curl -o out.txt https://totally-devoted-krill.edgecompute.app
 cat out.txt
