@@ -15,3 +15,4 @@ syn = { version = "1.0.0", features = ["full"] }
 lazy_static = "1.4.0"
 regex = "1.4.3"
 rand = "0.7.2"
+strfmt = "0.1.6"
