@@ -23,8 +23,12 @@ export RUSTFLAGS="$LINK_ALL"
 #export RUSTFLAGS=''
 
 cargo build --target=wasm32-wasi
+d=$(date +"%d%m%H%ss"   )
+cp target/wasm32-wasi/debug/$FASTLY_NAME history/${d}_$FASTLY_NAME
+
 cp target/wasm32-wasi/debug/$FASTLY_NAME $FASTLY_NAME 
 wasm2wat $FASTLY_NAME -o $FASTLY_NAME.wat
+wasm2wat history/${d}_$FASTLY_NAME -o history/${d}_$FASTLY_NAME.wat
 grep -E "import \"env\"" $FASTLY_NAME.wat 
 #grep -vwE "import \"env\"" sodium.wat > clean.wat
 #wat2wasm clean.wat -o sodium.wasm
@@ -47,5 +51,5 @@ fastly compute deploy --verbose --path $WORKDIR/$PROJECT_NAME.tar.gz --service-i
 cd ..
 
 sleep 60s
-curl -o out.txt https://totally-devoted-krill.edgecompute.app
+curl -isvo out.txt https://totally-devoted-krill.edgecompute.app
 cat out.txt
