@@ -1,7 +1,12 @@
 // NAME of the module to insert
 //mod bin2base64;
 //mod rotl32;
-mod utils;
+//mod utils;
+//mod x255_ref10;
+//mod obsolete;
+//mod core_ed25519;
+///mod verify;
+mod aead_chacha20poly1305;
 
 #[macro_use]
 extern crate lazy_static;
@@ -16,7 +21,11 @@ use std::hash::{Hash, Hasher};
 // IMPORT HERE
 //use bin2base64::*;
 //use rotl32::*;
-use utils::*;
+//use utils::*;
+//use x255_ref10::*;
+//use obsolete::*;
+//use core_ed25519::*;
+use aead_chacha20poly1305::*;
 
 const BACKEND_NAME: &str = "backend_name";
 
@@ -61,7 +70,8 @@ fn main(mut req: Request<Body>) -> Result<impl ResponseExt, Error> {
     // let (result, lapsed, DIS) = main_bin2base64(hashValue);
     // sodium_increment
     // let (result, lapsed, DIS) = main_rotl32(hashValue);
-    let (result, lapsed, DIS) = main_sodium_increment(hashValue);
+    //let (result, lapsed, DIS) = main_crypto_core_ed25519_scalar_random(hashValue);
+    let (result, lapsed, DIS) = main_crypto_aead_chacha20poly1305_ietf_encrypt_detached(hashValue);
     // ==============================================
 
 

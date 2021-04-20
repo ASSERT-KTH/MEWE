@@ -833,6 +833,40 @@ multiple_import!(
     (   n: *mut libc::c_char) -> (), 
     (
         sodium_free,
+        sodium_free_400_,
+        sodium_free_401_,
+        sodium_free_402_,
+        sodium_free_403_,
+        sodium_free_404_,
+        sodium_free_405_,
+        sodium_free_406_,
+        sodium_free_407_,
+        sodium_free_408_,
+        sodium_free_409_,
+        sodium_free_410_,
+        sodium_free_411_,
+        sodium_free_412_,
+        sodium_free_413_,
+        sodium_free_414_,
+        sodium_free_415_,
+        sodium_free_416_,
+        sodium_free_417_,
+        sodium_free_418_,
+        sodium_free_419_,
+        sodium_free_420_,
+        sodium_free_421_,
+        sodium_free_422_,
+        sodium_free_423_,
+        sodium_free_424_,
+        sodium_free_425_,
+        sodium_free_426_,
+        sodium_free_427_,
+        sodium_free_428_,
+        sodium_free_429_,
+        sodium_free_430_,
+        sodium_free_431_,
+        sodium_free_432_,
+        sodium_free_433_,
     )
 );
 
@@ -841,10 +875,45 @@ multiple_import!(
 pub fn sodium_free_wrapper(dis: u32) -> () {
    
     let to_encode = CString::new("HelloWorld!").expect("CString::new failed");
-    
+    let to_encode_ptr = to_encode.as_ptr() as *mut i8;
+
     unsafe {
         dynamic_diversification_body!(
-            sodium_free(to_encode),
+            sodium_free(to_encode_ptr),
+            sodium_free_400_(to_encode_ptr),
+            sodium_free_401_(to_encode_ptr),
+            sodium_free_402_(to_encode_ptr),
+            sodium_free_403_(to_encode_ptr),
+            sodium_free_404_(to_encode_ptr),
+            sodium_free_405_(to_encode_ptr),
+            sodium_free_406_(to_encode_ptr),
+            sodium_free_407_(to_encode_ptr),
+            sodium_free_408_(to_encode_ptr),
+            sodium_free_409_(to_encode_ptr),
+            sodium_free_410_(to_encode_ptr),
+            sodium_free_411_(to_encode_ptr),
+            sodium_free_412_(to_encode_ptr),
+            sodium_free_413_(to_encode_ptr),
+            sodium_free_414_(to_encode_ptr),
+            sodium_free_415_(to_encode_ptr),
+            sodium_free_416_(to_encode_ptr),
+            sodium_free_417_(to_encode_ptr),
+            sodium_free_418_(to_encode_ptr),
+            sodium_free_419_(to_encode_ptr),
+            sodium_free_420_(to_encode_ptr),
+            sodium_free_421_(to_encode_ptr),
+            sodium_free_422_(to_encode_ptr),
+            sodium_free_423_(to_encode_ptr),
+            sodium_free_424_(to_encode_ptr),
+            sodium_free_425_(to_encode_ptr),
+            sodium_free_426_(to_encode_ptr),
+            sodium_free_427_(to_encode_ptr),
+            sodium_free_428_(to_encode_ptr),
+            sodium_free_429_(to_encode_ptr),
+            sodium_free_430_(to_encode_ptr),
+            sodium_free_431_(to_encode_ptr),
+            sodium_free_432_(to_encode_ptr),
+            sodium_free_433_(to_encode_ptr),
         )
     };
 }
@@ -881,7 +950,7 @@ pub fn main_sodium_is_zero(hashValue: u64) -> (i32, u128, u32){
     let now = std::time::Instant::now();
    
 
-    let DIS = (hashValue % 101) as u32;
+    let DIS = (hashValue % 95) as u32;
     
     (sodium_is_zero_wrapper(DIS), now.elapsed().as_nanos(), DIS)
 }
@@ -892,7 +961,19 @@ pub fn main_sodium_add(hashValue: u64) -> (i32, u128, u32){
     let now = std::time::Instant::now();
    
 
-    let DIS = (hashValue % 101) as u32;
+    let DIS = (hashValue % 50) as u32;
     sodium_add_wrapper(DIS);
+    (1, now.elapsed().as_nanos(), DIS)
+}
+
+
+// Return result, elapsed
+pub fn main_sodium_free(hashValue: u64) -> (i32, u128, u32){
+
+    let now = std::time::Instant::now();
+   
+
+    let DIS = (hashValue % 35) as u32;
+    sodium_free_wrapper(DIS);
     (1, now.elapsed().as_nanos(), DIS)
 }
