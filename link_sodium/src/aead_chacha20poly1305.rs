@@ -4,9 +4,9 @@ use core::slice;
 use std::ffi::CString;
 use libc::*;
 
-multiple_import!(
-    (   
 
+extern "C" {
+    pub fn crypto_aead_chacha20poly1305_ietf_decrypt_detached__n1 (   
         m: *mut c_uchar, 
         nsec: *mut c_uchar, 
         c: *const c_uchar, 
@@ -16,21 +16,11 @@ multiple_import!(
         adlen: c_ulonglong, 
         npub: *const c_uchar, 
         k: *const c_uchar
-    ) -> i32, 
-    (
-        crypto_aead_chacha20poly1305_ietf_decrypt_detached, 
-    )
-);
+    ) -> i32;
+}
 
 
-
-/*
-"46f0254965f769d52bdb4a70b443199f8ef207520d1220c55e4b70f0fda620ee",
-      "ab0dca716ee051d2782f4403", "91ca6c592cbcca53", "51", "c4",
-      "168310ca45b1f7c66cad4e99e43f72b9", "valid" 
-*/
-
-pub fn crypto_aead_chacha20poly1305_ietf_decrypt_detached_wrapper(dis: u32) -> i32 {
+pub fn crypto_aead_chacha20poly1305_ietf_decrypt_detached_wrapper() -> i32 {
     
     unsafe {
 
@@ -60,9 +50,7 @@ pub fn crypto_aead_chacha20poly1305_ietf_decrypt_detached_wrapper(dis: u32) -> i
         let nsec = CString::new("valid").expect("");// publc key
         let nsec_ptr = nsec.as_ptr() as *mut u8;
 
-        dynamic_diversification_body!(
-            crypto_aead_chacha20poly1305_ietf_decrypt_detached(outcome_ptr, nsec_ptr, detached_cypher_text_hex_ptr, 2, mac_hex_ptr, ad_hex_ptr, 8, nonce_hex_ptr, key_hex_ptr),
-        )
+        crypto_aead_chacha20poly1305_ietf_decrypt_detached__n1(outcome_ptr, nsec_ptr, detached_cypher_text_hex_ptr, 2, mac_hex_ptr, ad_hex_ptr, 8, nonce_hex_ptr, key_hex_ptr)
 
     }
 }
@@ -76,9 +64,9 @@ static  FIRST_KEY: [u8;32] = [
 
 
 
-multiple_import!(
-    (   
 
+extern "C" {
+    pub fn crypto_aead_chacha20poly1305_ietf_encrypt_detached__n1 (   
 
         c: *mut c_uchar, 
         mac: *mut c_uchar, 
@@ -90,14 +78,11 @@ multiple_import!(
         nsec: *const c_uchar, 
         npub: *const c_uchar, 
         k: *const c_uchar
-    ) -> i32, 
-    (
-        crypto_aead_chacha20poly1305_ietf_encrypt_detached, 
-    )
-);
+    ) -> i32;
+}
 
 
-pub fn crypto_aead_chacha20poly1305_ietf_encrypt_detached_wrapper(dis: u32) -> i32 {
+pub fn crypto_aead_chacha20poly1305_ietf_encrypt_detached_wrapper() -> i32 {
     
     unsafe {
 
@@ -107,44 +92,40 @@ pub fn crypto_aead_chacha20poly1305_ietf_encrypt_detached_wrapper(dis: u32) -> i
 
         let mut mac =  [0u8; 16];
 
-        let mut found_maclen: c_ulonglong = 16 ;
+        // The way to allocate changes the final Wasm !
+        let found_maclen: *mut c_ulonglong = libc::malloc(std::mem::size_of::<u64>()) as *mut c_ulonglong;
 
         let nonce: [u8;12]  = [0x50, 0x51, 0x52, 0x53, 0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7];
         let ad: [u8;12]  = [
             0x07, 0x00, 0x00, 0x00,
             0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47];
 
-        dynamic_diversification_body!(
-            crypto_aead_chacha20poly1305_ietf_encrypt_detached(
+            crypto_aead_chacha20poly1305_ietf_encrypt_detached__n1(
                 detached_c.as_mut_ptr(), 
                 mac.as_mut_ptr(), 
-                &mut found_maclen, 
+                found_maclen, 
                 slice.as_ptr(), 
                 slice.len() as u64, 
                 ad.as_ptr(), ad.len() as u64, 
                 std::ptr::null(), 
-                nonce.as_ptr(), FIRST_KEY.as_ptr()),
-        )
+                nonce.as_ptr(), FIRST_KEY.as_ptr())
 
     }
 }
 
 
 // Return result, elapsed
-pub fn main_crypto_aead_chacha20poly1305_ietf_decrypt_detached(hashValue: u64) -> (i32, u128, u32){
+pub fn main_crypto_aead_chacha20poly1305_ietf_decrypt_detached() -> (i32, u128){
 
     let now = std::time::Instant::now();
    
 
-    let DIS = (hashValue % 1) as u32;
-    (crypto_aead_chacha20poly1305_ietf_decrypt_detached_wrapper(DIS), now.elapsed().as_nanos(), DIS)
+    (crypto_aead_chacha20poly1305_ietf_decrypt_detached_wrapper(), now.elapsed().as_nanos())
 }
 
-pub fn main_crypto_aead_chacha20poly1305_ietf_encrypt_detached(hashValue: u64) -> (i32, u128, u32){
+pub fn main_crypto_aead_chacha20poly1305_ietf_encrypt_detached() -> (i32, u128){
 
     let now = std::time::Instant::now();
    
-
-    let DIS = (hashValue % 1) as u32;
-    (crypto_aead_chacha20poly1305_ietf_encrypt_detached_wrapper(DIS), now.elapsed().as_nanos(), DIS)
+    (crypto_aead_chacha20poly1305_ietf_encrypt_detached_wrapper(), now.elapsed().as_nanos())
 }

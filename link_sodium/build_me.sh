@@ -14,7 +14,9 @@
 FASTLY_NAME="multivariant.wasm"
 WORKDIR=untar
 PROJECT_NAME="multivariant"
-LINK_ALL=$(find ../sodium2 -name "*.bc" -exec bash -c "echo -n ' -C' link-arg={}" \; )
+LINK_ALL=$(find ../sodium4 -name "*.bc" -exec bash -c "echo -n ' -C' link-arg={}" \; )
+
+#LINK_ALL="-C link-arg=../sodium4/codecs.multivariant.bc"
 
 export RUSTFLAGS="$LINK_ALL"
 
@@ -22,17 +24,27 @@ export RUSTFLAGS="$LINK_ALL"
 #export LDFLAGS="-L/Users/javierca/Documents/Develop/fastly4edge/sodium"
 #export RUSTFLAGS=''
 
-cargo build --target=wasm32-wasi
-d=$(date +"%d%m%H%ss"   )
+cargo build --target=wasm32-wasi || exit 1
+d=$(date +"%d_%m_%H.%M.%ss"   )
 cp target/wasm32-wasi/debug/$FASTLY_NAME history/${d}_$FASTLY_NAME
+mkdir -p history/${d}_src
+cp -p src/* history/${d}_src/
 
 cp target/wasm32-wasi/debug/$FASTLY_NAME $FASTLY_NAME 
 wasm2wat $FASTLY_NAME -o $FASTLY_NAME.wat
 wasm2wat history/${d}_$FASTLY_NAME -o history/${d}_$FASTLY_NAME.wat
-grep -E "import \"env\"" $FASTLY_NAME.wat 
+
+if grep -qE "import \"env\"" $FASTLY_NAME.wat;
+then
+   echo "Error invalid import"
+   grep -E "import \"env\"" $FASTLY_NAME.wat 
+   exit 1
+fi
+
+#exit 0
+
 #grep -vwE "import \"env\"" sodium.wat > clean.wat
 #wat2wasm clean.wat -o sodium.wasm
-
 #exit 0
 
 mkdir -p $WORKDIR/$PROJECT_NAME/bin

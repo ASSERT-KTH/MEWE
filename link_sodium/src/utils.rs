@@ -2,376 +2,32 @@
 use diversifier::{static_diversification,dynamic_diversification_body,  dynamic_diversification, multiple_import, expand };
 use std::ffi::CString;
 
-multiple_import!(
-    (   
+extern "C" {
+    pub fn sodium_increment__n1(   
         n: *mut libc::c_char,
-        nlen: usize) -> (), 
-    (
-        sodium_increment,
-        sodium_increment_283_,
-        sodium_increment_284_,
-        sodium_increment_285_,
-        sodium_increment_286_,
-        sodium_increment_287_,
-        sodium_increment_288_,
-        sodium_increment_289_,
-        sodium_increment_290_,
-        sodium_increment_291_,
-        sodium_increment_292_,
-        sodium_increment_293_,
-        sodium_increment_294_,
-        sodium_increment_295_,
-        sodium_increment_296_,
-        sodium_increment_297_,
-        sodium_increment_298_,
-        sodium_increment_299_,
-        sodium_increment_300_,
-        sodium_increment_301_,
-        sodium_increment_302_,
-        sodium_increment_303_,
-        sodium_increment_304_,
-        sodium_increment_305_,
-        sodium_increment_306_,
-        sodium_increment_307_,
-        sodium_increment_308_,
-        sodium_increment_309_,
-        sodium_increment_310_,
-        sodium_increment_311_,
-        sodium_increment_312_,
-        sodium_increment_313_,
-        sodium_increment_314_,
-        sodium_increment_315_,
-        sodium_increment_316_,
-        sodium_increment_317_,
-        sodium_increment_318_,
-        sodium_increment_319_,
-        sodium_increment_320_,
-        sodium_increment_321_,
-        sodium_increment_322_,
-        sodium_increment_323_,
-        sodium_increment_324_,
-        sodium_increment_325_,
-        sodium_increment_326_,
-        sodium_increment_327_,
-        sodium_increment_328_,
-        sodium_increment_329_,
-        sodium_increment_330_,
-        sodium_increment_331_,
-        sodium_increment_332_,
-        sodium_increment_333_,
-        sodium_increment_334_,
-        sodium_increment_335_,
-        sodium_increment_336_,
-        sodium_increment_337_,
-        sodium_increment_338_,
-        sodium_increment_339_,
-        sodium_increment_340_,
-        sodium_increment_341_,
-        sodium_increment_342_,
-        sodium_increment_343_,
-        sodium_increment_344_,
-        sodium_increment_345_,
-        sodium_increment_346_,
-        sodium_increment_347_,
-        sodium_increment_348_,
-        sodium_increment_349_,
-        sodium_increment_350_,
-        sodium_increment_351_,
-        sodium_increment_352_,
-        sodium_increment_353_,
-        sodium_increment_354_,
-        sodium_increment_355_,
-        sodium_increment_356_,
-        sodium_increment_357_,
-        sodium_increment_358_,
-        sodium_increment_359_,
-        sodium_increment_360_,
-        sodium_increment_361_,
-        sodium_increment_362_,
-        sodium_increment_363_,
-        sodium_increment_364_,
-        sodium_increment_365_,
-        sodium_increment_366_,
-        sodium_increment_367_,
-        sodium_increment_368_,
-        sodium_increment_369_,
-        sodium_increment_370_,
-        sodium_increment_371_,
-        sodium_increment_372_,
-        sodium_increment_373_,
-        sodium_increment_374_,
-        sodium_increment_375_,
-        sodium_increment_376_,
-        sodium_increment_377_,
-        sodium_increment_378_,
-        sodium_increment_379_,
-        sodium_increment_380_,
-        sodium_increment_381_,
-        sodium_increment_382_,
-        sodium_increment_383_,
-        sodium_increment_384_,
-        sodium_increment_385_,
-        sodium_increment_386_,
-        sodium_increment_387_,
-        sodium_increment_388_,
-        sodium_increment_389_,
-        sodium_increment_390_,
-        sodium_increment_391_,
-        sodium_increment_392_,
-        sodium_increment_393_,
-        sodium_increment_394_,
-        sodium_increment_395_,
-        sodium_increment_396_,
-        sodium_increment_397_,
-        sodium_increment_398_,
-        sodium_increment_399_
-    )
-);
+        nlen: usize) -> ();
+}
 
-pub fn sodium_increment_wrapper(dis: u32) -> (){
+
+pub fn sodium_increment_wrapper() -> (){
    
     let to_encode = CString::new("HelloWorld!").expect("CString::new failed");
     let size = 11 as usize;
     let to_encode_ptr = to_encode.as_ptr() as *mut i8;
 
     unsafe {
-        dynamic_diversification_body!(
-            sodium_increment(to_encode_ptr, size),
-            sodium_increment_283_(to_encode_ptr, size),
-            sodium_increment_284_(to_encode_ptr, size),
-            sodium_increment_285_(to_encode_ptr, size),
-            sodium_increment_286_(to_encode_ptr, size),
-            sodium_increment_287_(to_encode_ptr, size),
-            sodium_increment_288_(to_encode_ptr, size),
-            sodium_increment_289_(to_encode_ptr, size),
-            sodium_increment_290_(to_encode_ptr, size),
-            sodium_increment_291_(to_encode_ptr, size),
-            sodium_increment_292_(to_encode_ptr, size),
-            sodium_increment_293_(to_encode_ptr, size),
-            sodium_increment_294_(to_encode_ptr, size),
-            sodium_increment_295_(to_encode_ptr, size),
-            sodium_increment_296_(to_encode_ptr, size),
-            sodium_increment_297_(to_encode_ptr, size),
-            sodium_increment_298_(to_encode_ptr, size),
-            sodium_increment_299_(to_encode_ptr, size),
-            sodium_increment_300_(to_encode_ptr, size),
-            sodium_increment_301_(to_encode_ptr, size),
-            sodium_increment_302_(to_encode_ptr, size),
-            sodium_increment_303_(to_encode_ptr, size),
-            sodium_increment_304_(to_encode_ptr, size),
-            sodium_increment_305_(to_encode_ptr, size),
-            sodium_increment_306_(to_encode_ptr, size),
-            sodium_increment_307_(to_encode_ptr, size),
-            sodium_increment_308_(to_encode_ptr, size),
-            sodium_increment_309_(to_encode_ptr, size),
-            sodium_increment_310_(to_encode_ptr, size),
-            sodium_increment_311_(to_encode_ptr, size),
-            sodium_increment_312_(to_encode_ptr, size),
-            sodium_increment_313_(to_encode_ptr, size),
-            sodium_increment_314_(to_encode_ptr, size),
-            sodium_increment_315_(to_encode_ptr, size),
-            sodium_increment_316_(to_encode_ptr, size),
-            sodium_increment_317_(to_encode_ptr, size),
-            sodium_increment_318_(to_encode_ptr, size),
-            sodium_increment_319_(to_encode_ptr, size),
-            sodium_increment_320_(to_encode_ptr, size),
-            sodium_increment_321_(to_encode_ptr, size),
-            sodium_increment_322_(to_encode_ptr, size),
-            sodium_increment_323_(to_encode_ptr, size),
-            sodium_increment_324_(to_encode_ptr, size),
-            sodium_increment_325_(to_encode_ptr, size),
-            sodium_increment_326_(to_encode_ptr, size),
-            sodium_increment_327_(to_encode_ptr, size),
-            sodium_increment_328_(to_encode_ptr, size),
-            sodium_increment_329_(to_encode_ptr, size),
-            sodium_increment_330_(to_encode_ptr, size),
-            sodium_increment_331_(to_encode_ptr, size),
-            sodium_increment_332_(to_encode_ptr, size),
-            sodium_increment_333_(to_encode_ptr, size),
-            sodium_increment_334_(to_encode_ptr, size),
-            sodium_increment_335_(to_encode_ptr, size),
-            sodium_increment_336_(to_encode_ptr, size),
-            sodium_increment_337_(to_encode_ptr, size),
-            sodium_increment_338_(to_encode_ptr, size),
-            sodium_increment_339_(to_encode_ptr, size),
-            sodium_increment_340_(to_encode_ptr, size),
-            sodium_increment_341_(to_encode_ptr, size),
-            sodium_increment_342_(to_encode_ptr, size),
-            sodium_increment_343_(to_encode_ptr, size),
-            sodium_increment_344_(to_encode_ptr, size),
-            sodium_increment_345_(to_encode_ptr, size),
-            sodium_increment_346_(to_encode_ptr, size),
-            sodium_increment_347_(to_encode_ptr, size),
-            sodium_increment_348_(to_encode_ptr, size),
-            sodium_increment_349_(to_encode_ptr, size),
-            sodium_increment_350_(to_encode_ptr, size),
-            sodium_increment_351_(to_encode_ptr, size),
-            sodium_increment_352_(to_encode_ptr, size),
-            sodium_increment_353_(to_encode_ptr, size),
-            sodium_increment_354_(to_encode_ptr, size),
-            sodium_increment_355_(to_encode_ptr, size),
-            sodium_increment_356_(to_encode_ptr, size),
-            sodium_increment_357_(to_encode_ptr, size),
-            sodium_increment_358_(to_encode_ptr, size),
-            sodium_increment_359_(to_encode_ptr, size),
-            sodium_increment_360_(to_encode_ptr, size),
-            sodium_increment_361_(to_encode_ptr, size),
-            sodium_increment_362_(to_encode_ptr, size),
-            sodium_increment_363_(to_encode_ptr, size),
-            sodium_increment_364_(to_encode_ptr, size),
-            sodium_increment_365_(to_encode_ptr, size),
-            sodium_increment_366_(to_encode_ptr, size),
-            sodium_increment_367_(to_encode_ptr, size),
-            sodium_increment_368_(to_encode_ptr, size),
-            sodium_increment_369_(to_encode_ptr, size),
-            sodium_increment_370_(to_encode_ptr, size),
-            sodium_increment_371_(to_encode_ptr, size),
-            sodium_increment_372_(to_encode_ptr, size),
-            sodium_increment_373_(to_encode_ptr, size),
-            sodium_increment_374_(to_encode_ptr, size),
-            sodium_increment_375_(to_encode_ptr, size),
-            sodium_increment_376_(to_encode_ptr, size),
-            sodium_increment_377_(to_encode_ptr, size),
-            sodium_increment_378_(to_encode_ptr, size),
-            sodium_increment_379_(to_encode_ptr, size),
-            sodium_increment_380_(to_encode_ptr, size),
-            sodium_increment_381_(to_encode_ptr, size),
-            sodium_increment_382_(to_encode_ptr, size),
-            sodium_increment_383_(to_encode_ptr, size),
-            sodium_increment_384_(to_encode_ptr, size),
-            sodium_increment_385_(to_encode_ptr, size),
-            sodium_increment_386_(to_encode_ptr, size),
-            sodium_increment_387_(to_encode_ptr, size),
-            sodium_increment_388_(to_encode_ptr, size),
-            sodium_increment_389_(to_encode_ptr, size),
-            sodium_increment_390_(to_encode_ptr, size),
-            sodium_increment_391_(to_encode_ptr, size),
-            sodium_increment_392_(to_encode_ptr, size),
-            sodium_increment_393_(to_encode_ptr, size),
-            sodium_increment_394_(to_encode_ptr, size),
-            sodium_increment_395_(to_encode_ptr, size),
-            sodium_increment_396_(to_encode_ptr, size),
-            sodium_increment_397_(to_encode_ptr, size),
-            sodium_increment_398_(to_encode_ptr, size),
-            sodium_increment_399_(to_encode_ptr, size)
-        )
+            sodium_increment__n1(to_encode_ptr, size)
     }
 }
 
-
-multiple_import!(
-    (n: *mut libc::c_char,
+extern "C" {
+    pub fn sodium_memcmp__n1(n: *mut libc::c_char,
         n1: *mut libc::c_char,
-        nlen: usize) -> i32, 
-    (
-        sodium_memcmp,
-        sodium_memcmp_150_,
-        sodium_memcmp_151_,
-        sodium_memcmp_152_,
-        sodium_memcmp_153_,
-        sodium_memcmp_154_,
-        sodium_memcmp_155_,
-        sodium_memcmp_156_,
-        sodium_memcmp_157_,
-        sodium_memcmp_158_,
-        sodium_memcmp_159_,
-        sodium_memcmp_160_,
-        sodium_memcmp_161_,
-        sodium_memcmp_162_,
-        sodium_memcmp_163_,
-        sodium_memcmp_164_,
-        sodium_memcmp_165_,
-        sodium_memcmp_166_,
-        sodium_memcmp_167_,
-        sodium_memcmp_168_,
-        sodium_memcmp_169_,
-        sodium_memcmp_170_,
-        sodium_memcmp_171_,
-        sodium_memcmp_172_,
-        sodium_memcmp_173_,
-        sodium_memcmp_174_,
-        sodium_memcmp_175_,
-        sodium_memcmp_176_,
-        sodium_memcmp_177_,
-        sodium_memcmp_178_,
-        sodium_memcmp_179_,
-        sodium_memcmp_180_,
-        sodium_memcmp_181_,
-        sodium_memcmp_182_,
-        sodium_memcmp_183_,
-        sodium_memcmp_184_,
-        sodium_memcmp_185_,
-        sodium_memcmp_186_,
-        sodium_memcmp_187_,
-        sodium_memcmp_188_,
-        sodium_memcmp_189_,
-        sodium_memcmp_190_,
-        sodium_memcmp_191_,
-        sodium_memcmp_192_,
-        sodium_memcmp_193_,
-        sodium_memcmp_194_,
-        sodium_memcmp_195_,
-        sodium_memcmp_196_,
-        sodium_memcmp_197_,
-        sodium_memcmp_198_,
-        sodium_memcmp_199_,
-        sodium_memcmp_200_,
-        sodium_memcmp_201_,
-        sodium_memcmp_202_,
-        sodium_memcmp_203_,
-        sodium_memcmp_204_,
-        sodium_memcmp_205_,
-        sodium_memcmp_206_,
-        sodium_memcmp_207_,
-        sodium_memcmp_208_,
-        sodium_memcmp_209_,
-        sodium_memcmp_210_,
-        sodium_memcmp_211_,
-        sodium_memcmp_212_,
-        sodium_memcmp_213_,
-        sodium_memcmp_214_,
-        sodium_memcmp_215_,
-        sodium_memcmp_216_,
-        sodium_memcmp_217_,
-        sodium_memcmp_218_,
-        sodium_memcmp_219_,
-        sodium_memcmp_220_,
-        sodium_memcmp_221_,
-        sodium_memcmp_222_,
-        sodium_memcmp_223_,
-        sodium_memcmp_224_,
-        sodium_memcmp_225_,
-        sodium_memcmp_226_,
-        sodium_memcmp_227_,
-        sodium_memcmp_228_,
-        sodium_memcmp_229_,
-        sodium_memcmp_230_,
-        sodium_memcmp_231_,
-        sodium_memcmp_232_,
-        sodium_memcmp_233_,
-        sodium_memcmp_234_,
-        sodium_memcmp_235_,
-        sodium_memcmp_236_,
-        sodium_memcmp_237_,
-        sodium_memcmp_238_,
-        sodium_memcmp_239_,
-        sodium_memcmp_240_,
-        sodium_memcmp_241_,
-        sodium_memcmp_242_,
-        sodium_memcmp_243_,
-        sodium_memcmp_244_,
-        sodium_memcmp_245_,
-        sodium_memcmp_246_,
-        sodium_memcmp_247_,
-        sodium_memcmp_248_,
-        sodium_memcmp_249_,
-        sodium_memcmp_250_
-    )
-);
+        nlen: usize) -> i32;
+}
 
 
-
-pub fn sodium_memcmp_wrapper(dis: u32) -> i32 {
+pub fn sodium_memcmp_wrapper() -> i32 {
    
     let to_encode = CString::new("HelloWorld!").expect("CString::new failed");
     let to_encode2 = CString::new("HelloWorld!").expect("CString::new failed");
@@ -381,220 +37,18 @@ pub fn sodium_memcmp_wrapper(dis: u32) -> i32 {
     let to_encode_ptr2 = to_encode2.as_ptr() as *mut i8;
 
     unsafe {
-        dynamic_diversification_body!(
-            sodium_memcmp(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_150_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_151_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_152_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_153_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_154_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_155_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_156_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_157_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_158_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_159_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_160_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_161_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_162_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_163_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_164_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_165_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_166_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_167_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_168_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_169_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_170_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_171_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_172_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_173_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_174_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_175_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_176_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_177_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_178_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_179_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_180_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_181_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_182_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_183_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_184_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_185_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_186_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_187_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_188_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_189_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_190_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_191_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_192_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_193_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_194_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_195_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_196_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_197_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_198_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_199_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_200_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_201_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_202_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_203_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_204_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_205_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_206_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_207_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_208_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_209_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_210_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_211_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_212_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_213_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_214_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_215_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_216_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_217_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_218_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_219_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_220_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_221_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_222_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_223_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_224_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_225_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_226_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_227_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_228_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_229_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_230_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_231_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_232_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_233_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_234_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_235_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_236_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_237_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_238_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_239_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_240_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_241_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_242_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_243_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_244_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_245_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_246_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_247_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_248_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_249_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_memcmp_250_(to_encode_ptr, to_encode_ptr2, size)
-        )
+        sodium_memcmp__n1(to_encode_ptr, to_encode_ptr2, size)
     }
 }
 
 
-
-multiple_import!(
-    (n: *mut libc::c_char,
-        nlen: usize) -> i32, 
-    (
-        sodium_is_zero,
-        sodium_is_zero_56_,
-        sodium_is_zero_57_,
-        sodium_is_zero_58_,
-        sodium_is_zero_59_,
-        sodium_is_zero_60_,
-        sodium_is_zero_61_,
-        sodium_is_zero_62_,
-        sodium_is_zero_63_,
-        sodium_is_zero_64_,
-        sodium_is_zero_65_,
-        sodium_is_zero_66_,
-        sodium_is_zero_67_,
-        sodium_is_zero_68_,
-        sodium_is_zero_69_,
-        sodium_is_zero_70_,
-        sodium_is_zero_71_,
-        sodium_is_zero_72_,
-        sodium_is_zero_73_,
-        sodium_is_zero_74_,
-        sodium_is_zero_75_,
-        sodium_is_zero_76_,
-        sodium_is_zero_77_,
-        sodium_is_zero_78_,
-        sodium_is_zero_79_,
-        sodium_is_zero_80_,
-        sodium_is_zero_81_,
-        sodium_is_zero_82_,
-        sodium_is_zero_83_,
-        sodium_is_zero_84_,
-        sodium_is_zero_85_,
-        sodium_is_zero_86_,
-        sodium_is_zero_87_,
-        sodium_is_zero_88_,
-        sodium_is_zero_89_,
-        sodium_is_zero_90_,
-        sodium_is_zero_91_,
-        sodium_is_zero_92_,
-        sodium_is_zero_93_,
-        sodium_is_zero_94_,
-        sodium_is_zero_95_,
-        sodium_is_zero_96_,
-        sodium_is_zero_97_,
-        sodium_is_zero_98_,
-        sodium_is_zero_99_,
-        sodium_is_zero_100_,
-        sodium_is_zero_101_,
-        sodium_is_zero_102_,
-        sodium_is_zero_103_,
-        sodium_is_zero_104_,
-        sodium_is_zero_105_,
-        sodium_is_zero_106_,
-        sodium_is_zero_107_,
-        sodium_is_zero_108_,
-        sodium_is_zero_109_,
-        sodium_is_zero_110_,
-        sodium_is_zero_111_,
-        sodium_is_zero_112_,
-        sodium_is_zero_113_,
-        sodium_is_zero_114_,
-        sodium_is_zero_115_,
-        sodium_is_zero_116_,
-        sodium_is_zero_117_,
-        sodium_is_zero_118_,
-        sodium_is_zero_119_,
-        sodium_is_zero_120_,
-        sodium_is_zero_121_,
-        sodium_is_zero_122_,
-        sodium_is_zero_123_,
-        sodium_is_zero_124_,
-        sodium_is_zero_125_,
-        sodium_is_zero_126_,
-        sodium_is_zero_127_,
-        sodium_is_zero_128_,
-        sodium_is_zero_129_,
-        sodium_is_zero_130_,
-        sodium_is_zero_131_,
-        sodium_is_zero_132_,
-        sodium_is_zero_133_,
-        sodium_is_zero_134_,
-        sodium_is_zero_135_,
-        sodium_is_zero_136_,
-        sodium_is_zero_137_,
-        sodium_is_zero_138_,
-        sodium_is_zero_139_,
-        sodium_is_zero_140_,
-        sodium_is_zero_141_,
-        sodium_is_zero_142_,
-        sodium_is_zero_143_,
-        sodium_is_zero_144_,
-        sodium_is_zero_145_,
-        sodium_is_zero_146_,
-        sodium_is_zero_147_,
-        sodium_is_zero_148_,
-        sodium_is_zero_149_,
-    )
-);
+extern "C" {
+    pub fn sodium_is_zero__n1(n: *mut libc::c_char,
+        nlen: usize) -> i32;
+}
 
 
-
-pub fn sodium_is_zero_wrapper(dis: u32) -> i32 {
+pub fn sodium_is_zero_wrapper() -> i32 {
    
     let to_encode = CString::new("HelloWorld!").expect("CString::new failed");
 
@@ -602,167 +56,18 @@ pub fn sodium_is_zero_wrapper(dis: u32) -> i32 {
     let to_encode_ptr = to_encode.as_ptr() as *mut i8;
 
     unsafe {
-        dynamic_diversification_body!(
-            sodium_is_zero(to_encode_ptr, size),
-            sodium_is_zero_56_(to_encode_ptr, size),
-            sodium_is_zero_57_(to_encode_ptr, size),
-            sodium_is_zero_58_(to_encode_ptr, size),
-            sodium_is_zero_59_(to_encode_ptr, size),
-            sodium_is_zero_60_(to_encode_ptr, size),
-            sodium_is_zero_61_(to_encode_ptr, size),
-            sodium_is_zero_62_(to_encode_ptr, size),
-            sodium_is_zero_63_(to_encode_ptr, size),
-            sodium_is_zero_64_(to_encode_ptr, size),
-            sodium_is_zero_65_(to_encode_ptr, size),
-            sodium_is_zero_66_(to_encode_ptr, size),
-            sodium_is_zero_67_(to_encode_ptr, size),
-            sodium_is_zero_68_(to_encode_ptr, size),
-            sodium_is_zero_69_(to_encode_ptr, size),
-            sodium_is_zero_70_(to_encode_ptr, size),
-            sodium_is_zero_71_(to_encode_ptr, size),
-            sodium_is_zero_72_(to_encode_ptr, size),
-            sodium_is_zero_73_(to_encode_ptr, size),
-            sodium_is_zero_74_(to_encode_ptr, size),
-            sodium_is_zero_75_(to_encode_ptr, size),
-            sodium_is_zero_76_(to_encode_ptr, size),
-            sodium_is_zero_77_(to_encode_ptr, size),
-            sodium_is_zero_78_(to_encode_ptr, size),
-            sodium_is_zero_79_(to_encode_ptr, size),
-            sodium_is_zero_80_(to_encode_ptr, size),
-            sodium_is_zero_81_(to_encode_ptr, size),
-            sodium_is_zero_82_(to_encode_ptr, size),
-            sodium_is_zero_83_(to_encode_ptr, size),
-            sodium_is_zero_84_(to_encode_ptr, size),
-            sodium_is_zero_85_(to_encode_ptr, size),
-            sodium_is_zero_86_(to_encode_ptr, size),
-            sodium_is_zero_87_(to_encode_ptr, size),
-            sodium_is_zero_88_(to_encode_ptr, size),
-            sodium_is_zero_89_(to_encode_ptr, size),
-            sodium_is_zero_90_(to_encode_ptr, size),
-            sodium_is_zero_91_(to_encode_ptr, size),
-            sodium_is_zero_92_(to_encode_ptr, size),
-            sodium_is_zero_93_(to_encode_ptr, size),
-            sodium_is_zero_94_(to_encode_ptr, size),
-            sodium_is_zero_95_(to_encode_ptr, size),
-            sodium_is_zero_96_(to_encode_ptr, size),
-            sodium_is_zero_97_(to_encode_ptr, size),
-            sodium_is_zero_98_(to_encode_ptr, size),
-            sodium_is_zero_99_(to_encode_ptr, size),
-            sodium_is_zero_100_(to_encode_ptr, size),
-            sodium_is_zero_101_(to_encode_ptr, size),
-            sodium_is_zero_102_(to_encode_ptr, size),
-            sodium_is_zero_103_(to_encode_ptr, size),
-            sodium_is_zero_104_(to_encode_ptr, size),
-            sodium_is_zero_105_(to_encode_ptr, size),
-            sodium_is_zero_106_(to_encode_ptr, size),
-            sodium_is_zero_107_(to_encode_ptr, size),
-            sodium_is_zero_108_(to_encode_ptr, size),
-            sodium_is_zero_109_(to_encode_ptr, size),
-            sodium_is_zero_110_(to_encode_ptr, size),
-            sodium_is_zero_111_(to_encode_ptr, size),
-            sodium_is_zero_112_(to_encode_ptr, size),
-            sodium_is_zero_113_(to_encode_ptr, size),
-            sodium_is_zero_114_(to_encode_ptr, size),
-            sodium_is_zero_115_(to_encode_ptr, size),
-            sodium_is_zero_116_(to_encode_ptr, size),
-            sodium_is_zero_117_(to_encode_ptr, size),
-            sodium_is_zero_118_(to_encode_ptr, size),
-            sodium_is_zero_119_(to_encode_ptr, size),
-            sodium_is_zero_120_(to_encode_ptr, size),
-            sodium_is_zero_121_(to_encode_ptr, size),
-            sodium_is_zero_122_(to_encode_ptr, size),
-            sodium_is_zero_123_(to_encode_ptr, size),
-            sodium_is_zero_124_(to_encode_ptr, size),
-            sodium_is_zero_125_(to_encode_ptr, size),
-            sodium_is_zero_126_(to_encode_ptr, size),
-            sodium_is_zero_127_(to_encode_ptr, size),
-            sodium_is_zero_128_(to_encode_ptr, size),
-            sodium_is_zero_129_(to_encode_ptr, size),
-            sodium_is_zero_130_(to_encode_ptr, size),
-            sodium_is_zero_131_(to_encode_ptr, size),
-            sodium_is_zero_132_(to_encode_ptr, size),
-            sodium_is_zero_133_(to_encode_ptr, size),
-            sodium_is_zero_134_(to_encode_ptr, size),
-            sodium_is_zero_135_(to_encode_ptr, size),
-            sodium_is_zero_136_(to_encode_ptr, size),
-            sodium_is_zero_137_(to_encode_ptr, size),
-            sodium_is_zero_138_(to_encode_ptr, size),
-            sodium_is_zero_139_(to_encode_ptr, size),
-            sodium_is_zero_140_(to_encode_ptr, size),
-            sodium_is_zero_141_(to_encode_ptr, size),
-            sodium_is_zero_142_(to_encode_ptr, size),
-            sodium_is_zero_143_(to_encode_ptr, size),
-            sodium_is_zero_144_(to_encode_ptr, size),
-            sodium_is_zero_145_(to_encode_ptr, size),
-            sodium_is_zero_146_(to_encode_ptr, size),
-            sodium_is_zero_147_(to_encode_ptr, size),
-            sodium_is_zero_148_(to_encode_ptr, size),
-            sodium_is_zero_149_(to_encode_ptr, size),
-        )
+            sodium_is_zero__n1(to_encode_ptr, size)
+        
     }
 }
 
-multiple_import!(
-    (   n: *mut libc::c_char,
+extern "C" {
+    pub fn sodium_add__n1(   n: *mut libc::c_char,
         n2: *mut libc::c_char,
-        nlen: usize) -> (), 
-    (
-        sodium_add,
-        sodium_add_7_,
-        sodium_add_8_,
-        sodium_add_9_,
-        sodium_add_10_,
-        sodium_add_11_,
-        sodium_add_12_,
-        sodium_add_13_,
-        sodium_add_14_,
-        sodium_add_15_,
-        sodium_add_16_,
-        sodium_add_17_,
-        sodium_add_18_,
-        sodium_add_19_,
-        sodium_add_20_,
-        sodium_add_21_,
-        sodium_add_22_,
-        sodium_add_23_,
-        sodium_add_24_,
-        sodium_add_25_,
-        sodium_add_26_,
-        sodium_add_27_,
-        sodium_add_28_,
-        sodium_add_29_,
-        sodium_add_30_,
-        sodium_add_31_,
-        sodium_add_32_,
-        sodium_add_33_,
-        sodium_add_34_,
-        sodium_add_35_,
-        sodium_add_36_,
-        sodium_add_37_,
-        sodium_add_38_,
-        sodium_add_39_,
-        sodium_add_40_,
-        sodium_add_41_,
-        sodium_add_42_,
-        sodium_add_43_,
-        sodium_add_44_,
-        sodium_add_45_,
-        sodium_add_46_,
-        sodium_add_47_,
-        sodium_add_48_,
-        sodium_add_49_,
-        sodium_add_50_,
-        sodium_add_51_,
-        sodium_add_52_,
-        sodium_add_53_,
-        sodium_add_54_,
-        sodium_add_55_
-    )
-);
+        nlen: usize) -> ();
+}
 
-
-
-pub fn sodium_add_wrapper(dis: u32) -> () {
+pub fn sodium_add_wrapper() -> () {
    
     let to_encode = CString::new("HelloWorld!").expect("CString::new failed");
     let to_encode2 = CString::new("HelloWorld!").expect("CString::new failed");
@@ -772,208 +77,63 @@ pub fn sodium_add_wrapper(dis: u32) -> () {
     let to_encode_ptr2 = to_encode2.as_ptr() as *mut i8;
 
     unsafe {
-        dynamic_diversification_body!(
-            sodium_add(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_7_(to_encode_ptr, to_encode_ptr2,size),
-            sodium_add_8_(to_encode_ptr, to_encode_ptr2,size),
-            sodium_add_9_(to_encode_ptr, to_encode_ptr2,size),
-            sodium_add_10_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_11_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_12_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_13_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_14_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_15_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_16_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_17_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_18_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_19_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_20_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_21_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_22_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_23_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_24_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_25_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_26_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_27_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_28_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_29_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_30_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_31_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_32_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_33_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_34_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_35_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_36_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_37_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_38_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_39_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_40_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_41_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_42_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_43_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_44_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_45_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_46_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_47_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_48_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_49_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_50_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_51_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_52_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_53_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_54_(to_encode_ptr, to_encode_ptr2, size),
-            sodium_add_55_(to_encode_ptr, to_encode_ptr2, size)
-        )
+        sodium_add__n1(to_encode_ptr, to_encode_ptr2, size)
+        
     };
 }
 
 
 
-multiple_import!(
-    (   n: *mut libc::c_char) -> (), 
-    (
-        sodium_free,
-        sodium_free_400_,
-        sodium_free_401_,
-        sodium_free_402_,
-        sodium_free_403_,
-        sodium_free_404_,
-        sodium_free_405_,
-        sodium_free_406_,
-        sodium_free_407_,
-        sodium_free_408_,
-        sodium_free_409_,
-        sodium_free_410_,
-        sodium_free_411_,
-        sodium_free_412_,
-        sodium_free_413_,
-        sodium_free_414_,
-        sodium_free_415_,
-        sodium_free_416_,
-        sodium_free_417_,
-        sodium_free_418_,
-        sodium_free_419_,
-        sodium_free_420_,
-        sodium_free_421_,
-        sodium_free_422_,
-        sodium_free_423_,
-        sodium_free_424_,
-        sodium_free_425_,
-        sodium_free_426_,
-        sodium_free_427_,
-        sodium_free_428_,
-        sodium_free_429_,
-        sodium_free_430_,
-        sodium_free_431_,
-        sodium_free_432_,
-        sodium_free_433_,
-    )
-);
+extern "C" {
+    pub fn sodium_free__n1(   n: *mut libc::c_char) -> ();
+}
 
 
-
-pub fn sodium_free_wrapper(dis: u32) -> () {
+pub fn sodium_free_wrapper() -> () {
    
-    let to_encode = CString::new("HelloWorld!").expect("CString::new failed");
-    let to_encode_ptr = to_encode.as_ptr() as *mut i8;
-
     unsafe {
-        dynamic_diversification_body!(
-            sodium_free(to_encode_ptr),
-            sodium_free_400_(to_encode_ptr),
-            sodium_free_401_(to_encode_ptr),
-            sodium_free_402_(to_encode_ptr),
-            sodium_free_403_(to_encode_ptr),
-            sodium_free_404_(to_encode_ptr),
-            sodium_free_405_(to_encode_ptr),
-            sodium_free_406_(to_encode_ptr),
-            sodium_free_407_(to_encode_ptr),
-            sodium_free_408_(to_encode_ptr),
-            sodium_free_409_(to_encode_ptr),
-            sodium_free_410_(to_encode_ptr),
-            sodium_free_411_(to_encode_ptr),
-            sodium_free_412_(to_encode_ptr),
-            sodium_free_413_(to_encode_ptr),
-            sodium_free_414_(to_encode_ptr),
-            sodium_free_415_(to_encode_ptr),
-            sodium_free_416_(to_encode_ptr),
-            sodium_free_417_(to_encode_ptr),
-            sodium_free_418_(to_encode_ptr),
-            sodium_free_419_(to_encode_ptr),
-            sodium_free_420_(to_encode_ptr),
-            sodium_free_421_(to_encode_ptr),
-            sodium_free_422_(to_encode_ptr),
-            sodium_free_423_(to_encode_ptr),
-            sodium_free_424_(to_encode_ptr),
-            sodium_free_425_(to_encode_ptr),
-            sodium_free_426_(to_encode_ptr),
-            sodium_free_427_(to_encode_ptr),
-            sodium_free_428_(to_encode_ptr),
-            sodium_free_429_(to_encode_ptr),
-            sodium_free_430_(to_encode_ptr),
-            sodium_free_431_(to_encode_ptr),
-            sodium_free_432_(to_encode_ptr),
-            sodium_free_433_(to_encode_ptr),
-        )
+        let to_encode = libc::malloc(100) as *mut libc::c_char;
+
+        sodium_free__n1(to_encode)
     };
 }
 
 // Return result, elapsed
-pub fn main_sodium_increment(hashValue: u64) -> (u32, u128, u32){
+pub fn main_sodium_increment() -> (u32, u128){
 
     let now = std::time::Instant::now();
    
-
-    let DIS = (hashValue % 117) as u32;
-    sodium_increment_wrapper(DIS);
-    (1, now.elapsed().as_nanos(), DIS)
+    sodium_increment_wrapper();
+    (1, now.elapsed().as_nanos())
 }
 
 
 
 // Return result, elapsed
-pub fn main_sodium_memcmp(hashValue: u64) -> (i32, u128, u32){
-
+pub fn main_sodium_memcmp() -> (i32, u128){
     let now = std::time::Instant::now();
-   
-
-    let DIS = (hashValue % 101) as u32;
-    
-    (sodium_memcmp_wrapper(DIS), now.elapsed().as_nanos(), DIS)
+    (sodium_memcmp_wrapper(), now.elapsed().as_nanos())
 }
 
 
 
 // Return result, elapsed
-pub fn main_sodium_is_zero(hashValue: u64) -> (i32, u128, u32){
-
+pub fn main_sodium_is_zero() -> (i32, u128){
     let now = std::time::Instant::now();
-   
-
-    let DIS = (hashValue % 95) as u32;
-    
-    (sodium_is_zero_wrapper(DIS), now.elapsed().as_nanos(), DIS)
+    (sodium_is_zero_wrapper(), now.elapsed().as_nanos())
 }
 
 // Return result, elapsed
-pub fn main_sodium_add(hashValue: u64) -> (i32, u128, u32){
-
+pub fn main_sodium_add() -> (i32, u128){
     let now = std::time::Instant::now();
-   
-
-    let DIS = (hashValue % 50) as u32;
-    sodium_add_wrapper(DIS);
-    (1, now.elapsed().as_nanos(), DIS)
+    sodium_add_wrapper();
+    (1, now.elapsed().as_nanos())
 }
 
 
 // Return result, elapsed
-pub fn main_sodium_free(hashValue: u64) -> (i32, u128, u32){
-
+pub fn main_sodium_free() -> (i32, u128){
     let now = std::time::Instant::now();
-   
-
-    let DIS = (hashValue % 35) as u32;
-    sodium_free_wrapper(DIS);
-    (1, now.elapsed().as_nanos(), DIS)
+    sodium_free_wrapper();
+    (1, now.elapsed().as_nanos())
 }
