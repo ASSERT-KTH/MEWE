@@ -1,0 +1,27 @@
+crypto_aead_chacha20poly1305_ietf_encrypt_detached_n1  682308
+sodium_memcmp_original  626982
+sodium_memcmp_n1  678373
+
+sodium_is_zero_n1  673967
+crypto_core_ed25519_scalar_random_original  628348
+
+sodium_increment_original  626695
+
+bin2base64_n1  720077
+bin2base64_original  651241
+
+crypto_aead_chacha20poly1305_ietf_encrypt_detached_original  630237
+crypto_core_ed25519_scalar_complement_original  629309
+
+crypto_core_ed25519_scalar_complement_n1  700585
+
+sodium_add_n1  669260
+crypto_core_ed25519_scalar_invert_original  631550
+
+crypto_core_ed25519_scalar_random_n1  699899
+crypto_core_ed25519_scalar_invert_n1  681617
+
+sodium_is_zero_original  626717
+
+crypto_aead_chacha20poly1305_ietf_decrypt_detached_n1  695511
+crypto_aead_chacha20poly1305_ietf_decrypt_detached_original  633270

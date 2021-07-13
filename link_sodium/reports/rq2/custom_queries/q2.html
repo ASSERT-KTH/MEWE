@@ -1,0 +1,34 @@
+<html>
+    <script src="https://rawgit.com/neo4j-contrib/neovis.js/master/dist/neovis.js"></script>
+    <script>
+        function draw() {
+            var config = {
+                container_id: "viz",
+                server_url: "bolt://localhost:7687",
+                server_user: "neo4j",
+                server_password: "test",
+                arrows: true,
+
+                hierarchical_layout:true,
+                hierarchical_sort_method:"directed",
+                labels: {
+                    "FUNCTION": {
+                        caption: "name"
+                    }
+                },
+                relationships: {
+                    "CLL": {
+                        caption: "pop",
+                        thickness: "0.1"
+                    }                                       
+                },
+                initial_cypher: "match (n)-[r:CLL {dispatcher:'instrumented'}]->(m)  where r.pop='bma' return n,r, m"
+            }
+            var viz = new NeoVis.default(config);
+            viz.render();
+        }
+    </script>
+    <body onload="draw()">
+        <div id="viz"></div>
+    </body>
+</html>

@@ -1,0 +1,9 @@
+# This file describes a Fastly Compute@Edge package. To learn more visit:
+# https://developer.fastly.com/reference/fastly-toml/
+
+authors = [""]
+description = "captcha generator"
+language = "rust"
+manifest_version = 1
+name = "CAPTCHA"
+service_id = "5lCLFiDlbie8puV6NjK3H7"

@@ -1,0 +1,9 @@
+# This file describes a Fastly Compute@Edge package. To learn more visit:
+# https://developer.fastly.com/reference/fastly-toml/
+
+authors = [""]
+description = "QR generator"
+language = "rust"
+manifest_version = 1
+name = "QRGEN"
+service_id = "5lCLFiDlbie8puV6NjK3H7"

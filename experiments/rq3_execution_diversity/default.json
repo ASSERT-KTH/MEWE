@@ -1,0 +1,22 @@
+{
+    "files": [],
+    "pairs": [],
+    "method": {
+        "name": "DTW", 
+        "params": []
+    },
+    "threadPoolCount": 5, 
+    "outputAlignment": true,
+    "separator": "[,]", 
+    "clean": [ "[\r\t\n ]"],
+    "include": {
+        "pattern": "(\\d+)",
+        "group": 0
+    }, 
+    "comparison": { 
+        "eq": 0,
+        "diff": 2,
+        "gap": 1
+    }
+    
+}

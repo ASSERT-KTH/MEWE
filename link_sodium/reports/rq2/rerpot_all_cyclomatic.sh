@@ -1,0 +1,1 @@
+python3 dfs_count.py stability/rq11.stability.json bin2base64 1 crypto_aead_chacha20poly1305_ietf_decrypt_detached 2 crypto_aead_chacha20poly1305_ietf_encrypt_detached 3 crypto_core_ed25519_scalar_random 4 crypto_core_ed25519_scalar_invert 5 crypto_core_ed25519_scalar_complement 6

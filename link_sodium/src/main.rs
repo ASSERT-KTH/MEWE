@@ -1,7 +1,4 @@
 // NAME of the module to insert
-mod bin2base64_r;
-mod utils;
-mod core_ed25519;
 mod aead_chacha20poly1305;
 
 #[macro_use]
@@ -14,43 +11,18 @@ use rand::RngCore;
 use std::sync::Mutex;
 use std::collections::hash_map::{DefaultHasher, RandomState};
 use std::hash::{Hash, Hasher};
+
 // IMPORT HERE
-use bin2base64_r::*;
-use utils::*;
-use core_ed25519::*;
 use aead_chacha20poly1305::*;
 
-const BACKEND_NAME: &str = "backend_name";
 
-/// The name of a second backend associated with this service.
-const OTHER_BACKEND_NAME: &str = "other_backend_name";
-
-lazy_static! {
-    static ref STACKTRACE: Mutex<Vec<String>> = Mutex::new(vec![]);
-}
-
-#[warn(non_snake_case)]
-#[no_mangle]
-pub fn _cb71P5H47J3A(id: i32) {
-    // Save in global path header
-    STACKTRACE.lock().unwrap().push(format!("{}",id));
-}
 
 #[warn(non_snake_case)]
 #[no_mangle]
 pub fn discriminate(total: i32) -> i32 {
-   
-    let mut hasher = DefaultHasher::new();
 
-	
-	let pop = match std::env::var("FASTLY_POP") {
-		Ok(val) => val,
-		Err(_) => "NO_POP".to_string()
-	};
-
-    // PoP discriminator
-    pop.hash(&mut hasher);
-    (hasher.finish() as i32)%total
+    let popId = (rand::thread_rng().next_u32()%1000000u32) as i32;
+    popId%total
 }
 /// The entry point for your application.
 ///
@@ -63,25 +35,7 @@ pub fn discriminate(total: i32) -> i32 {
 fn main(mut req: Request<Body>) -> Result<impl ResponseExt, Error> {
    
     // ENTRY POINT FOR MULTIVERSION FUNCTIONS
-    // ==============================================
-    
-    //let (result, lapsed) = main_bin2base64();
-
-    // let (result, lapsed) = main_sodium_increment();
-    //let (result, lapsed) = main_sodium_memcmp();
-    // let (result, lapsed) = main_sodium_is_zero();
-    // let (result, lapsed) = main_sodium_add();
-    //let (result, lapsed) = main_sodium_free(); // It is getting erros probably due to free
-
-    
-    //let (result, lapsed) = main_crypto_core_ed25519_scalar_invert();
-    // let (result, lapsed) = main_crypto_core_ed25519_scalar_complement();
-    // let (result, lapsed) = main_crypto_core_ed25519_scalar_random();
-    
-    // let (result, lapsed) = main_crypto_aead_chacha20poly1305_ietf_decrypt_detached();
-    // let (r2, lapsed2) = main_crypto_aead_chacha20poly1305_ietf_encrypt_detached();
-    // ==============================================
-
+    let (result, lapsed) = main_crypto_aead_chacha20poly1305_ietf_encrypt_detached();
 
     let mut hasher = DefaultHasher::new();
 
@@ -94,8 +48,6 @@ fn main(mut req: Request<Body>) -> Result<impl ResponseExt, Error> {
     // PoP discriminator
     pop.hash(&mut hasher);
     // get path and send thourgh header
-    let path = STACKTRACE.lock().unwrap().join(",");
-
     let hashValue = hasher.finish() as i32;
     // Pattern match on the request method and path.
     match (req.method(), req.uri().path()) {
@@ -104,9 +56,8 @@ fn main(mut req: Request<Body>) -> Result<impl ResponseExt, Error> {
             .status(StatusCode::OK)
             .header("XPop", format!("{}", pop))
             .header("XPopHash", format!("{}", hashValue))
-            //.header("Xdis", format!("{}", DIS))
             .header("Xtime", format!("{}", lapsed))
-            .header("Xpath", format!("{}", path))
+            //.header("Xpath", format!("{:?}", path))
             .body(Body::from(format!("POP: {} Result {:?} ", pop, result
             )))?),
       

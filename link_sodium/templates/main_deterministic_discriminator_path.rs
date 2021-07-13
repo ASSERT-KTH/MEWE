@@ -16,14 +16,14 @@ use std::hash::{Hash, Hasher};
 
 
 lazy_static! {
-    static ref STACKTRACE: Mutex<Vec<String>> = Mutex::new(vec![]);
+    static ref STACKTRACE: Mutex<Vec<i32>> = Mutex::new(vec![]);
 }
 
 #[warn(non_snake_case)]
 #[no_mangle]
 pub fn _cb71P5H47J3A(id: i32) {
     // Save in global path header
-    STACKTRACE.lock().unwrap().push(format!("{}",id));
+    STACKTRACE.lock().unwrap().push(id);
 }
 
 
@@ -36,7 +36,8 @@ pub fn discriminate(total: i32) -> i32 {
 		Err(_) => "NO_POP".to_string()
 	};
 
-    popId = match pop {
+
+    let popId = match pop.as_str(){
         "AMS" => 0,
         "IAD" => 1,
         "WDC" => 2,
@@ -116,6 +117,7 @@ pub fn discriminate(total: i32) -> i32 {
         "YVR" => 76,
         "VIE" => 77,
         "WLG" => 78,
+        _ => 79
 
     };
     popId%total
@@ -144,7 +146,7 @@ fn main(mut req: Request<Body>) -> Result<impl ResponseExt, Error> {
     // PoP discriminator
     pop.hash(&mut hasher);
     // get path and send thourgh header
-    let path = STACKTRACE.lock().unwrap().join(",");
+    let path = STACKTRACE.lock().unwrap();
 
     let hashValue = hasher.finish() as i32;
     // Pattern match on the request method and path.
@@ -154,9 +156,8 @@ fn main(mut req: Request<Body>) -> Result<impl ResponseExt, Error> {
             .status(StatusCode::OK)
             .header("XPop", format!("{}", pop))
             .header("XPopHash", format!("{}", hashValue))
-            //.header("Xdis", format!("{}", DIS))
             .header("Xtime", format!("{}", lapsed))
-            .header("Xpath", format!("{}", path))
+            .header("Xpath", format!("{:?}", path))
             .body(Body::from(format!("POP: {} Result {:?} ", pop, result
             )))?),
       

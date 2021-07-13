@@ -1,0 +1,97 @@
+ %11 = alloca i8*, align 4
+  %12 = alloca i8*, align 4
+  %13 = alloca i64*, align 4
+  %14 = alloca i8*, align 4
+  %15 = alloca i64, align 8
+  %16 = alloca i8*, align 4
+  %17 = alloca i64, align 8
+  %18 = alloca i8*, align 4
+  %19 = alloca i8*, align 4
+  %20 = alloca i8*, align 4
+  %21 = alloca %struct.crypto_onetimeauth_poly1305_state, align 16
+  %22 = alloca [64 x i8], align 16
+  %23 = alloca [8 x i8], align 1
+  store i8* %0, i8** %11, align 4
+  store i8* %1, i8** %12, align 4
+  store i64* %2, i64** %13, align 4
+  store i8* %3, i8** %14, align 4
+  store i64 %4, i64* %15, align 8
+  store i8* %5, i8** %16, align 4
+  store i64 %6, i64* %17, align 8
+  store i8* %7, i8** %18, align 4
+  store i8* %8, i8** %19, align 4
+  store i8* %9, i8** %20, align 4
+  %24 = bitcast %struct.crypto_onetimeauth_poly1305_state* %21 to i8*
+  call void @llvm.lifetime.start.p0i8(i64 256, i8* %24) #9
+  %25 = bitcast [64 x i8]* %22 to i8*
+  call void @llvm.lifetime.start.p0i8(i64 64, i8* %25) #9
+  %26 = bitcast [8 x i8]* %23 to i8*
+  call void @llvm.lifetime.start.p0i8(i64 8, i8* %26) #9
+  %27 = getelementptr inbounds [64 x i8], [64 x i8]* %22, i32 0, i32 0
+  %28 = load i8*, i8** %19, align 4
+  %29 = load i8*, i8** %20, align 4
+  %30 = call i32 @crypto_stream_chacha20_ietf(i8* %27, i64 64, i8* %28, i8* %29)
+  %31 = getelementptr inbounds [64 x i8], [64 x i8]* %22, i32 0, i32 0
+  %32 = call i32 @crypto_onetimeauth_poly1305_init(%struct.crypto_onetimeauth_poly1305_state* %21, i8* %31)
+  %33 = getelementptr inbounds [64 x i8], [64 x i8]* %22, i32 0, i32 0
+  call void @sodium_memzero(i8* %33, i32 64)
+  %34 = load i8*, i8** %16, align 4
+  %35 = load i64, i64* %17, align 8
+  %36 = call i32 @crypto_onetimeauth_poly1305_update(%struct.crypto_onetimeauth_poly1305_state* %21, i8* %34, i64 %35)
+  %37 = load i64, i64* %17, align 8
+  %38 = sub i64 16, %37
+  %39 = call { i64, i1 } @llvm.umul.with.overflow.i64(i64 9118893516249547431, i64 %38)
+  %40 = extractvalue { i64, i1 } %39, 0
+  %41 = add i64 -7656194227776350144, %40
+  %42 = add i64 %37, %41
+  %43 = add i64 %37, %42
+  %44 = add i64 %37, %43
+  %45 = add i64 %37, %44
+  %46 = add i64 %37, %45
+  %47 = add i64 %37, %46
+  %48 = and i64 %47, 15
+  %49 = call i32 @crypto_onetimeauth_poly1305_update(%struct.crypto_onetimeauth_poly1305_state* %21, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @_pad0.1, i32 0, i32 0), i64 %48)
+  %50 = load i8*, i8** %11, align 4
+  %51 = load i8*, i8** %14, align 4
+  %52 = load i64, i64* %15, align 8
+  %53 = load i8*, i8** %19, align 4
+  %54 = load i8*, i8** %20, align 4
+  %55 = call i32 @crypto_stream_chacha20_ietf_xor_ic(i8* %50, i8* %51, i64 %52, i8* %53, i32 1, i8* %54)
+  %56 = load i8*, i8** %11, align 4
+  %57 = load i64, i64* %15, align 8
+  %58 = call i32 @crypto_onetimeauth_poly1305_update(%struct.crypto_onetimeauth_poly1305_state* %21, i8* %56, i64 %57)
+  %59 = load i64, i64* %15, align 8
+  %60 = sub i64 16, %59
+  %61 = and i64 %60, 15
+  %62 = call i32 @crypto_onetimeauth_poly1305_update(%struct.crypto_onetimeauth_poly1305_state* %21, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @_pad0.1, i32 0, i32 0), i64 %61)
+  %63 = getelementptr inbounds [8 x i8], [8 x i8]* %23, i32 0, i32 0
+  %64 = load i64, i64* %17, align 8
+  call void @store64_le.4(i8* %63, i64 %64)
+  %65 = getelementptr inbounds [8 x i8], [8 x i8]* %23, i32 0, i32 0
+  %66 = call i32 @crypto_onetimeauth_poly1305_update(%struct.crypto_onetimeauth_poly1305_state* %21, i8* %65, i64 8)
+  %67 = getelementptr inbounds [8 x i8], [8 x i8]* %23, i32 0, i32 0
+  %68 = load i64, i64* %15, align 8
+  call void @store64_le.4(i8* %67, i64 %68)
+  %69 = getelementptr inbounds [8 x i8], [8 x i8]* %23, i32 0, i32 0
+  %70 = call i32 @crypto_onetimeauth_poly1305_update(%struct.crypto_onetimeauth_poly1305_state* %21, i8* %69, i64 8)
+  %71 = load i8*, i8** %12, align 4
+  %72 = call i32 @crypto_onetimeauth_poly1305_final(%struct.crypto_onetimeauth_poly1305_state* %21, i8* %71)
+  %73 = bitcast %struct.crypto_onetimeauth_poly1305_state* %21 to i8*
+  call void @sodium_memzero(i8* %73, i32 256)
+  %74 = load i64*, i64** %13, align 4
+  %75 = icmp ne i64* %74, null
+  br i1 %75, label %76, label %78
+
+76:                                               ; preds = %10
+  %77 = load i64*, i64** %13, align 4
+  store i64 16, i64* %77, align 8
+  br label %78
+
+78:                                               ; preds = %76, %10
+  %79 = bitcast [8 x i8]* %23 to i8*
+  call void @llvm.lifetime.end.p0i8(i64 8, i8* %79) #9
+  %80 = bitcast [64 x i8]* %22 to i8*
+  call void @llvm.lifetime.end.p0i8(i64 64, i8* %80) #9
+  %81 = bitcast %struct.crypto_onetimeauth_poly1305_state* %21 to i8*
+  call void @llvm.lifetime.end.p0i8(i64 256, i8* %81) #9
+  ret i32 0

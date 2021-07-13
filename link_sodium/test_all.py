@@ -2,50 +2,93 @@ import sys
 import os
 import string
 import shutil
-from subprocess import check_output
+from subprocess import PIPE, check_output, Popen
 import subprocess
 import requests
 import json
+import sys
 
 import urllib3
 from cases import *
 from extract_wasm_stats import process as process_wasm_stats
+import traceback
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 urllib3.disable_warnings()
 
-def deploy(mainContent, bitcodes_folder="../sodium4", save_as=None):
-    print("Deploying")
+def deploy(mainContent, bitcodes_folder="inlined/original", save_as=None, save_sec_as="sec.txt"):
+    print("Deploying", bitcodes_folder)
 
+    #shutil.rmtree("target")
     open("src/main.rs", 'w').write(mainContent)
     # executing deploy script
-    FNULL = open(os.devnull, 'w')
 
-    out = check_output(
+    try:
+        p = subprocess.Popen(
+            [
+                "bash",
+                "build_me.sh",
+                os.getenv("SERVICE_ID"),
+                bitcodes_folder
+            ]#,stderr=sys.stdout,
+            ,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+
+        out, err = p.communicate()
+
+        print(out.decode(), err.decode())
+        # check file size
+        wasmSize = len(open("multivariant.wasm", 'rb').read())
+        try:
+            metadata = process_wasm_stats("multivariant.wasm")
+        except:
+            metadata = { }
+        if save_as:
+            shutil.copy("multivariant.wasm", f"out/{save_as}")
+    except Exception as e:
+        print(e)
+    # execute wasmbench security analysis tool
+
+    '''p = Popen(
         [
-            "bash",
-            "build_me.sh",
-            os.getenv("SERVICE_ID"),
-            bitcodes_folder
-        ]#, stderr=subprocess.STDOUT
+            os.environ.get("SEC"),
+            "multivariant.wasm"
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
     )
 
-    # check file size
-    wasmSize = len(open("multivariant.wasm", 'rb').read())
-    metadata = process_wasm_stats("multivariant.wasm")
+    out, stderr = p.communicate()
+    out= out.decode()
+    stderr=stderr.decode()
+    open(save_sec_as, 'w').write(f"{out}\n{stderr}")'''
 
-    if save_as:
-        shutil.copy("multivariant.wasm", f"out/{save_as}")
 
-    return wasmSize, metadata
+    return wasmSize, metadata, out
 
-def execute_to_time(service_name, times=100):
+def execute_to_time(service_name, times=100000):
 
     result = []
+    headers = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0',
+    'Cache-Control': 'private, max-age=0, no-cache',
+    'Connection': 'keep-alive',
+    'Host': 'totally-devoted-krill.edgecompute.app',
+    'Pragma': 'no-cache',
+    'Upgrade-Insecure-Requests': '1',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.5',
+    'Accept-Encoding': 'gzip, deflate, br'
+    }
     print("Getting execution time distribution")
     for t in range(times):
-        response = requests.get(service_name)
-        result.append(int(response.headers["xtime"]))
-        print(response.headers)
+        response = requests.get(service_name,headers)
+        result.append(int(response.headers["xtime"]) if 'xtime' in response.headers else -1)
+        if 'xtime' in response.headers:
+            print(response.headers['xtime'])
 
     return result
 
@@ -54,9 +97,9 @@ cache = {
 
 }
 
-BLACKLIST = ["mxp"]
+BLACKLIST = ["mxp", "lck", "msp", "sin"]
 
-def execute_paths(service_name):
+def execute_paths(service_name, t=1):
     global cache
 
     print("Getting execution paths")
@@ -64,56 +107,71 @@ def execute_paths(service_name):
     results = {
 
     }
-    for i, pop in enumerate(POPS):
-        popl = pop["code"].lower()
+    retry_strategy = Retry(
+        total=1,
+        status_forcelist=[429, 500, 502, 503, 504],
+        method_whitelist=["HEAD", "GET", "OPTIONS"]
+    )
+    adapter = HTTPAdapter(max_retries=retry_strategy)
+    http = requests.Session()
+    http.mount("https://", adapter)
+    http.mount("http://", adapter)
+    for _ in range(t):
+        for i, pop in enumerate(POPS):
+            popl = pop["code"].lower()
 
-        if popl in BLACKLIST:
-            continue
+            if popl in BLACKLIST:
+                continue
 
-        print(i, len(POPS), popl)
-        # try machines until it executes succesfully
-        if os.path.exists(f"{sys.argv[1]}/range_{popl}.json"):
-            machines = json.loads(open(f"{sys.argv[1]}/range_{popl}.json", 'r').read())
+            print(i, len(POPS), popl)
+            # try machines until it executes succesfully
+            if os.path.exists(f"{sys.argv[1]}/range_{popl}.json"):
+                machines = json.loads(open(f"{sys.argv[1]}/range_{popl}.json", 'r').read())
 
-            for j, machine in enumerate(machines["valid"]):
+                for j, machine in enumerate(machines["valid"]):
 
-                if popl in cache:
-                    pcNumber = cache[popl]
-                else:
-                    pcNumber = machine["at"]
+                    if popl in cache:
+                        pcNumber = cache[popl]
+                    else:
+                        pcNumber = machine["at"]
 
-                #print("\r%s %s"%(j, len(machines['valid'])))
-                try:
-                    response = requests.get(
-                        f"https://cache-{popl}{pcNumber}.hosts.secretcdn.net",
-                        headers={
-                            'Host': service_name
-                        },
-                        verify=False,
-                        timeout=20
-                    )
-                    content = response.text
-                    print(response.headers)
-                    path = response.headers["xpath"].split(",") if 'xpath' in response.headers else []
-                    time = response.headers['xtime']
-                    results[popl] = {
-                        'content': content,
-                        'path': path,
-                        'time': time
-                    }
-                    print("Gotcha", popl, pcNumber)
-                    cache[popl] = pcNumber
-                    break
-                except KeyboardInterrupt:
-                    return results
-                except Exception as e:
-                    print(e)
-                    if popl in cache and pcNumber == cache[popl]:
-                        del cache[popl]
+                    #print("\r%s %s"%(j, len(machines['valid'])))
+                    try:
+                        response = http.get(
+                            f"https://cache-{popl}{pcNumber}.hosts.secretcdn.net",
+                            headers={
+                                'Host': service_name
+                            },
+                            verify=False,
+                            timeout=20
+                        )
+                        content = response.text
+                        #print(response.headers)
+                        print(content)
+                        path = eval(response.headers["xpath"]) if 'xpath' in response.headers else []
+                        print(len(path))
+                        time = response.headers['xtime']
+                        if popl not in results:
+                            results[popl] = []
+                        results[popl].append({
+                            'content': content,
+                            'path': path,
+                            'time': time
+                        })
+                        
+                        print("Gotcha", popl, pcNumber, f"{time}ns")
+                        cache[popl] = pcNumber
+                        break
+                    except KeyboardInterrupt:
+                        return results
+                    except Exception as e:
+                        print(e)
+                        if popl in cache and pcNumber == cache[popl]:
+                            del cache[popl]
 
     return results
 
-def test_with_template(case, template_name, extract_paths=True, extract_times=True, bitcodes_folder="../sodium4"):
+def test_with_template(case, template_name, extract_paths=True, extract_times=True, bitcodes_folder="inlined/instrumented", t=1):
     mname, module, usage, entry4Path, entry4time,importNoDiversification, entryNoDiversification, _   = case
 
     MAIN_TEMPLATE = open(f"templates/{template_name}", 'r').read()
@@ -131,11 +189,13 @@ def test_with_template(case, template_name, extract_paths=True, extract_times=Tr
     # test entry path
     rPathMain = MAIN_TEMPLATE.format(module=module, usage=usage, entry=entry4Path)
 
-    rPathSize, meta = deploy(rPathMain, bitcodes_folder, save_as=f"{mname}_n1.wasm" if extract_paths else f"{mname}_paths.wasm")
+    rPathSize, meta, secmeta = deploy(rPathMain, bitcodes_folder, save_as=f"{mname}_d.wasm" if extract_paths else f"{mname}_paths.wasm", save_sec_as=f"{mname}{extract_paths}{extract_times}{bitcodes_folder}.sec.txt")
+
+    #open(, 'w').write(secmeta)
 
     print("rPath size", rPathSize)
-    times = execute_to_time("https://totally-devoted-krill.edgecompute.app") if extract_times else { }
-    paths = execute_paths("totally-devoted-krill.edgecompute.app") if extract_paths else []
+    times = execute_to_time("https://totally-devoted-krill.edgecompute.app", times=10000) if extract_times else { }
+    paths = execute_paths("totally-devoted-krill.edgecompute.app", t=t) if extract_paths else []
 
     return dict(
         paths=paths,
@@ -144,8 +204,8 @@ def test_with_template(case, template_name, extract_paths=True, extract_times=Tr
         meta = meta
     )
 
-def test_with_instrumentation(case, template="main.rs"):
-    return test_with_template(case, template, extract_times=False)
+def test_with_instrumentation(case, template="main.rs", times=1):
+    return test_with_template(case, template, extract_times=False, bitcodes_folder="inlined/instrumented", t=times)
 
 def test_without_instrumentation(case, template="main_4_time.rs"):
     mname, module, usage, entry4Path, entry4time, importNoDiversification, entryNoDiversification, module  = case
@@ -170,7 +230,8 @@ def test_no_diversification(case):
     rPathMain = MAIN_TEMPLATE.format(usage=importNoDiversification,
                                      entry=entryNoDiversification)
 
-    rPathSize, meta = deploy(rPathMain, "../sodium5", save_as=f"{mname}_original.wasm")
+    rPathSize, meta, secmeta = deploy(rPathMain, "original", save_as=f"{mname}_original.wasm", save_sec_as=f"{mname}.regular.sec.txt")
+    #open(f"{mname}.regular.sec.txt", 'w').write(secmeta)
 
     print("rPath size", rPathSize)
     withrPathTimes = execute_to_time("https://totally-devoted-krill.edgecompute.app")
@@ -184,47 +245,81 @@ def test_no_diversification(case):
 
 def test_case(case):
     print("testing", case[0])
-    print("No div")
-    noDivResults = test_no_diversification(case)
-    print("instrumented deterministic ")
-    instrumentedDeterministicResults = test_with_instrumentation(case, template="main_deterministic_discriminator_path.rs")
-    print("N1 deterministic")
-    nonInstrumentedDeterministicResults = test_without_instrumentation(case, template="main_deterministic_discriminator.rs")
-    print("instrumented")
-    instrumentedResults = test_with_instrumentation(case)
-    print("N1")
-    nonInstrumentedResults = test_without_instrumentation(case)
 
-    return noDivResults, instrumentedResults, nonInstrumentedResults, instrumentedDeterministicResults, nonInstrumentedDeterministicResults
+    # pureley random
+    print("Random dispatcher")
+    instrumentedPureRandom = None # test_with_instrumentation(case, template="main_rnd_path.rs", times=1)
+    pureRandom = test_without_instrumentation(case, template="main_rnd.rs")
+
+    print("Instrumented diversifier deterministic ")
+    #instrumentedDeterministicResults = test_with_instrumentation(case, template="main_deterministic_discriminator_path.rs", times=2)
+    print("Original libsodium")
+    noDivResults = test_no_diversification(case) # template f"templates/main_single.rs"
+    
+    print("Non instrumented diversifier deterministic")
+    #nonInstrumentedDeterministicResults = test_without_instrumentation(case, template="main_deterministic_discriminator.rs")
+    print("Instrumented diversifier based on hashing")
+    #instrumentedResults = test_with_instrumentation(case, times=2)
+    print("Diversifier based on hashing")
+    #nonInstrumentedResults = test_without_instrumentation(case)
+
+
+    return noDivResults, None, None, None, None, instrumentedPureRandom, pureRandom
 
 def test_all():
     
     cases = [
+
+        bin2base64,
         crypto_aead_chacha20poly1305_ietf_encrypt_detached,
         crypto_aead_chacha20poly1305_ietf_decrypt_detached,
         crypto_core_ed25519_scalar_invert,
         crypto_core_ed25519_scalar_complement,
         crypto_core_ed25519_scalar_random,
-        sodium_increment,
-        sodium_memcpy,
-        sodium_is_zero,
-        sodium_add,
-        bin2base64
+        #sodium_increment,
+        #sodium_memcpy,
+        #sodium_is_zero,
+        #sodium_add,
     ]
 
     OVERALL = dict()
     for case in cases:
-        original, instrumented, nonInstrumented, instrumentedDeterministic, nonInstrumentedDeterministic = test_case(case)
+        try:
+            original, instrumented, nonInstrumented, instrumentedDeterministic, nonInstrumentedDeterministic, instrumentedPureRandom, pureRandom = test_case(case)
 
-        OVERALL[case[0]] = dict(
-            original=original,
-            instrumented=instrumented,
-            nonInstrumented=nonInstrumented,
-            instrumentedDeterministic=instrumentedDeterministic,
-            nonInstrumentedDeterministic=nonInstrumentedDeterministic
-        )
+            OVERALL[case[0]] = dict(
+                original=original,
+                instrumented=instrumented,
+                nonInstrumented=nonInstrumented,
+                instrumentedDeterministic=instrumentedDeterministic,
+                nonInstrumentedDeterministic=nonInstrumentedDeterministic,
+                instrumentedPureRandom=instrumentedPureRandom,
+                pureRandom=pureRandom
+            )
 
-        print(original["packageSize"], instrumented["packageSize"], nonInstrumented["packageSize"])
+            # Save single case
+            if not os.path.exists(f"results"):
+                os.mkdir("results")
+
+            open(f"results/{case[0]}.result.json", 'w').write(
+                json.dumps(
+                    {
+                        case[0]: dict(
+                            original=original,
+                            instrumented=instrumented,
+                            nonInstrumented=nonInstrumented,
+                            instrumentedDeterministic=instrumentedDeterministic,
+                            nonInstrumentedDeterministic=nonInstrumentedDeterministic,
+                            instrumentedPureRandom=instrumentedPureRandom,
+                            pureRandom=pureRandom
+                        )
+                    }
+                )
+            )
+
+            #print(original["packageSize"], instrumented["packageSize"], nonInstrumented["packageSize"])
+        except Exception as e:
+            print("Error",case[0], e, traceback.format_exc())
 
     open("results.json", 'w').write(json.dumps(OVERALL, indent=4))
 

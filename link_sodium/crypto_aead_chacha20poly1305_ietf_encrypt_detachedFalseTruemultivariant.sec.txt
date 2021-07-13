@@ -1,0 +1,6 @@
+Input file: multivariant.wasm
+  binary:    multivariant.wasm
+
+
+thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: Error(Repr { offset: 0, kind: Io, grammar_element: "std::fs::File", source: Some(Os { code: 2, kind: NotFound, message: "No such file or directory" }) })', src/main.rs:19:48
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

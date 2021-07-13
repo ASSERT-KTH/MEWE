@@ -1,0 +1,6 @@
+Parsing original bitcode rust/bitcodes/all.bc
+Creating linker 
+Modules count 833
+Function count 0
+Hashing original functions833
+Hashing functions in parallel: 24612
