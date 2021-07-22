@@ -18,8 +18,8 @@ class RedisCache(object):
                 port=port,
                 password=passwd,
                 db=0,
-                socket_timeout=60,
-                socket_connect_timeout=60,
+                socket_timeout=160,
+                socket_connect_timeout=160,
                 retry_on_timeout=True,
             )
 
@@ -55,11 +55,11 @@ redis_cache = RedisCache(
 class DBUtils(object):
 
 
-    def __init__(self, dbname="fastly4edge", connection="localhost:27017", passwd=None, usr=None):
+    def __init__(self, dbname="fastly4edge", connection="0.0.0.0:27017", passwd=None, usr=None):
         if usr == None:
             self.client = pymongo.MongoClient(f"mongodb://{connection}/")
         else:
-            self.client = pymongo.MongoClient(f"mongodb://{usr}:{passwd}@{connection}/")
+            self.client = pymongo.MongoClient(f"mongodb://{usr}:{passwd}@{connection}/", connectTimeoutMS=5000, socketTimeoutMS=5000)
 
 
         self.db = self.client[dbname]
@@ -73,7 +73,7 @@ class DBUtils(object):
             **kwargs
         ))
 
-    def get_paths(self, popname, casename, collection="paths", sessionname="test1", **kwargs):
+    def get_paths(self, popname, casename, collection="paths", sessionname=None, **kwargs):
         for i in self.db[collection].find(dict( pop=popname,
             casename=casename,
             session=sessionname,
@@ -85,16 +85,16 @@ class DBUtils(object):
             )
     
 
-    def count_all_paths(self, casename, collection="paths", sessionname="test1", **kwargs):
-        return self.db[collection].count_documents(dict(session=sessionname,**kwargs))
+    def count_all_paths(self, casename, collection="paths", sessionname=None, **kwargs):
+        return self.db[collection].count_documents(dict(casename=casename,session=sessionname,**kwargs))
     
-    def get_all_paths(self, casename, collection="paths", sessionname="test1", **kwargs):
-        for i in self.db[collection].find(dict(session=sessionname,**kwargs)):
+    def get_all_paths(self, casename, collection="paths", sessionname=None, **kwargs):
+        for i in self.db[collection].find(dict(casename=casename,session=sessionname,**kwargs)):
             yield dict(**i,pathraw=json.loads(self.fs.get(i['path']).read().decode())) # project the large file
 
 
 
-    def first(self, popname, casename, collection="paths", sessionname="test1", **kwargs):
+    def first(self, popname, casename, collection="paths", sessionname=None, **kwargs):
         for i in self.get_paths(popname, casename, collection, sessionname, **kwargs):
             return i
     

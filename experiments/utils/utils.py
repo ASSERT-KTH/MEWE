@@ -260,6 +260,10 @@ def dfs2(start_at, end_at, visited, NMatrix, cache, PRESERVATION):
 		else:
 			return 1, 1
 
+	pr = get_preservation(start_at)
+	if pr[0] >  1:
+		# Notify a dispatcher
+		print(start_at, pr)
 	if(start_at == end_at):
 		preservation = get_preservation(end_at)
 		#print(preservation)
@@ -270,10 +274,6 @@ def dfs2(start_at, end_at, visited, NMatrix, cache, PRESERVATION):
 
 	visited[start_at] -= 1
 
-	pr = get_preservation(start_at)
-	if pr[1] >  1:
-		# Notify a dispatcher
-		print(start_at, pr)
 	counts = [0, 0 ,0]
 	try:
 		if start_at in NMatrix:
@@ -396,8 +396,6 @@ def classify_variants_based_on_preservation(fmap, reversed, preservation):
 
 def get_entropy(data, ngramsize=1):
 
-
-
 	FREQ = {}
 	for p in data:
 		if p not in FREQ:
@@ -406,23 +404,33 @@ def get_entropy(data, ngramsize=1):
 	
 	PROBS = {}
 
-	for p in FREQ:
+	SUM = sum([v for k, v in FREQ.items()])
+
+	for p in FREQ.keys():
 		PROBS[p] = FREQ[p]/len(data)
 	
 	E = 0
 
+	# print(PROBS, len(data), SUM, len(PROBS))
 	for p in PROBS:
-		E += -1*PROBS[p]*log(PROBS[p], 2) #32 bits per function id
+		E += -1*PROBS[p]*log(PROBS[p], 10) #32 bits per function id
 	
-	RI = len(PROBS.keys())
+	BEST_CASE = [1/len(data) for _ in range(len(data))]
+	BE = 0
+	for p in BEST_CASE:
+		BE += -1*p*log(p, 10) #32 bits per function id
+	
+
+	RI = len(data)
+	print(E, BE, E/BE)
 	#print(E, E/log(RI, 2))
-	return E, E/log(RI, 2)
+	return E, E/log(RI, 10)
 
 import zlib
 
 def get_entropy_by_compression(data):
 
-	bytes = functools.reduce(lambda x, y: x + y.to_bytes(4, 'big'), data, b'')
+	bytes = data.__str__().encode()
 	
 	size = len(bytes)
 	#print(size)
@@ -436,56 +444,133 @@ def get_entropy_by_compression(data):
 
 	return E
 
-if __name__ == "__main__":
+# this will provide the original CG
+def parse_edges(file, fmap, reversed, start_at="sodium_bin2base64"):
+	content = open(file, 'r')
+	edges = {}
+	buffer = []
+	pieces = {}
+	s1 = None
+	for l in content:
+		if not l.startswith("->"): # it is a parent
 
-	import json
-	import sys
-	'''
-	from utils.dbutils import DBUtils
-	import os
-
-
-	fmap, reversed = parse_map(sys.argv[1])
-	preservation = json.loads(open(sys.argv[2], 'r').read())
-	db = DBUtils(passwd=os.environ.get("MONGO_PASS"), usr=os.environ.get("MONGO_USER"))
-
-	trace = db.first("bma", "run_qr")["pathraw"]
-	EDGES, nodes, EDGES_COUNT, START, END = create_graph_from_trace(trace, fmap)
-	print(EDGES, nodes, EDGES_COUNT, START, END)
-	'''
-
-	paths = json.loads(open(sys.argv[1], 'r').read())
-	fname = sys.argv[2]
-
+			s = l.strip()
+			if s1 is None:
+				s1 = s
+				continue
+			
+			pieces[s1] = [*buffer] # piece of a graph
+			buffer = []
+			s1 = s
+		else:
+			buffer.append(l.replace("->", "").strip())
+		
 	
-	p = paths[fname]['instrumentedPureRandom']['paths']
-	overall = []
+	
+	def dfs(start_at, indent = 0):
+		
+		if start_at in reversed:
+			print("\t"*indent, start_at)
+			for ch in pieces[start_at]:
+				#print("\t"*(indent + 1), ch)
+				if  start_at != ch:
+					dfs(ch, indent + 1)
+				else:
+					print("\t"*indent, f"{start_at}->{ch}")
 
-	r = 2
-	t = []
-	for i in range(100):
-		try:
-			for pop, k in p.items():
-				overall += k[i]['path']
-		except Exception as e:
-			print(e, pop)
-			pass
-	print(len(overall))
-	# overall = [1,2,2,1]
-	entropy = get_entropy(overall)
-	# entropy = get_entropy_by_compression(overall)
+	dfs(start_at)
+	return pieces
+
+def create_graph_from_wasm(wasmfile, fname="sodium_bin2base64", blacklist=['discriminate', '_cb71P5H47J3A']):
+	FUNC_START=re.compile(r"\(func \$")
+
+	content = open(wasmfile, 'r').read()
+	print("reading wat file")
+
+	CG4FUNCTION = {}
+	PATHS = {}
+	LOOPS = {}
+	for m in FUNC_START.finditer(content):
+		start_at = m.span()[0]
 
 
-	import matplotlib.pyplot as plt
+		PARCOUNT = 1
+		FUNCTION_CONTENT = ''	
+		for c in content[start_at + 1:]:
+			if c == '(':
+				PARCOUNT += 1
+			if c == ')':
+				PARCOUNT -= 1
+			
+			if PARCOUNT == 0:
+				break
+			FUNCTION_CONTENT += c
+		FUNCTION_CONTENT = FUNCTION_CONTENT.split("\n")
+		FNAME = FUNCTION_CONTENT[0].split(" ")[1][1:]
+		if FNAME not in CG4FUNCTION:
+			CG4FUNCTION[FNAME] = {}
+		if FNAME not in PATHS:
+			PATHS[FNAME] = []
+		for i, instr in enumerate(FUNCTION_CONTENT):
+			if i == 0:
+				continue
+			#print(instr)
+			if "call" in instr:
+				# print(instr)
+				instr = instr.strip()
+				F2 = instr.split(" ")[1][1:]
 
-	plt.scatter([
-		0.007549822026078572, 0.004562478418211799, 0.01138211298827306, 0.0035073945050326815, 0.003529551127067959
-	], [
-		12314, 253, 41, 2538, 78
-	])
-	#plt.show()
-# 
-# crypto_core_ed25519_scalar_random 0.79273131273825 0.007549822026078572 12314
-# crypto_aead_chacha20poly1305_ietf_encrypt_detached 0.3011235756019788 0.004562478418211799 253
-# bin2base640.4325202935543763 0.01138211298827306 41
-# crypto_core_ed25519_scalar_invert 0.2805915604026145 0.0035073945050326815 2538
+				if F2 not in CG4FUNCTION:
+					CG4FUNCTION[F2] = {}
+				
+				CG4FUNCTION[FNAME][F2] = {}
+				if F2 != FNAME:
+					PATHS[FNAME].append(F2)
+				if F2 == FNAME:
+					LOOPS[FNAME] = 1
+				# look for far most loop
+				LOOPINDEX=-1
+				for j in range(i, 0, -1):
+					if 'loop' in FUNCTION_CONTENT[j]:
+						LOOPINDEX = j
+						break
+				if LOOPINDEX != -1:
+					# create and edge between f2 and F but passing through other function calls in the middle
+					#print(LOOPINDEX)
+					CG4FUNCTION[F2][F2] = {}
+					LOOPS[F2] = 1
+			if "call_indirect" in instr:
+				print(f"WARNING: Indirect call {instr}")
+		# print(CG4FUNCTION[FNAME])
+	visited = {}
+	filtered = {}
+
+	#print(CG4FUNCTION)
+
+	def dfs2(init, chs, indent = 0):
+		if init in visited or init in blacklist:
+			return
+		print("|","\t"*indent, init, end = "")
+
+		visited[init] = 1
+		if init in LOOPS:
+			print(" <-")
+		else:
+			print()
+		for ch in chs:
+			if ch in PATHS:
+				dfs2(ch, PATHS[ch], indent + 1)
+
+	print(PATHS)
+	def dfs(ed, start_at):
+		if start_at in visited:
+			return
+		
+		visited[start_at] = 1
+		for ch in ed[start_at].keys():
+			
+			print(f"{start_at} -> {ch}")
+			if ch not in visited:
+				dfs(ed, ch)
+	dfs2(fname, PATHS[fname])
+	return CG4FUNCTION

@@ -1,0 +1,50 @@
+sodium_bin2base64
+         
+        discriminate
+        sodium_bin2base64
+            sodium_bin2base64_1_
+            sodium_bin2base64_2_
+            sodium_bin2base64_3_
+            sodium_bin2base64_4_
+            sodium_bin2base64_5_
+            sodium_bin2base64_6_
+            sodium_bin2base64_7_
+            sodium_bin2base64_8_
+            sodium_bin2base64_9_
+            sodium_bin2base64_10_
+            sodium_bin2base64_11_
+            sodium_bin2base64_12_
+            sodium_bin2base64_13_
+            sodium_bin2base64_14_
+            sodium_bin2base64_15_
+            sodium_bin2base64_16_
+            sodium_bin2base64_17_
+            sodium_bin2base64_18_
+            sodium_bin2base64_19_
+            sodium_bin2base64_20_
+            sodium_bin2base64_21_
+            sodium_bin2base64_22_
+            sodium_bin2base64_23_
+            sodium_bin2base64_24_
+            sodium_bin2base64_25_
+            sodium_bin2base64_26_
+            sodium_bin2base64_27_
+            sodium_bin2base64_28_
+            sodium_bin2base64_29_
+            sodium_bin2base64_30_
+            sodium_bin2base64_31_
+            sodium_bin2base64_32_
+            sodium_bin2base64_33_
+            sodium_bin2base64_34_
+            sodium_bin2base64_35_
+            sodium_bin2base64_36_
+            sodium_bin2base64_37_
+            sodium_bin2base64_38_
+            sodium_bin2base64_39_
+            sodium_bin2base64_40_
+            sodium_bin2base64_original
+        b64_byte_to_urlsafe_char.243 <-
+                b64_byte_to_urlsafe_char_43_
+                b64_byte_to_urlsafe_char_44_
+                b64_byte_to_urlsafe_char_original
+         

@@ -1,5 +1,11 @@
 #python3 -m rq1\&2.report_stability rq1\&2/results/qrcode/rq11_qrcode_.stability.json
 
+python3 -m rq1\&2.dfs_count2 rq1\&2/results/qrcode/rq11_qrcode_.stability.json rq3_execution_diversity/results/qrcode/fmap.txt db  run_qr
+
+python3 -m rq1\&2.dfs_count2 rq1\&2/results/qrcode/rq11_qrcode_.stability.json rq3_execution_diversity/results/qrcode/fmap.txt db run_qr_str
+
+
+
 python3 -m rq1\&2.dfs_count2 rq1\&2/results/libsodium/rq11.stability.json rq3_execution_diversity/results/libsodium/fmap.txt file rq3_execution_diversity/results/libsodium/from_pops/bin2base64.result.json    bin2base64 
 
 
@@ -15,11 +21,6 @@ python3 -m rq1\&2.dfs_count2 rq1\&2/results/libsodium/rq11.stability.json rq3_ex
 
 
 python3 -m rq1\&2.dfs_count2 rq1\&2/results/libsodium/rq11.stability.json rq3_execution_diversity/results/libsodium/fmap.txt file rq3_execution_diversity/results/libsodium/from_pops/crypto_core_ed25519_scalar_random.result.json    crypto_core_ed25519_scalar_random
-
-
-python3 -m rq1\&2.dfs_count2 rq1\&2/results/qrcode/rq11_qrcode_.stability.json rq3_execution_diversity/results/qrcode/fmap.txt db  run_qr
-
-python3 -m rq1\&2.dfs_count2 rq1\&2/results/qrcode/rq11_qrcode_.stability.json rq3_execution_diversity/results/qrcode/fmap.txt db run_qr_str
 
 
 exit 0

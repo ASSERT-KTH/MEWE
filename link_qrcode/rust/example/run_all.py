@@ -67,7 +67,7 @@ def deploy(mainContent, bitcodes_folder="original", save_as=None, save_sec_as="s
     
     return wasmSize, metadata, out
 
-def execute_to_time(service_name, times=100000, meta={}):
+def execute_to_time(service_name, times=1, meta={}):
 
     result = []
     print("Getting execution time distribution")
@@ -219,7 +219,7 @@ def test_with_template(case, template_name, extract_paths=True, extract_times=Tr
         tpe="multivariant" if not execute_paths else "instrumented",
     )
 
-    times = execute_to_time("https://totally-devoted-krill.edgecompute.app", meta=record, times=10000) if extract_times else { }
+    times = execute_to_time("https://totally-devoted-krill.edgecompute.app", meta=record, times=100) if extract_times else { }
     paths = execute_paths("totally-devoted-krill.edgecompute.app", t=t, meta=record) if extract_paths else []
 
     execs = mydb["execs"]
@@ -280,16 +280,16 @@ def test_case(case):
 
     print("Instrumented")
     multivariant_bc, template = instrumented
-    instrumentedPureRandom = None # test_with_instrumentation(case, template=template, times=100, bitcode=multivariant_bc)
+    instrumentedPureRandom =  test_with_instrumentation(case, template=template, times=100, bitcode=multivariant_bc)
     
 
     print("Original libsodium")
     bc, template = original
-    noDivResults = test_no_diversification(fname, bitcode=bc, template=template) # template f"templates/main_single.rs"
+    noDivResults = None # test_no_diversification(fname, bitcode=bc, template=template) # template f"templates/main_single.rs"
     
     print("Random dispatcher")
     multivariant_bc, template = multivariant
-    pureRandom = test_without_instrumentation(case, template=template, bitcode=multivariant_bc)
+    pureRandom = None #test_without_instrumentation(case, template=template, bitcode=multivariant_bc)
 
     #print("Instrumented diversifier deterministic ")
     instrumentedDeterministicResults = None
@@ -306,17 +306,18 @@ def test_all():
     
     cases = [
         (
-            "run_qr_str",[
-            ("all.bc", "main.rs"), # original
-            ("allinone.multivariant.i.bc", "instrumented_str.rs"), # instrumented for path
-            ("allinone.multivariant.bc", "main.rs")] # multivariant
-        ),
-        (
             "run_qr",[
             ("all.bc", "main_bytes.rs"), # original
             ("allinone.multivariant.i.bc", "instrumented.rs"), # instrumented for path
             ("allinone.multivariant.bc", "main_bytes.rs")] # multivariant
+        ),
+        (
+            "run_qr_str",[
+            ("all.bc", "main.rs"), # original
+            ("allinone.multivariant.i.bc", "instrumented_str.rs"), # instrumented for path
+            ("allinone.multivariant.bc", "main.rs")] # multivariant
         )
+        
     ]
 
     OVERALL = dict()

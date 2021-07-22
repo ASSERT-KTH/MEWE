@@ -4,7 +4,7 @@ WORKDIR=untar
 FASTLY_NAME=example_qr.wasm
 PROJECT_NAME=QRGEN
 BC=$2
-export RUSTFLAGS="-C link-arg=../../multivariant/$BC -C opt-level=0 -C link-dead-code=on"
+export RUSTFLAGS="-C link-arg=../../multivariant.bck/$BC -C opt-level=0 -C link-dead-code=on"
 cargo build --release --target=wasm32-wasi || exit 1
 $WASM2WAT target/wasm32-wasi/release/$FASTLY_NAME -o $FASTLY_NAME.wat
 cp target/wasm32-wasi/release/$FASTLY_NAME $FASTLY_NAME

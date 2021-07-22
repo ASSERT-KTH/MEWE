@@ -11,6 +11,18 @@ use std::collections::hash_map::{DefaultHasher, RandomState};
 use std::hash::{Hash, Hasher};
 
 
+lazy_static! {
+    static ref STACKTRACE: Mutex<Vec<i32>> = Mutex::new(vec![]);
+}
+
+#[warn(non_snake_case)]
+#[no_mangle]
+pub fn _cb71P5H47J3A(id: i32) {
+    // Save in global path header
+    STACKTRACE.lock().unwrap().push(id);
+}
+
+
 #[warn(non_snake_case)]
 #[no_mangle]
 pub fn discriminate(total: i32) -> i32 {
@@ -39,10 +51,11 @@ fn main(_req: Request) -> Result<Response, Error> {
 		Err(_) => "NO_POP".to_string()
 	};
     let now = std::time::Instant::now();
-    let img = unsafe { run_qr_str(String::from("Hello world form MEWE !")) };
-    let lapsed = now.elapsed().as_nanos();
+    let img = unsafe { run_qr(String::from("Hello world form MEWE !")) };
 
-    let res = Response::from_body( "[]")
+    let path = STACKTRACE.lock().unwrap();
+
+    let res = Response::from_body( format!("{:?}", path))
     .with_header("Xtime", format!("{:?}", now.elapsed().as_nanos()))
     .with_header("Xpop", format!("{:?}", pop))
     //.with_header("XContent", img)
