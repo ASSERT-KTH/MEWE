@@ -5,7 +5,7 @@ b64_byte_to_urlsafe_char [4, 1]
 |         |  172 | 172.00
 |         |  41 | 0.24
 
-rq3_execution_diversity/results/libsodium/fmap.txt
+results/rq1/maps/sodium.txt
 crypto_aead_chacha20poly1305_ietf_decrypt_detached [28, 26]
 crypto_stream_chacha20_ietf (1, 1)
 crypto_stream_chacha20_ietf_ext (1, 1)
@@ -30,7 +30,7 @@ poly1305_finish [5, 3]
 |         |  84 | 28.00
 |         |  78 | 0.93
 
-rq3_execution_diversity/results/libsodium/fmap.txt
+results/rq1/maps/sodium.txt
 crypto_aead_chacha20poly1305_ietf_encrypt_detached [25, 23]
 crypto_stream_chacha20_ietf (1, 1)
 crypto_stream_chacha20_ietf_ext (1, 1)
@@ -58,7 +58,7 @@ poly1305_finish [5, 3]
 |         |  325 | 81.25
 |         |  253 | 0.78
 
-rq3_execution_diversity/results/libsodium/fmap.txt
+results/rq1/maps/sodium.txt
 crypto_core_ed25519_scalar_invert [29, 27]
 sc25519_invert (1, 1)
 sc25519_sq (1, 1)
@@ -71,7 +71,7 @@ sodium_is_zero [96, 94]
 |         |  2784 | 2784.00
 |         |  2538 | 0.91
 
-rq3_execution_diversity/results/libsodium/fmap.txt
+results/rq1/maps/sodium.txt
 crypto_core_ed25519_scalar_random [134, 131]
 randombytes_buf (1, 1)
 randombytes_init_if_needed (1, 1)
@@ -84,7 +84,7 @@ sodium_is_zero [96, 94]
 |         |  12864 | 12864.00
 |         |  12314 | 0.96
 
-rq3_execution_diversity/results/qrcode/fmap.txt
+results/rq1/maps/qrcode.txt
 run_qr (1, 1)
 _ZN6qrcode6QrCode3new17hf33ed4fcf5fd78c5E (1, 1)
 _ZN6qrcode6QrCode27with_error_correction_level17h09f216cfdb870c52E (1, 1)
@@ -1073,7 +1073,7 @@ _ZN4core10intrinsics11write_bytes17h92f37295d9206652E (1, 1)
 |         |  3 702 495 767 | 2632.14
 |         |  617 378 119 | 0.17
 
-rq3_execution_diversity/results/qrcode/fmap.txt
+results/rq1/maps/qrcode.txt
 run_qr_str (1, 1)2034-1076
 _ZN6qrcode6QrCode3new17hf33ed4fcf5fd78c5E (1, 1)
 _ZN6qrcode6QrCode27with_error_correction_level17h09f216cfdb870c52E (1, 1)

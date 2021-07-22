@@ -352,7 +352,7 @@ def process(folder):
             )
         )
 
-        open(f"rq1&2/results/{sys.argv[2]}/rq11_{sys.argv[2]}_.stability.json", 'w').write(json.dumps(OVERALL, indent=4))
+        open(f"results/rq2/preservation/{sys.argv[2]}/rq11_{sys.argv[2]}_.stability.json", 'w').write(json.dumps(OVERALL, indent=4))
 
 
 if __name__ == "__main__":
