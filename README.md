@@ -1,8 +1,9 @@
 ## MEWE research repository
 
 ### Folders structure:
- - experiments: Research question experiments for MEWE
+ - experiments: scripts for experimentation reproduction
  - link_sodium, link_captcha, link_image, link_qrcode: MEWE pipelines. 
+ - crow-linker: The MEWE mixer.
  
  ### MEWE multivariants:
 
