@@ -2,22 +2,27 @@
 
 ## Prerequisites
 
-TODO
+- Download data: run `bash download_results.sh`
+- Python3: needed libraries are: matplotlib, numpy, scipy and pymongo
+- Restore mongodb database with collected traces
 
-## RQ1 (Multivariant generation)
+## RQ1 and RQ2 (Multivariant generation and preservation)
 
-TODO
-
-## RQ2 (Preservation)
-
-TODO
+Run `bash report_preservation.sh`
 
 ## RQ3 (Intra MTD)
 
-TODO
+RuN `bash plot_traces_report_multiple_pops.sh`
 
 ## RQ4 (Inter MTD)
+
+Run `bash report_entropy.sh`
+
+### Provided inputs
 
 TODO
 
 ## RQ5 (Performance)
+
+Run `bash compare_times.sh`
+
