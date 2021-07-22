@@ -1,6 +1,0 @@
-version = 353
-name = "customWasm"
-description = "Deploying custom wasm as a Fastly service"
-authors = [""]
-language = "rust"
-service_id = ""
