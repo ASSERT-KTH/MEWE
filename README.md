@@ -3,7 +3,7 @@
 ### Folders structure:
  - experiments: scripts for experimentation reproduction
  - link_sodium, link_captcha, link_image, link_qrcode: MEWE pipelines. 
- - crow-linker: The MEWE mixer.
+ - crow-linker: The MEWE mulrivariant generator.
  
  ### MEWE multivariants:
 

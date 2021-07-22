@@ -21,7 +21,7 @@ LINK_ALL=$(find $BITCODES_FOLDER -name "*.bc" -exec bash -c "echo -n ' -C' link-
 
 #LINK_ALL="-C link-arg=../sodium4/codecs.multivariant.bc"
 
-export RUSTFLAGS="$LINK_ALL -C opt-level=0 -C lto=off -C inline-threshold=0 -C link-dead-code=on"
+export RUSTFLAGS="$LINK_ALL -C linker=$CROW_BACK_CLANG -C opt-level=0 -C lto=off -C inline-threshold=0 -C link-dead-code=on"
 # 11889700
 #  8797759
 #  8864430
