@@ -1,6 +1,0 @@
-version = 415
-name = "reduce"
-description = "Multi variant version to fastly"
-authors = [""]
-language = "rust"
-service_id = "5CHKC0tGBZ9oOjetdP8Krp"

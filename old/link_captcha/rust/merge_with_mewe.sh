@@ -1,6 +1,0 @@
-BITCODES="bitcodes/num_iter.bc,bitcodes/rayon.bc,bitcodes/getrandom.bc,bitcodes/tiff.bc,bitcodes/scopeguard.bc,bitcodes/num_rational.bc,bitcodes/lazy_static.bc,bitcodes/adler32.bc,bitcodes/memoffset.bc,bitcodes/ryu.bc,bitcodes/rand_chacha.bc,bitcodes/either.bc,bitcodes/libc.bc,bitcodes/crossbeam_channel.bc,bitcodes/crc32fast.bc,bitcodes/crossbeam_deque.bc,bitcodes/num_cpus.bc,bitcodes/rayon_core.bc,bitcodes/scoped_threadpool.bc,bitcodes/adler.bc,bitcodes/ahash.bc,bitcodes/rand_core.bc,bitcodes/gif.bc,bitcodes/deflate.bc,bitcodes/serde.bc,bitcodes/itoa.bc,bitcodes/rgb.bc,bitcodes/lodepng.bc,bitcodes/hound.bc,bitcodes/hashbrown.bc,bitcodes/byteorder.bc,bitcodes/bitflags.bc,bitcodes/num_integer.bc,bitcodes/bytemuck.bc,bitcodes/wcaptcha.bc,bitcodes/miniz_oxide.bc,bitcodes/rand.bc,bitcodes/serde_json.bc,bitcodes/flate2.bc,bitcodes/captcha.bc,bitcodes/cfg_if.bc,bitcodes/png.bc,bitcodes/wasi.bc,bitcodes/color_quant.bc,bitcodes/weezl.bc,bitcodes/ppv_lite86.bc,bitcodes/image.bc,bitcodes/num_traits.bc,bitcodes/jpeg_decoder.bc,bitcodes/crossbeam_utils.bc,bitcodes/crossbeam_epoch.bc,bitcodes/fallible_collections.bc"
-
-
-
-/Users/javierca/Documents/Develop/crow-merge-pass/build/crow-linker bitcodes/base64.bc "captcha.all.bc" -complete-replace=true --override -crow-merge-debug-level=1 -crow-merge-skip-on-error -crow-merge-bitcodes="$BITCODES"
-

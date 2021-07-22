@@ -1,2 +1,0 @@
-Direct calls: 64513
-Indirect calls: 33
