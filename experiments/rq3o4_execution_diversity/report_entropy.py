@@ -126,7 +126,7 @@ def get_entropy_from_db(fname, jsonfile, fmap, stability, breakatfirst = True):
     
 
     print()
-    print(L1, np.median(distribs), np.std(distribs), len(dispatchers_distrib), sum(v for k, v in dispatchers_distrib.items())*(6400 if breakatfirst else 1))
+    print(L1, np.median(distribs), np.std(distribs), len(dispatchers_distrib), sum(v for k, v in dispatchers_distrib.items())*(1 if breakatfirst else 1))
     
     #if breakatfirst:
     #    for k, v in dispatchers_distrib.items():

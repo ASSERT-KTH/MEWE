@@ -413,18 +413,18 @@ def get_entropy(data, ngramsize=1):
 
 	# print(PROBS, len(data), SUM, len(PROBS))
 	for p in PROBS:
-		E += -1*PROBS[p]*log(PROBS[p], 10) #32 bits per function id
+		E += -1*PROBS[p]*log(PROBS[p], 2) #32 bits per function id
 	
 	BEST_CASE = [1/len(data) for _ in range(len(data))]
 	BE = 0
 	for p in BEST_CASE:
-		BE += -1*p*log(p, 10) #32 bits per function id
+		BE += -1*p*log(p, 2) #32 bits per function id
 	
 
 	RI = len(data)
 	print(E, BE, E/BE)
 	#print(E, E/log(RI, 2))
-	return E, E/log(RI, 10)
+	return E, E/log(RI, 2)
 
 import zlib
 

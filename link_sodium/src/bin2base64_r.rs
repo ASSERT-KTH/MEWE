@@ -1,6 +1,5 @@
 
 #[macro_use]
-use diversifier::{static_diversification,dynamic_diversification_body,  dynamic_diversification, multiple_import, expand };
 use std::ffi::CString;
 
 

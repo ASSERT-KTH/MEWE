@@ -1,0 +1,6 @@
+version = 317
+name = "fingerprinting"
+description = "Deploying custom wasm as a Fastly service"
+authors = [""]
+language = "rust"
+service_id = ""
