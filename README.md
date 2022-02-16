@@ -2,7 +2,7 @@
 
 MEWE is a toolset and methodology tailored to provide multivariant execution at the Edge. It uses an extended LLVM linker, CROW and the Fastly ABI to provide multivariant binaries that can be successfully deployed to the Fastly's platform.
 
-![diagram](docs/diagram.png)
+![diagram](docs/diagram2.png)
 
 # Repository structure
  - `multivariant-mixer`: The MEWE mulrivariant library generator.
@@ -10,13 +10,11 @@ MEWE is a toolset and methodology tailored to provide multivariant execution at 
  - `experiments`: scripts for experiments reproduction
 
 
-## Extended linker and multivariant generation
-[![mewe linker](https://github.com/Jacarte/MEWE/actions/workflows/build_linker.yaml/badge.svg?branch=main)](https://github.com/Jacarte/MEWE/actions/workflows/build_linker.yaml)
+## Extended linker and multivariant generation [![mewe linker](https://github.com/Jacarte/MEWE/actions/workflows/build_linker.yaml/badge.svg?branch=main)](https://github.com/Jacarte/MEWE/actions/workflows/build_linker.yaml)
 
 
-We extended the LLVM linker tool to merge several libraries into a big one despite symbol duplication.. Our linker takes a collection of LLVM libraries as input and outputs a big library containing semantically equivalent functions (yet statically different) for which we orchestrate their execution at runtime.
+Our [linker](multivariant-mixer) takes a collection of LLVM libraries as input and outputs a big library containing semantically equivalent functions (yet statically different) for which we orchestrate their execution at runtime.
 
-[Read more about it [here](multivariant-mixer)]
  
 ### MEWE multivariants:
 
