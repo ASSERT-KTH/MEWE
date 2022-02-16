@@ -31,11 +31,11 @@ pub fn sodium_bin2base64_original_wrapper(size: usize, bin: *const libc::c_uchar
 
 pub fn main_bin2base64() -> (CString, u128){
 
-    let now = std::time::Instant::now();
-
     let to_encode = CString::new("HelloWorld!").expect("CString::new failed");
     let size = 20 as usize;
     let to_encode_ptr = to_encode.as_ptr() as *mut u8;
+
+    let now = std::time::Instant::now();
 
     (sodium_bin2base64_wrapper(50, to_encode_ptr, size), now.elapsed().as_nanos())
 }
@@ -43,11 +43,11 @@ pub fn main_bin2base64() -> (CString, u128){
 
 pub fn main_bin2base64_time() -> (CString, u128){
 
-    let now = std::time::Instant::now();
-
     let to_encode = CString::new("HelloWorld!").expect("CString::new failed");
     let size = 20 as usize;
     let to_encode_ptr = to_encode.as_ptr() as *mut u8;
+
+    let now = std::time::Instant::now();
 
     (sodium_bin2base64_original_wrapper(50, to_encode_ptr, size), now.elapsed().as_nanos())
 }

@@ -12,6 +12,11 @@ use std::sync::Mutex;
 use std::collections::hash_map::{DefaultHasher, RandomState};
 use std::hash::{Hash, Hasher};
 
+
+lazy_static! {
+    static ref DISPATCHER_OPTIONS: Mutex<Vec<i32>> = Mutex::new(vec![]);
+}
+
 // IMPORT HERE
 <%usage%>
 
@@ -22,7 +27,10 @@ use std::hash::{Hash, Hasher};
 pub fn discriminate(total: i32) -> i32 {
 
     let popId = (rand::thread_rng().next_u32()%1000000u32) as i32;
-    popId%total
+    let r = (popId)%total;
+    // Save the dispatcher result
+    DISPATCHER_OPTIONS.lock().unwrap().push(r);
+    r
 }
 /// The entry point for your application.
 ///
@@ -48,7 +56,9 @@ fn main(mut req: Request<Body>) -> Result<impl ResponseExt, Error> {
     // PoP discriminator
     pop.hash(&mut hasher);
     // get path and send thourgh header
+    let path = DISPATCHER_OPTIONS.lock().unwrap();
     let hashValue = hasher.finish() as i32;
+
     // Pattern match on the request method and path.
     match (req.method(), req.uri().path()) {
         // If request is a `GET` to the `/` path, send a default response.
@@ -57,8 +67,9 @@ fn main(mut req: Request<Body>) -> Result<impl ResponseExt, Error> {
             .header("XPop", format!("{}", pop))
             .header("XPopHash", format!("{}", hashValue))
             .header("Xtime", format!("{}", lapsed))
+            .header("Xdispatcher", format!("{:?}", path))
             //.header("Xpath", format!("{:?}", path))
-            .body(Body::from(format!("POP: {} Result {:?} ", pop, result
+            .body(Body::from(format!("POP: {} Result {:?} DISPATCHER {:?}", pop, result, path
             )))?),
       
         // Catch all other requests and return a 404.

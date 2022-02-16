@@ -48,6 +48,7 @@ $WASM2WAT history/${d}_$FASTLY_NAME -o history/${d}_$FASTLY_NAME.wat
 
 if grep -qE "import \"env\"" $FASTLY_NAME.wat;
 then
+   # exit if the binary has external dependencies out of WASI or the Fastly ABI
    echo "Error invalid import"
    grep -E "import \"env\"" $FASTLY_NAME.wat 
    exit 1
@@ -70,10 +71,9 @@ tar -cvzf $PROJECT_NAME.tar.gz $PROJECT_NAME
 
 cd ..
 
-exit 0
+fastly compute deploy --verbose --path $WORKDIR/$PROJECT_NAME.tar.gz --service-id $1
 
-fastly compute deploy --verbose --path $WORKDIR/$PROJECT_NAME.tar.gz --service-id $1 || exit 1
-
+echo "Deployed"
 cd ..
 
 sleep 65s

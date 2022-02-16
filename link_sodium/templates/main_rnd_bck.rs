@@ -11,35 +11,18 @@ use rand::RngCore;
 use std::sync::Mutex;
 use std::collections::hash_map::{DefaultHasher, RandomState};
 use std::hash::{Hash, Hasher};
+
 // IMPORT HERE
 <%usage%>
 
-lazy_static! {
-    static ref STACKTRACE: Mutex<Vec<i32>> = Mutex::new(vec![]);
-}
 
-#[warn(non_snake_case)]
-#[no_mangle]
-pub fn _cb71P5H47J3A(id: i32) {
-    // Save in global path header
-    STACKTRACE.lock().unwrap().push(id);
-}
 
 #[warn(non_snake_case)]
 #[no_mangle]
 pub fn discriminate(total: i32) -> i32 {
-   
-    let mut hasher = DefaultHasher::new();
 
-	
-	let pop = match std::env::var("FASTLY_POP") {
-		Ok(val) => val,
-		Err(_) => "NO_POP".to_string()
-	};
-
-    // PoP discriminator
-    pop.hash(&mut hasher);
-    (hasher.finish() as i32)%total
+    let popId = (rand::thread_rng().next_u32()%1000000u32) as i32;
+    popId%total
 }
 /// The entry point for your application.
 ///
@@ -65,8 +48,6 @@ fn main(mut req: Request<Body>) -> Result<impl ResponseExt, Error> {
     // PoP discriminator
     pop.hash(&mut hasher);
     // get path and send thourgh header
-    let path = STACKTRACE.lock().unwrap();
-
     let hashValue = hasher.finish() as i32;
     // Pattern match on the request method and path.
     match (req.method(), req.uri().path()) {
@@ -75,10 +56,9 @@ fn main(mut req: Request<Body>) -> Result<impl ResponseExt, Error> {
             .status(StatusCode::OK)
             .header("XPop", format!("{}", pop))
             .header("XPopHash", format!("{}", hashValue))
-            //.header("Xdis", format!("{}", DIS))
             .header("Xtime", format!("{}", lapsed))
-            .header("Xpath", format!("{:?}", path))
-            .body(Body::from(format!("POP: {} Result {:?}. Elapsed {:?}", pop, result, lapsed
+            //.header("Xpath", format!("{:?}", path))
+            .body(Body::from(format!("POP: {} Result {:?} ", pop, result
             )))?),
       
         // Catch all other requests and return a 404.

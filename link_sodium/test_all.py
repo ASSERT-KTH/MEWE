@@ -17,7 +17,7 @@ from requests.packages.urllib3.util.retry import Retry
 
 urllib3.disable_warnings()
 
-def deploy(mainContent, bitcodes_folder="inlined/original", save_as=None, save_sec_as="sec.txt"):
+def deploy(mainContent, bitcodes_folder="inlined/original", save_as=None, save_sec_as="sec.txt", instrument_small_check=True):
     print("Deploying", bitcodes_folder)
 
     #shutil.rmtree("target")
@@ -25,6 +25,8 @@ def deploy(mainContent, bitcodes_folder="inlined/original", save_as=None, save_s
     # executing deploy script
 
     try:
+        print("Executing...", "bash build_me.sh", 
+                os.getenv("SERVICE_ID"), bitcodes_folder)
         p = subprocess.Popen(
             [
                 "bash",
@@ -50,6 +52,8 @@ def deploy(mainContent, bitcodes_folder="inlined/original", save_as=None, save_s
             shutil.copy("multivariant.wasm", f"out/{save_as}")
     except Exception as e:
         print(e)
+
+    # instrument for small path checking...
     # execute wasmbench security analysis tool
 
     '''p = Popen(
@@ -72,6 +76,7 @@ def deploy(mainContent, bitcodes_folder="inlined/original", save_as=None, save_s
 def execute_to_time(service_name, times=100000):
 
     result = []
+    dispatchers = []
     headers = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0',
     'Cache-Control': 'private, max-age=0, no-cache',
@@ -85,13 +90,20 @@ def execute_to_time(service_name, times=100000):
     }
     print("Getting execution time distribution")
     for t in range(times):
-        response = requests.get(service_name,headers)
-        result.append(int(response.headers["xtime"]) if 'xtime' in response.headers else -1)
-        if 'xtime' in response.headers:
-            print(response.headers['xtime'])
+        try:
+            response = requests.get(service_name,headers)
+            if 'xtime' in response.headers:
+                print(t, response.headers['xtime'])
+                result.append(int(response.headers["xtime"]) if 'xtime' in response.headers else -1)
+            if 'xdispatcher' in response.headers:
+                # print(response.headers['xdispatcher'])
+                dispatchers.append(eval(response.headers["xdispatcher"]) if 'xtime' in response.headers else [])
+            else:
+                exit(1)
+        except KeyboardInterrupt:
+            break
 
-    return result
-
+    return result, dispatchers
 
 cache = {
 
@@ -191,10 +203,8 @@ def test_with_template(case, template_name, extract_paths=True, extract_times=Tr
 
     rPathSize, meta, secmeta = deploy(rPathMain, bitcodes_folder, save_as=f"{mname}_d.wasm" if extract_paths else f"{mname}_paths.wasm", save_sec_as=f"{mname}{extract_paths}{extract_times}{bitcodes_folder}.sec.txt")
 
-    #open(, 'w').write(secmeta)
-
     print("rPath size", rPathSize)
-    times = execute_to_time("https://totally-devoted-krill.edgecompute.app", times=10000) if extract_times else { }
+    times = execute_to_time("https://totally-devoted-krill.edgecompute.app", times=100000) if extract_times else { }
     paths = execute_paths("totally-devoted-krill.edgecompute.app", t=t) if extract_paths else []
 
     return dict(
@@ -248,23 +258,25 @@ def test_case(case):
 
     # pureley random
     print("Random dispatcher")
-    instrumentedPureRandom = None # test_with_instrumentation(case, template="main_rnd_path.rs", times=1)
+    instrumentedPureRandom = test_with_instrumentation(case, template="main_rnd_path.rs", times=1)
     pureRandom = test_without_instrumentation(case, template="main_rnd.rs")
+    # pureRandomLocal = test_without_instrumentation(case, template="main_local.rs")
+
 
     print("Instrumented diversifier deterministic ")
-    #instrumentedDeterministicResults = test_with_instrumentation(case, template="main_deterministic_discriminator_path.rs", times=2)
+    instrumentedDeterministicResults = test_with_instrumentation(case, template="main_deterministic_discriminator_path.rs", times=2)
     print("Original libsodium")
     noDivResults = test_no_diversification(case) # template f"templates/main_single.rs"
     
     print("Non instrumented diversifier deterministic")
-    #nonInstrumentedDeterministicResults = test_without_instrumentation(case, template="main_deterministic_discriminator.rs")
+    nonInstrumentedDeterministicResults = test_without_instrumentation(case, template="main_deterministic_discriminator.rs")
     print("Instrumented diversifier based on hashing")
-    #instrumentedResults = test_with_instrumentation(case, times=2)
+    instrumentedResults = test_with_instrumentation(case, times=2)
     print("Diversifier based on hashing")
-    #nonInstrumentedResults = test_without_instrumentation(case)
+    nonInstrumentedResults = test_without_instrumentation(case)
 
 
-    return noDivResults, None, None, None, None, instrumentedPureRandom, pureRandom
+    return noDivResults, instrumentedDeterministicResults, nonInstrumentedDeterministicResults, instrumentedResults, nonInstrumentedResults, instrumentedPureRandom, pureRandom
 
 def test_all():
     
