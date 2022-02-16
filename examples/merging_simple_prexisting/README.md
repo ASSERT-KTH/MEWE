@@ -1,6 +1,6 @@
 # Example 1:
 
-Creating a multivariant from two preexisting libraries. In this example we compile two variants of the same function from source code. We create a multivariant library and we glue all together with an executable entrypoint.
+Creating a multivariant from two preexisting libraries. In this example we compile two variants of the same function from source code. We create a multivariant library, and we glue all together with an executable entrypoint. The full scriptinf could be find at `build_multivariant.sh`.
 
 ## Variant 1
 ```C
@@ -72,10 +72,9 @@ llvm-link allinone.bc entrypoint.bc -o allinone.complete.bc
 ```
 llc -filetype=obj allinone.complete.bc -o allinone.o
 clang allinone.o -o allinone
-
-time ./allinone
-
 ```
+
+## Executing the multivariant binary
 
 ```
 -> % time ./allinone           

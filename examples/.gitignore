@@ -1,0 +1,6 @@
+*.bc
+*.ll
+*.o
+allinone
+crow_out
+settings
