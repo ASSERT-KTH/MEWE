@@ -1,8 +1,6 @@
-name: Build mewe
+name: mewe linker
 on:
-  push:
-    branches:
-      - no-run
+  - push
 jobs:
   build:
     name: Build
