@@ -22,7 +22,7 @@
 
 using namespace llvm;
 
-namespace crow_linker{
+namespace mewe_linker{
 
     static std::map<std::string, GlobalValue::LinkageTypes> backupLinkage4Functions;
 

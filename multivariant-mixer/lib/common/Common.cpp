@@ -6,7 +6,7 @@
 
 extern unsigned DebugLevel;
 
-namespace crow_linker {
+namespace mewe_linker {
     bool exists (const std::string& name) {
         struct stat buffer;
         return (stat (name.c_str(), &buffer) == 0);

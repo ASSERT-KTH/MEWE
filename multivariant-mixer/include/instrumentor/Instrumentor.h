@@ -13,7 +13,7 @@
 
 using namespace llvm;
 
-namespace crow_linker {
+namespace mewe_linker {
     Function* declare_function_instrument_cb(Module &M, LLVMContext &context);
     void instrument_functions(Function* fCb, Module &bitcode, std::map<std::string, char> &variantsMap);
 }

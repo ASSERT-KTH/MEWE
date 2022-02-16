@@ -33,7 +33,7 @@
 
 
 using namespace llvm;
-using namespace crow_linker;
+using namespace mewe_linker;
 
 unsigned DebugLevel;
 

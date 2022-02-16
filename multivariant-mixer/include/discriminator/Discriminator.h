@@ -11,7 +11,7 @@
 #include <llvm/IR/IRBuilder.h>
 #include <common/Common.h>
 
-namespace crow_linker {
+namespace mewe_linker {
     void merge_variants(Module &bitcode, LLVMContext& context, std::map<std::string, std::vector<std::string>> &fMap, std::map<std::string, char> &variantsMap);
 }
 

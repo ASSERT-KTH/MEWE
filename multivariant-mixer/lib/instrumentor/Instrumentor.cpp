@@ -4,7 +4,7 @@
 #include "instrumentor/Instrumentor.h"
 
 using namespace llvm;
-using namespace crow_linker;
+using namespace mewe_linker;
 
 extern unsigned DebugLevel;
 
@@ -12,10 +12,10 @@ bool InstrumentFunction;
 bool InstrumentBB;
 bool InstrumentOnlyVariants;
 
-namespace crow_linker {
+namespace mewe_linker {
 
     static cl::opt<unsigned> StartIdAt(
-            "crow-merge-id-start",
+            "mewe-merge-id-start",
             cl::desc("Start the function mapping with this number. This will be valid only with the instrumentation flags"),
             cl::init(0));
 

@@ -4,7 +4,7 @@
 #include "discriminator/Discriminator.h"
 
 using namespace llvm;
-using namespace crow_linker;
+using namespace mewe_linker;
 extern unsigned DebugLevel;
 
 std::string MergeFunctionSuffix;
@@ -14,7 +14,7 @@ bool NoInline;
 bool AggressiveNoInline;
 std::string DiscrminatorCallbackName;
 
-namespace crow_linker {
+namespace mewe_linker {
 
     static cl::opt<std::string, /*ExternalStorage=*/ true> MergeFunctionSuffixFlag("merge-function-suffix",
                                                     cl::desc("N1 diversifier function suffix"),

@@ -35,7 +35,7 @@
 #include <iostream>
 
 using namespace llvm;
-using namespace crow_linker;
+using namespace mewe_linker;
 using namespace std;
 
 unsigned DebugLevel;
