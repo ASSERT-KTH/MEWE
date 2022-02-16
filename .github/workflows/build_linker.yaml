@@ -1,0 +1,32 @@
+name: Build mewe
+on:
+  push:
+    branches:
+      - no-run
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2 # checkout latest version of the repo
+      - name: Install packages
+        run: |
+          sudo apt-get update && sudo apt-get -y install cmake make gcc
+
+      - name: Listing repo
+        run : |
+          tree .
+      - name: Build MEWE linker
+        run: |
+          cd multivariant-mixer && bash build_deps.sh && bash build.sh
+      - name: Compress binaries
+        run: |
+          zip -r mewe-linker.zip ./build
+      - name: Submit release mewe-linker
+        uses: svenstaro/upload-release-action@v1-release
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: '*.zip'
+          tag: v0.6
+          file_glob: true

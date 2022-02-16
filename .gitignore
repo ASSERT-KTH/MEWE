@@ -4,3 +4,6 @@ bitcodes/
 temp
 data/*
 mewe.tar.gz
+deps/
+build/
+test/
