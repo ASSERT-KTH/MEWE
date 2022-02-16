@@ -7,3 +7,4 @@ mewe.tar.gz
 deps/
 build/
 test/
+__pycache__/

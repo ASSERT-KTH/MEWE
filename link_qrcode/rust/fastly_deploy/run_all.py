@@ -283,7 +283,7 @@ def test_case(case):
     instrumentedPureRandom =  test_with_instrumentation(case, template=template, times=100, bitcode=multivariant_bc)
     
 
-    print("Original libsodium")
+    print("Original qr")
     bc, template = original
     noDivResults = None # test_no_diversification(fname, bitcode=bc, template=template) # template f"templates/main_single.rs"
     
@@ -340,25 +340,7 @@ def test_all():
             # Save single case
             if not os.path.exists(f"results"):
                 os.mkdir("results")
-
-            '''open(f"results/{case[0]}.result.json", 'w').write(
-                json.dumps(
-                    {
-                        case[0]: dict(
-                            original=original,
-                            instrumented=instrumented,
-                            nonInstrumented=nonInstrumented,
-                            instrumentedDeterministic=instrumentedDeterministic,
-                            nonInstrumentedDeterministic=nonInstrumentedDeterministic,
-                            instrumentedPureRandom=instrumentedPureRandom,
-                            pureRandom=pureRandom
-                        )
-                    }
-                )
-            )'''
-
-            #print(original["packageSize"], instrumented["packageSize"], nonInstrumented["packageSize"])
-        except Exception as e:
+         except Exception as e:
             print("Error",case[0], e, traceback.format_exc())
 
     open("results.json", 'w').write(json.dumps(OVERALL, indent=4))

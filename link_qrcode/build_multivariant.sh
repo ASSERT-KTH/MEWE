@@ -1,8 +1,7 @@
 CURRENT="$PWD"
 OUT_FOLDER="multivariant"
 ORIGINAL_BITCODE=$1
-MEWE_FOLDER=$2
-VARIANTS_FOLDER=$3
+VARIANTS_FOLDER=$2
 shift 3
 
 args="--variants-no-inline --instrument-only-variants --instrument-include=run_qr,run_qr_str"
