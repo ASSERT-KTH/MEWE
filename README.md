@@ -1,8 +1,6 @@
 # MEWE (Multivariant Execution for WebAssembly at the Edge)
 
-MEWE is a toolset and methodology tailored to provide multivariant execution at the Edge. It uses an extended LLVM linker, CROW and the Fastly ABI to provide multivariant binaries that can be successfully deployed to the Fastly's platform.
-
-![diagram](docs/diagram2.png)
+MEWE is a toolset and methodology tailored to provide multivariant execution.
 
 # Repository structure
  - `multivariant-mixer`: The MEWE mulrivariant library generator.
@@ -10,17 +8,33 @@ MEWE is a toolset and methodology tailored to provide multivariant execution at 
  - `experiments`: scripts for experiments reproduction
 
 
-## Extended linker and multivariant generation [![mewe linker](https://github.com/Jacarte/MEWE/actions/workflows/build_linker.yaml/badge.svg?branch=main)](https://github.com/Jacarte/MEWE/actions/workflows/build_linker.yaml)
+# Extended linker and multivariant generation [![mewe linker](https://github.com/Jacarte/MEWE/actions/workflows/build_linker.yaml/badge.svg?branch=main)](https://github.com/Jacarte/MEWE/actions/workflows/build_linker.yaml)
 
 
 Our [linker](multivariant-mixer) takes a collection of LLVM libraries as input and outputs a big library containing semantically equivalent functions (yet statically different) for which we orchestrate their execution at runtime.
 
  
-### MEWE multivariants:
+# MEWE multivariants
 
-Once with our linker, you can start creating multivariant libraries. To do so, you need to be able of creating semantically equivalent functions out of the original library. A previous [work of us](https://github.com/KTH/slumps/tree/master/crow), uses a superoptimizer to create a handful number of variants out of a single LLVM bitcode. We would like to remark that this approach will work with any diversifier, as soon as it fits with our linker in terms of binary correctness. 
+Once with our linker, you can start creating multivariant libraries. To do so, you need to be able of creating semantically equivalent functions out of the original library. A previous [work of us](https://github.com/KTH/slumps/tree/master/crow) uses a superoptimizer to create a handful number of variants out of a single LLVM bitcode. We would like to remark that this approach will work with any diversifier, as soon as it fits with our linker in terms of binary correctness. 
 
-### Multivariant binaries at the Edge:
+# Walkthrough
+
+To create multivarian programs:
+
+1. Generate the library variants
+2. Call our linker to generate the multivariant library
+3. Glue the multivariant library with an entrypoint, e.g. an executable.
+
+Look for examples [here](examples)
+
+# Multivariant binaries at the Edge
+
+
+With MEWE, we use an extended LLVM linker, CROW and the Fastly ABI to provide multivariant binaries that can be successfully deployed to the Fastly's platform.
+
+![diagram](docs/diagram2.png)
+
 
 We created a proof of concept of deploying multivariants at the Edge, specifically at the Fastly platform. We create multivariant libraries for `libsodium` and a `qrcode_generator`. We then pass these multivariant binaries to the `rustc` compiler to generate a valid executable Wasm binary (according to the Fastly ABI). For sake of reproduction, we enumerate the roadmap in the following.
 
@@ -33,4 +47,11 @@ We created a proof of concept of deploying multivariants at the Edge, specifical
 
 3 - After collecting the variants we merge them with our linker into multivariant libraries. 
 
-4 - The multivariant libraries can be then used by any LLVM-like compiler. In this case, we use `rustc` to link the multivariant libraries to 7 endpoints to be deployed as functions in the Fastly's platform. 
+4 - The multivariant libraries can be then used by any LLVM-like compiler. 
+
+5 - We use `rustc` to link the multivariant libraries to 7 endpoints to be deployed as functions in the Fastly's platform. 
+
+
+# Licence
+
+This project is licensed under the MIT licence. See [LICENSE](LICENCE.md) for more details.

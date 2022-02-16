@@ -1,9 +1,0 @@
-# This file describes a Fastly Compute@Edge package. To learn more visit:
-# https://developer.fastly.com/reference/fastly-toml/
-
-authors = [""]
-description = "Multi variant version to fastly"
-language = "rust"
-manifest_version = 1
-name = "Unnamed Service 3"
-service_id = "5lCLFiDlbie8puV6NjK3H7"

@@ -8,7 +8,7 @@ We extended the LLVM linker tool to merge several libraries into a big one despi
 
 When you try to run the standard LLVM linker to merge to arbitrary libraries, it might result on a `"Duplicate definition of symbol ..."`. Despite other limitations or analysis such as potential side effects, we see this as a naming issue. **The main reason is that we are merging artificially created libraries, which means that if a function is duplicated it will behave as the original one regarding the memory during runtime**. 
 
-**We extended the LLVM linker to support the renaming of duplicated symbols.** During the new linking process, if a function was already in the library to merge, we check if the body of the function is not the same to the previous added duplicates, we rename it, and then we add it.
+**We extended the LLVM linker to support the renaming of duplicated symbols.** During the new linking process, if a function was already in the library to merge, we check if the body of the function is not the same to the previous added duplicates, we rename it, and then we add it. In addition, it replaces each call to the original name function to the dispatcher.
 
 ### Orchestration
 

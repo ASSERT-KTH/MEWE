@@ -99,7 +99,9 @@
 		"variant": "cpp",
 		"vector": "cpp",
 		"__bits": "cpp",
-		"*.ipp": "cpp"
+		"*.ipp": "cpp",
+		"*.inc": "cpp",
+		"stdio.h": "c"
 	},
 	"git.ignoreLimitWarning": true,
 	"cross-rust-analyzer.target": "wasm32-unknown-emscripten",

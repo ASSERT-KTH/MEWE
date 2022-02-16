@@ -1,8 +1,0 @@
-/target
-**/*.rs.bk
-/bin
-/pkg
-.cargo/
-untar/
-*.wasm
-history/

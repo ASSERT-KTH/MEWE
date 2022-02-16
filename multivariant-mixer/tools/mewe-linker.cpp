@@ -150,9 +150,9 @@ static bool is_same_func(std::string function_name, std::string module_file, boo
 
     size_t hash = hasher(fObjectDump);
 
+
     if(moduleFunctionHashes.count(hash)){ // Already exist
         errs() <<  function_name << " already exist in " << module_file  << " w:" << worker <<  "\n";;
-
         return true;
     }
 
