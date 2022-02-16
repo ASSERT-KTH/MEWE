@@ -17,6 +17,9 @@ from requests.packages.urllib3.util.retry import Retry
 
 urllib3.disable_warnings()
 
+# set TEST=False to avoid exhasutive test
+TEST=False
+
 def deploy(mainContent, bitcodes_folder="inlined/original", save_as=None, save_sec_as="sec.txt", instrument_small_check=True):
     print("Deploying", bitcodes_folder)
 
@@ -53,24 +56,6 @@ def deploy(mainContent, bitcodes_folder="inlined/original", save_as=None, save_s
     except Exception as e:
         print(e)
 
-    # instrument for small path checking...
-    # execute wasmbench security analysis tool
-
-    '''p = Popen(
-        [
-            os.environ.get("SEC"),
-            "multivariant.wasm"
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
-
-    out, stderr = p.communicate()
-    out= out.decode()
-    stderr=stderr.decode()
-    open(save_sec_as, 'w').write(f"{out}\n{stderr}")'''
-
-
     return wasmSize, metadata, out
 
 def execute_to_time(service_name, times=100000):
@@ -78,15 +63,15 @@ def execute_to_time(service_name, times=100000):
     result = []
     dispatchers = []
     headers = {
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0',
-    'Cache-Control': 'private, max-age=0, no-cache',
-    'Connection': 'keep-alive',
-    'Host': 'totally-devoted-krill.edgecompute.app',
-    'Pragma': 'no-cache',
-    'Upgrade-Insecure-Requests': '1',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-    'Accept-Language': 'en-US,en;q=0.5',
-    'Accept-Encoding': 'gzip, deflate, br'
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0',
+        'Cache-Control': 'private, max-age=0, no-cache',
+        'Connection': 'keep-alive',
+        'Host': 'totally-devoted-krill.edgecompute.app',
+        'Pragma': 'no-cache',
+        'Upgrade-Insecure-Requests': '1',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate, br'
     }
     print("Getting execution time distribution")
     for t in range(times):
@@ -204,8 +189,8 @@ def test_with_template(case, template_name, extract_paths=True, extract_times=Tr
     rPathSize, meta, secmeta = deploy(rPathMain, bitcodes_folder, save_as=f"{mname}_d.wasm" if extract_paths else f"{mname}_paths.wasm", save_sec_as=f"{mname}{extract_paths}{extract_times}{bitcodes_folder}.sec.txt")
 
     print("rPath size", rPathSize)
-    times = execute_to_time("https://totally-devoted-krill.edgecompute.app", times=100000) if extract_times else { }
-    paths = execute_paths("totally-devoted-krill.edgecompute.app", t=t) if extract_paths else []
+    times = execute_to_time("https://totally-devoted-krill.edgecompute.app", times=100000) if extract_times and TEST else { }
+    paths = execute_paths("totally-devoted-krill.edgecompute.app", t=t) if extract_paths and TEST else []
 
     return dict(
         paths=paths,
@@ -287,16 +272,17 @@ def test_all():
         crypto_aead_chacha20poly1305_ietf_decrypt_detached,
         crypto_core_ed25519_scalar_invert,
         crypto_core_ed25519_scalar_complement,
-        crypto_core_ed25519_scalar_random,
-        #sodium_increment,
-        #sodium_memcpy,
-        #sodium_is_zero,
-        #sodium_add,
+        crypto_core_ed25519_scalar_random
     ]
 
     OVERALL = dict()
     for case in cases:
+        original, instrumented, nonInstrumented, instrumentedDeterministic, nonInstrumentedDeterministic, instrumentedPureRandom, pureRandom = test_case(case)
+
+    for case in cases:
         try:
+            # Compile all and generate the Wasm files first
+
             original, instrumented, nonInstrumented, instrumentedDeterministic, nonInstrumentedDeterministic, instrumentedPureRandom, pureRandom = test_case(case)
 
             OVERALL[case[0]] = dict(
@@ -341,6 +327,7 @@ if __name__ == "__main__":
         if os.path.exists("cache.json"):
             cache = json.loads(open("cache.json", 'r').read())
         print(cache)
+        
         test_all()
     except KeyboardInterrupt:
         pass

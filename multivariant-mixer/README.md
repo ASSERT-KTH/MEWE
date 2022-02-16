@@ -1,7 +1,7 @@
 
-# multivariant-mixer
+# multivariant-linker
 
-We merge several libraries into a big one, we call it a multivariant library. It is a big library containing semantically equivalent functions (yet statically different) for which we orchestrate their execution at runtime. `mixer` creates LLVM multivariant libraries out of a collection of LLVM libraries as input. To build this tool we have faced and solved some challenges as the following:
+We extended the LLVM linker tool to merge several libraries into a big one despite symbols duplication. It outputs a big library containing semantically equivalent functions (yet statically different) for which we orchestrate their execution at runtime. Our linker creates LLVM multivariant libraries out of a collection of LLVM libraries as input. To build this tool we have faced and solved some challenges as the following:
 
 
 ### Naming
@@ -39,7 +39,7 @@ define internal i32 @original_name_function(i32 %0) {
 
 We create a big switch case for which at runtime a variant is executed. Now every time a function with variants is called, a random one is executed.
 
-**Note**: The dispatchers are built as switch cases for sake of more execution time diversification and trying to avoid speculative execution. The `mixer` can be set to build table function calls instead.
+**Note**: The dispatchers are built as switch cases for sake of more execution time diversification and trying to avoid speculative execution. Our linker can be set to build table function calls instead.
 
 ## Build the mixer
 
