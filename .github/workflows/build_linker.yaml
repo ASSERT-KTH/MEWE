@@ -18,9 +18,13 @@ jobs:
       - name: Build MEWE linker
         run: |
           cd multivariant-mixer && bash build_deps.sh && bash build.sh
+      - name: Checking LLVM version
+        run: |
+          VERSION=$(./build/mewe-linker --version | grep LLVM | grep -oE "(\d+\.?)+")
+          echo "LLVM_VERSION=$VERSION" >> $GITHUB_ENV
       - name: Compress binaries
         run: |
-          zip -r mewe-linker.zip ./build
+          zip -r mewe-linker.llvm-$LLVM_VERSION.zip ./build
       - name: Submit release mewe-linker
         uses: svenstaro/upload-release-action@v1-release
         with:

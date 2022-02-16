@@ -23,5 +23,5 @@ jobs:
           cd experiments && bash download_results.sh
       - name: Running preservation report
         run: |
-          bash report_preservation.sh
+          cd experiments && bash report_preservation.sh
       
