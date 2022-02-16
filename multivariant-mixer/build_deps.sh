@@ -20,7 +20,7 @@ if [ -n "`which ninja`" ] ; then
   ninja -C $llvm_builddir
   ninja -C $llvm_builddir install
 else
-  (cd $llvm_builddir && cmake $cmake_flags -DCMAKE_CXX_FLAGS="-DDISABLE_WRONG_OPTIMIZATIONS_DEFAULT_VALUE=true -DDISABLE_PEEPHOLES_DEFAULT_VALUE=true" "$@")
+  (cd $llvm_builddir && cmake  ${llvm_srcdir}/llvm $cmake_flags -DCMAKE_CXX_FLAGS="-DDISABLE_WRONG_OPTIMIZATIONS_DEFAULT_VALUE=true -DDISABLE_PEEPHOLES_DEFAULT_VALUE=true" "$@")
   make -C $llvm_builddir -j $ncpus
   make -C $llvm_builddir -j $ncpus install
 fi
