@@ -11,10 +11,9 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: '3.11.0-alpha.1'
-        run: pip numpy scipy pymongo matplotlib
       - name: Install packages
         run: |
-          sudo apt-get update && sudo apt-get -y install wget
+          sudo apt-get update && sudo apt-get -y install wget && pip install numpy scipy pymongo matplotlib
 
       - name: Listing repo
         run : |
