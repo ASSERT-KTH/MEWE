@@ -8,3 +8,4 @@ deps/
 build/
 test/
 __pycache__/
+results.json
