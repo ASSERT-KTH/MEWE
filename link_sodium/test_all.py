@@ -25,12 +25,12 @@ def deploy(mainContent, bitcodes_folder="inlined/original", save_as=None, save_s
     # executing deploy script
 
     try:
-        print("Executing...", "bash build_me.sh", 
+        print("Executing...", "bash build_4fastly.sh", 
                 os.getenv("SERVICE_ID"), bitcodes_folder)
         p = subprocess.Popen(
             [
                 "bash",
-                "build_me.sh",
+                "build_4fastly.sh",
                 os.getenv("SERVICE_ID"),
                 bitcodes_folder
             ]#,stderr=sys.stdout,

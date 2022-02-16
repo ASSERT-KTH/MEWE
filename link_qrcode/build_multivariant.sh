@@ -18,12 +18,9 @@ echo $MULTIVARIANTS
 # Link all originals
 
 
-$MEWE_FOLDER/build/crow-linker $ORIGINAL_BITCODE "$OUT_FOLDER/allinone.multivariant.i.bc" -complete-replace=false -merge-function-switch-cases --replace-all-calls-by-the-discriminator --instrument-function --override -crow-merge-debug-level=2 -crow-merge-skip-on-error $args -crow-merge-bitcodes="$MULTIVARIANTS"  2> multivariant/i.map.txt
+$MEWE_LINKER_BIN $ORIGINAL_BITCODE "$OUT_FOLDER/allinone.multivariant.i.bc" -complete-replace=false -merge-function-switch-cases --replace-all-calls-by-the-discriminator --instrument-function --override -crow-merge-debug-level=2 -crow-merge-skip-on-error $args -crow-merge-bitcodes="$MULTIVARIANTS"  2> multivariant/i.map.txt
 
 
-$MEWE_FOLDER/build/crow-linker $ORIGINAL_BITCODE "$OUT_FOLDER/allinone.multivariant.bc" -complete-replace=false --replace-all-calls-by-the-discriminator -merge-function-switch-cases  --override -crow-merge-debug-level=2 -crow-merge-skip-on-error -crow-merge-bitcodes="$MULTIVARIANTS"
-
-
-llvm-dis "$OUT_FOLDER/allinone.multivariant.i.bc" -o multivariant/allinone.multivariant.i.bc.ll
+$MEWE_LINKER_BIN $ORIGINAL_BITCODE "$OUT_FOLDER/allinone.multivariant.bc" -complete-replace=false --replace-all-calls-by-the-discriminator -merge-function-switch-cases  --override -crow-merge-debug-level=2 -crow-merge-skip-on-error -crow-merge-bitcodes="$MULTIVARIANTS"
 
 #find out_group -name "*.multivariant.bc" -exec cp -f {} $OUT_FOLDER/ \;
