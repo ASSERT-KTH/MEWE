@@ -85,7 +85,9 @@ fi
 
 unzip build.zip -d linker
 
-linker/build/mewe-linker "f1.bc" "allinone.bc"  --complete-replace=false -merge-function-switch-cases --replace-all-calls-by-the-discriminator -mewe-merge-debug-level=1 -mewe-merge-skip-on-error  -mewe-merge-bitcodes="f2.bc"
+linker/build/mewe-linker "f1.bc" "allinone.bc"  --complete-replace=false -merge-function-switch-cases \
+--replace-all-calls-by-the-discriminator -mewe-merge-debug-level=1 \
+-mewe-merge-skip-on-error  -mewe-merge-bitcodes="f2.bc"
 
 # Link the random source for the dispatcher
 llvm-link allinone.bc entrypoint.bc -o allinone.complete.bc
