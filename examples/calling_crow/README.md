@@ -2,9 +2,53 @@
 
 Creating a multivariant using CROW to generate the variants. The source code `f.c` is passed to CROW which generates a handful number of semantically equivalent variants. The generated variants are passed to our linker and the multivariant library is created. The final step compiles the multivariant library and the entrypoint to an executable binary. The scripting can be found at `build_multivariant.sh`.
 
-Download the `f.c` and the `entrypoint.c` files, then, copy and paste the following code in your terminal to run this example. Make sure you have LLVM version 12 and docker installed in your computer.
+Copy and paste the following code in your terminal to run this example. Make sure you have LLVM version 12 and docker installed in your computer.
 
 ```bash
+
+f="
+#include<stdio.h>
+
+
+// Taken from the souper paper, https://arxiv.org/pdf/1711.04422.pdf
+int f(int cond, int z) {
+   int x, y;
+   if (cond) {
+      x = 3 * z;
+      y = z;
+   } else {
+      x = 2 * z;
+      y = 2 * z;
+   }
+   return x + y;
+}
+"
+
+entrypoint="
+#include <time.h>
+#include <stdio.h>
+
+int f(int a, int z);
+
+int discriminate(int size) {
+   int r = rand();
+   printf(\"Executing variant %d\", r%size);
+   return r%size;
+}
+
+int main() {
+   // Setting up the random generator
+   srand(time(NULL)); 
+
+   int r = f(1, 10);
+   return 1;
+}
+
+"
+
+echo "$f" > f.c
+echo "$entrypoint" > entrypoint.c
+
 clang entrypoint.c -emit-llvm -c -o entrypoint.bc
 clang f.c -emit-llvm -c -o f.bc
 
