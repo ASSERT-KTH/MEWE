@@ -51,7 +51,7 @@ After all the LLVM dependencies are installed, run
 
 `bash build.sh`
 
-If this command successfully finish, you will have a binary inside the `multivariant-mixer/build/mewe-linker`. If you want to prevent the build of this tool, you can take a look to the release section for a compilation that suits you. 
+If this command successfully finish, you will have a binary inside the `multivariant-mixer/build/mewe-linker`.
 
 ## Usage if the mixer
 
