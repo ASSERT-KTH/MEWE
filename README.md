@@ -3,8 +3,7 @@
 MEWE is a toolset and methodology tailored to provide multivariant execution.
 
 
-# Extended linker and multivariant generation [![mewe linker](https://github.com/Jacarte/MEWE/actions/workflows/build_linker.yaml/badge.svg?branch=main)](https://github.com/Jacarte/MEWE/actions/workflows/build_linker.yaml)
-
+# Extended linker and multivariant generation
 
 Our [linker](multivariant-mixer) takes a collection of LLVM libraries as input and outputs a big library containing semantically equivalent functions (yet statically different) for which we orchestrate their execution at runtime.
 
