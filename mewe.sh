@@ -1,10 +1,4 @@
-# Example 1:
-
-Creating a multivariant from two preexisting libraries. In this example we compile two variants of the same function from source code. We create a multivariant library, and we glue all together with an executable entrypoint. The full scriptinf could be find at `build_multivariant.sh`.
-
-Copy and paste the following code in your terminal to run this example. Make sure you have LLVM version 12 installed in your computer.
-
-```bash
+######  SOURCE CODE TO BE INCLUDED IN THE MULTIVARIANT
 f1="
 #include<stdio.h>
 
@@ -24,6 +18,8 @@ int dosomething() {
     return 0;
 }
 "
+
+######  ENTRYPOINT
 
 entrypoint="
 #include <time.h>
@@ -55,6 +51,7 @@ clang f1.c -emit-llvm -c -o f1.bc
 clang f2.c -emit-llvm -c -o f2.bc
 clang entrypoint.c -emit-llvm -c -o entrypoint.bc
 
+
 ######  DOWNLOADING OUR LINKER
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         wget -O build.zip https://github.com/Jacarte/MEWE/releases/download/binaries/build.linux.llvm12.x.x64.zip
@@ -68,7 +65,7 @@ fi
 
 unzip build.zip -d linker
 
-linker/build/mewe-linker  "f1.bc" "allinone.bc"  --complete-replace=false -merge-function-switch-cases --replace-all-calls-by-the-discriminator -mewe-merge-debug-level=1 -mewe-merge-skip-on-error  -mewe-merge-bitcodes="f2.bc"
+linker/build/mewe-linker "f1.bc" "allinone.bc"  --complete-replace=false -merge-function-switch-cases --replace-all-calls-by-the-discriminator -mewe-merge-debug-level=1 -mewe-merge-skip-on-error  -mewe-merge-bitcodes="f2.bc"
 
 # Link the random source for the dispatcher
 llvm-link allinone.bc entrypoint.bc -o allinone.complete.bc
@@ -78,4 +75,3 @@ llc -filetype=obj allinone.complete.bc -o allinone.o
 clang allinone.o -o allinone
 
 time ./allinone
-```

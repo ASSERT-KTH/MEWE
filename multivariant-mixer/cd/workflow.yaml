@@ -1,0 +1,79 @@
+
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: mewe-linker-compilation2-
+spec:
+  entrypoint: compile
+  parallelism: 1
+  arguments:
+    parameters:
+    - name: token
+  templates:
+  - name: compile
+    steps:
+    - - name: compile-single
+        template: compile-template
+        arguments:
+          parameters:
+          - name: version
+            value: "{{item.version}}"
+          - name: container
+            value: "{{item.container}}"
+          - name: os
+            value: "{{item.os}}"
+          - name: tpe
+            value: "{{item.tpe}}"
+        withItems:
+          # os selection 
+          # Using the containers listed on https://github.com/dockcross/dockcross 
+          - { os: "linux", version: "12.x", container: "dockcross/linux-arm64", tpe: "arm64" }
+          # - { os: "linux", version: "12.x", container: "dockcross/linux-x64-clang", tpe: "x64" }
+          # - { os: "windows", version: "12.x", container: "dockcross/windows-static-x64", tpe: "winx64" }
+          # - { os: "windows", version: "12.x", container: "dockcross/windows-shared-x64", tpe: "sharedwinx64" }
+          # Build for windows here as well ?
+        continueOn:
+          failed: false
+  - name: compile-template
+    nodeSelector:
+      kubernetes.io/os: "{{ inputs.parameters.os }}"
+    retryStrategy:
+      limit: 3
+      retryPolicy: "Always"
+      backoff:
+        duration: "2m"      # Must be a string. Default unit is seconds. Could also be a Duration, e.g.: "2m", "6h", "1d"
+        factor: 4
+        maxDuration: "3h"
+    inputs:
+      parameters:
+      - name: os
+      - name: version
+      - name: container
+      - name: tpe
+    script:
+      image: "{{ inputs.parameters.container }}"
+      command: [bash]
+      source: |
+
+        
+        # install packages
+        echo {{ inputs.parameters.os }} {{ inputs.parameters.version }} {{ inputs.parameters.container }}
+
+        apt-get update && apt-get install -y wget git
+
+        # download the repository
+        git clone https://github.com/Jacarte/MEWE
+        cd MEWE/multivariant-mixer
+        bash build_deps_on_version.sh {{ inputs.parameters.version }}
+        bash build.sh
+        
+        filename=build.{{inputs.parameters.os}}.llvm{{ inputs.parameters.version }}.{{inputs.parameters.tpe}}.zip
+
+        zip -r $filename build
+
+        token={{workflow.parameters.token}}
+        
+        curl -v   -X POST -H "Accept: application/vnd.github.v3+json" -H "Authorization: token $token" -H "Content-Type: application/zip;"  -H "Content-Type: multipart/form-data" --data-binary "@$PWD/$filename" "https://uploads.github.com/repos/Jacarte/MEWE/releases/59798855/assets?name=$(basename $filename)" 
+        # submit the compiled binary to the release folder
+        
+

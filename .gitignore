@@ -9,3 +9,9 @@ build/
 test/
 __pycache__/
 results.json
+f1.*
+f2.*
+entrypoint.*
+allinone*
+build.zip
+linker

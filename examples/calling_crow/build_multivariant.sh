@@ -15,7 +15,21 @@ do
 done
 
 
-$MEWE_LINKER_BIN "f.bc" "allinone.bc"  --complete-replace=false -merge-function-switch-cases --replace-all-calls-by-the-discriminator -mewe-merge-debug-level=2 -mewe-merge-skip-on-error  -mewe-merge-bitcodes="$VARIANTS"
+######  DOWNLOADING OUR LINKER
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        wget -O build.zip https://github.com/Jacarte/MEWE/releases/download/binaries/build.linux.llvm12.x.x64.zip
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+        wget -O build.zip https://github.com/Jacarte/MEWE/releases/download/binaries/build.macos.llvm12.zip
+elif [[ "$OSTYPE" == "win32" ]]; then
+        wget -O build.zip https://github.com/Jacarte/MEWE/releases/download/binaries/build.windows.llvm12.x.winx64.zip
+else
+        echo "NOT SUPPORTED OS $OSTYPE"
+fi
+
+
+unzip build.zip -d linker
+
+linker/build/mewe-linker  "f.bc" "allinone.bc"  --complete-replace=false -merge-function-switch-cases --replace-all-calls-by-the-discriminator -mewe-merge-debug-level=2 -mewe-merge-skip-on-error  -mewe-merge-bitcodes="$VARIANTS"
 
 # Link the random source for the dispatcher
 llvm-link allinone.bc entrypoint.bc -o allinone.complete.bc
@@ -23,3 +37,5 @@ llvm-link allinone.bc entrypoint.bc -o allinone.complete.bc
 
 llc -filetype=obj allinone.complete.bc -o allinone.o
 clang allinone.o -o allinone
+
+./allinone

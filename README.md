@@ -3,6 +3,101 @@
 MEWE is a toolset and methodology tailored to provide multivariant execution.
 
 
+```bibtex
+@article{arteaga2021multi,
+  title={Multi-Variant Execution at the Edge},
+  author={Arteaga, Javier Cabrera and Laperdrix, Pierre and Monperrus, Martin and Baudry, Benoit},
+  journal={arXiv preprint arXiv:2108.08125},
+  year={2021}
+}
+```
+
+## Try it out
+
+The following example generates a multivariant binary that can execute in your local machine. Make sure you have the LLVM toolchain in your system version 12.
+
+```bash
+######  SOURCE CODE TO BE INCLUDED IN THE MULTIVARIANT
+f1="
+#include<stdio.h>
+
+    int dosomething() {
+    // Variant 1 sleeps for 1 second
+    sleep(1);
+    return 0;
+}
+"
+
+f2="
+#include<stdio.h>
+
+int dosomething() {
+    // Variant 2 sleeps for 5 second
+    sleep(5);
+    return 0;
+}
+"
+
+######  ENTRYPOINT
+
+entrypoint="
+#include <time.h>
+#include <stdio.h>
+
+int dosomething();
+
+int discriminate(int size) {
+   int r = rand();
+   return r%size;
+}
+
+int main() {
+   // Setting up the random generator
+   srand(time(NULL)); 
+
+   int r = dosomething();
+   return 1;
+}
+
+"
+
+echo "$f1" > f1.c
+echo "$f2" > f2.c
+echo "$entrypoint" > entrypoint.c
+
+echo "Generating bitcodes"
+clang f1.c -emit-llvm -c -o f1.bc
+clang f2.c -emit-llvm -c -o f2.bc
+clang entrypoint.c -emit-llvm -c -o entrypoint.bc
+
+
+######  DOWNLOADING OUR LINKER
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        wget -O build.zip https://github.com/Jacarte/MEWE/releases/download/binaries/build.linux.llvm12.x.x64.zip
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+        wget -O build.zip https://github.com/Jacarte/MEWE/releases/download/binaries/build.macos.llvm12.zip
+elif [[ "$OSTYPE" == "win32" ]]; then
+        wget -O build.zip https://github.com/Jacarte/MEWE/releases/download/binaries/build.windows.llvm12.x.winx64.zip
+else
+        echo "NOT SUPPORTED OS $OSTYPE"
+fi
+
+
+unzip build.zip -d linker
+
+linker/build/mewe-linker "f1.bc" "allinone.bc"  --complete-replace=false -merge-function-switch-cases --replace-all-calls-by-the-discriminator -mewe-merge-debug-level=1 -mewe-merge-skip-on-error  -mewe-merge-bitcodes="f2.bc"
+
+# Link the random source for the dispatcher
+llvm-link allinone.bc entrypoint.bc -o allinone.complete.bc
+
+
+llc -filetype=obj allinone.complete.bc -o allinone.o
+clang allinone.o -o allinone
+
+time ./allinone
+
+```
+
 # Extended linker and multivariant generation
 
 Our [linker](multivariant-mixer) takes a collection of LLVM libraries as input and outputs a big library containing semantically equivalent functions (yet statically different) for which we orchestrate their execution at runtime.
