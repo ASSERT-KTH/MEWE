@@ -1,6 +1,7 @@
 mkdir -p deps
 cd deps
 git clone --recursive --branch release/$1 https://github.com/llvm/llvm-project.git
+shift
 #git clone  --recursive https://github.com/llvm/llvm-project.git
 cd ..
 
