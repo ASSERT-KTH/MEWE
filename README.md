@@ -10,7 +10,7 @@ Our [linker](multivariant-mixer) takes a collection of LLVM libraries as input a
  
 # MEWE multivariants
 
-With our linker, you can start creating multivariant libraries. To do so, you need to be able of creating semantically equivalent functions out of the original library. A previous [work of us](https://github.com/KTH/slumps/tree/master/crow) uses a superoptimizer to create a handful number of variants out of a single LLVM bitcode. We provide an [example](examples/calling_crow) about how to use CROW to generate variants is available.
+With our linker, you can start creating multivariant libraries. To do so, you need to be able of creating semantically equivalent functions out of the original library. A previous [work of us](https://github.com/KTH/slumps/tree/master/crow) uses a superoptimizer to create a handful number of variants out of a single LLVM bitcode. We provide an [example](examples/calling_crow) about how to use CROW to generate variants.
 
 Notice that, this approach will work with any diversifier, as soon as it fits with our linker in terms of binary correctness. 
 
