@@ -252,6 +252,7 @@ class MEWE:
         if popen.returncode != 0:
             print("Error")
             print(err.decode())
+            print(stdout.decode())
             exit(1)
 
         # We need the LL IR to get the main4main internal function
@@ -316,24 +317,33 @@ class MEWE:
         return f"{mutivariant_bitcodefile}.fix.bc", __internalmainnamereplace__
 
     def create_missing_deps_by_using_rustc(self, mainname, mindep):
+        
         print(f"Loading template 'templates/{self.template}'")
 
-        content = open(os.path.join(os.path.dirname(__file__), f"templates/{self.template}"), 'r').read()
+        ABS_PATH = os.path.join(os.path.dirname(__file__),) 
+        
+        if os.path.exists(f"mewe_out/{self.template}"):
+            shutil.rmtree(f"mewe_out/{self.template}")
+
+        shutil.copytree(f"{ABS_PATH}/templates/{self.template}", f"mewe_out/{self.template}")
+
+        content = open(f"mewe_out/{self.template}/src/bin/main.rs", 'r').read()
         
         content = content.replace("{{name}}", mainname)
 
-        open(f"mewe_out/{self.template}", 'w').write(content)
+        open(f"mewe_out/{self.template}/src/bin/main.rs", 'w').write(content)
 
 
         print("Calling rustc")
+        CWD = os.getcwd()
 
+        os.environ['RUSTFLAGS'] = f"-C link-arg={CWD}/{mindep}"
         popen = subprocess.Popen([
-            "rustc",
-            "-C",
-            f"link-arg={mindep}",
+            "cargo",
+            "build",
+            "--release",
             f"--target={self.target}",
-            f"mewe_out/{self.template}",
-            ], stderr=subprocess.PIPE,
+            ], cwd=f"mewe_out/{self.template}",stderr=subprocess.PIPE,
             stdout=subprocess.PIPE)  
         stdout, err = popen.communicate()
 
@@ -393,7 +403,7 @@ class MEWE:
             print("Creating multivariant library")
             multivariant_bitcode, multivariant_bitcode_instrumented = self.link_variants("mewe_out/all.bc", variants)
             # Change the tempalte to use the dispatcher
-            self.template = "main_dispatcher.rs"
+            self.template = "with_dispatcher"
         else:
             print("No variant could be created")
             multivariant_bitcode = "mewe_out/all.bc"
@@ -402,7 +412,7 @@ class MEWE:
 
         self.create_missing_deps_by_using_rustc(name, finalbitcode)
 
-        print("Collect your binary at the root folder !!")
+        print("Collect your binary in the <template folder>/target !!")
 
     def compile_project_and_collect_bc(self):
         os.environ['RUSTFLAGS'] = "--emit=llvm-bc"
@@ -455,7 +465,7 @@ if __name__ == "__main__":
                         nargs=1, default="wasm32-wasi",
                         help='Compilatio target')
     parser.add_argument('--template', metavar='t', type=str,      
-                    nargs=1, default="main.rs",
+                    nargs=1, default=["regular"],
                     help='Entrypoint tampering template')
                                         
 
@@ -495,7 +505,7 @@ if __name__ == "__main__":
     router.run_to_check()
 
     mewe = MEWE(router, target=args.target, 
-        template=args.template, include_files=args.include, 
+        template=args.template[0], include_files=args.include, 
         generation_timeout=args.generation_timeout[0],
         exploration_timeout_crow=args.exploration_timeout[0])
 
