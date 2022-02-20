@@ -17,7 +17,7 @@ __keepfiles__ = True
 __debugprocess__ = True
 __mainreplacename__ = "main2"
 __internalmainnamereplace__ = "internal_main"
-__skipgeneration__ = True
+__skipgeneration__ = False
 
 class BinariesRouter:
 
@@ -76,11 +76,12 @@ class BinariesRouter:
 class MEWE:
 
 
-    def __init__(self, router, target, include_files=[], template="main.rs", exploration_timeout_crow = 1):
+    def __init__(self, router, target, include_files=[], template="main.rs", exploration_timeout_crow = 1, generation_timeout=300):
         self.target = target
         self.template = template
         self.router = router
         self.include_files = include_files
+        self.generation_timeout = generation_timeout
         self.exploration_timeout_crow = exploration_timeout_crow
 
     def run(self):
@@ -105,20 +106,22 @@ class MEWE:
 
         CWD = os.getcwd()
         print(CWD)
+        name = f"CROW-worker{time.time()}"
         args = [
             # Use the default linker if not
             self.router.get_dockerbin(),
-            "run","-it","--rm","-e", "REDIS_PASS=\"\"",
+            "run","-it","--rm","-e", "REDIS_PASS=''",
             "-v", f"{CWD}/mewe_out/crow_out:/slumps/crow/crow/storage/out",
             "-v", f"{CWD}/mewe_out/:/workdir",
             "--entrypoint=/bin/bash",
+            f"--name={name}",
             "slumps/crow2:standalone",
             "launch_standalone_bitcode.sh",
             f"/workdir/{os.path.basename(bitcode_file)}",
             f'%DEFAULT.order',
             "1,2,4,5,5,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21",
             "%DEFAULT.workers",
-            "1",
+            "3",
             "%souper.workers",
             "2",
             "%DEFAULT.keep-wasm-files",
@@ -131,21 +134,36 @@ class MEWE:
 
         if not __skipgeneration__:
             if self.exploration_timeout_crow >= 0:
+                try:
+                    popen = subprocess.Popen(args,          
+                            stderr=subprocess.PIPE,
+                            stdout=subprocess.PIPE)    
 
-                popen = subprocess.Popen(args)    
+                    time.sleep(self.exploration_timeout_crow*7 + self.generation_timeout)
+                    print("Killing process")
+                except KeyboardInterrupt:
+                    pass
 
-                time.sleep(self.exploration_timeout_crow + 60)
-                print("Killing process")
-                subprocess.Popen.send_signal(signal.SIGINT)
+                popen.terminate()
+
+                subprocess.check_output([
+                    "docker",
+                    "rm",
+                    name,
+                    "--force"
+                ])
+
                 stdout, err = popen.communicate()
                 # the generation + system initialization
                 popen.wait()
-            
+            else:
+                print("Notice that the timeout is lower than zero, meaning that no diversification will be generated with CROW")
         # Collect the variants bitcodes
         variants = []
         for root, _, files in os.walk(f"mewe_out/crow_out"):
-            if root.endswith("variants"):
-                variants += [ f"{root}/{f}" for f in files ]
+            if root.endswith("variants") and "_" in root:
+                if len(files) > 0:
+                    variants += [ f"{root}/{f}" for f in files ]
 
         if len(variants) > 0:
             print(f"CROW generated {len(variants)} variants")
@@ -374,6 +392,8 @@ class MEWE:
             # Use the LINKER to create the multivariant
             print("Creating multivariant library")
             multivariant_bitcode, multivariant_bitcode_instrumented = self.link_variants("mewe_out/all.bc", variants)
+            # Change the tempalte to use the dispatcher
+            self.template = "main_dispatcher.rs"
         else:
             print("No variant could be created")
             multivariant_bitcode = "mewe_out/all.bc"
@@ -408,6 +428,8 @@ class MEWE:
 
         bitcodes_root_folder = f"target/{self.target}/release/deps"
 
+        if __debugprocess__:
+            print(os.listdir(bitcodes_root_folder))
         # Adding passed included bitcodes
         for bc in self.include_files:
             bitcodes.append(bc)
@@ -449,14 +471,20 @@ if __name__ == "__main__":
                     nargs=1, default=True,
                     help='Download precompiled binaries o MEWE for this OS and use them instead of the ones provided in the environment variables')
 
+    parser.add_argument('--generation-timeout', type=int,      
+                    nargs=1, default=[60],
+                    help='Stop CROW after x seconds (default 60)')
+
+    parser.add_argument('--exploration-timeout', type=int,      
+                    nargs=1, default=[30],
+                    help='Stop CROW exploration after x seconds (default 30)')
+
     args = parser.parse_args()
 
     if args.download_binaries:
         print("Downloading binaries")
         paths = download_mewe_binaries()
-        print(paths, args.llvm_version)
         bins = paths[args.llvm_version[0]]
-        print(bins)
 
         router = BinariesRouter(
             mewelinkergetter = bins['mewe_linker'],
@@ -466,6 +494,9 @@ if __name__ == "__main__":
     
     router.run_to_check()
 
-    mewe = MEWE(router, target=args.target, template=args.template, include_files=args.include)
+    mewe = MEWE(router, target=args.target, 
+        template=args.template, include_files=args.include, 
+        generation_timeout=args.generation_timeout[0],
+        exploration_timeout_crow=args.exploration_timeout[0])
 
     mewe.run()

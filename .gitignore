@@ -18,3 +18,5 @@ linker
 *.wasm
 mewe_out
 *.png
+deps_*
+build_*

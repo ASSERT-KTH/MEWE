@@ -1,0 +1,17 @@
+[package]
+name = "bin2base64"
+version = "0.1.0"
+authors = []
+edition = "2018"
+
+[dependencies]
+libc = "~0.2.40"
+
+[build-dependencies]
+bindgen = "0.53.1"
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 0

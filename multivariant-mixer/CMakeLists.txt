@@ -133,6 +133,10 @@ add_executable(mewe-linker
   ${CROW_MERGE_SOURCES}
   tools/mewe-linker.cpp)
 
+add_executable(mewe-fixer
+  ${CROW_MERGE_SOURCES}
+  tools/mewe-fixer.cpp)
+
 
 add_executable(static-mapper
         ${CROW_MERGE_SOURCES}
@@ -143,10 +147,11 @@ set(LLVM_LDFLAGS "${LLVM_LDFLAGS}")
 #VARIABLE_WATCH(LLVM_LIB_DIR)
 
 target_link_libraries(mewe-linker  ${LLVM_LIBS} ${LLVM_LDFLAGS})
+target_link_libraries(mewe-fixer ${LLVM_LIBS} ${LLVM_LDFLAGS})
 target_link_libraries(static-mapper  ${LLVM_LIBS} ${LLVM_LDFLAGS})
 
 
-foreach(target mewe-linker static-mapper )
+foreach(target mewe-linker static-mapper mewe-fixer )
   set_target_properties(${target} PROPERTIES COMPILE_FLAGS "${LLVM_CXXFLAGS}")
   target_include_directories(${target} PRIVATE "${LLVM_INCLUDEDIR}")
 endforeach()

@@ -1,0 +1,1 @@
+python3 -m pingpong.compare_deployment_times out/speedtest.ams.large.txt out/speedtest.ams.small.txt ams out/speedtest.bma.large.txt out/speedtest.small.bma.txt bma out/speedtest.sea.large.txt out/speedtest.sea.small.txt sea out/speedtest.bog.large.txt out/speedtest.txt bog

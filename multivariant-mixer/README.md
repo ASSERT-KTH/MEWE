@@ -63,3 +63,9 @@ build/mewe-linker "original.bc" "allinone.multivariant.bc" -complete-replace=fal
 ```
 
 To see the full list of options, just run `mewe-linker --help`
+
+# multivariant-fixer
+
+This binary tamers the multivariant library if it contains an entrypoint.
+
+TODO: Expand explanation

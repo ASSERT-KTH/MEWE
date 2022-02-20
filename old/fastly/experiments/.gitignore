@@ -1,0 +1,8 @@
+__pycache__
+out
+mongodb
+STRAC_payloads
+logs
+data/*
+mewe*
+results/*
