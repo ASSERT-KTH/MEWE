@@ -67,10 +67,10 @@ def download_mewe_binaries():
         return result
     elif system == 'Linux': # Linux
         
-        version, bins = download_and_add("https://github.com/Jacarte/MEWE/releases/download/binaries/build.macos.llvm13.zip", 13, dst_folder)
+        version, bins = download_and_add("https://github.com/Jacarte/MEWE/releases/download/binaries/build.linux.x64.llvm13.zip", 13, dst_folder)
         result[version] = bins
 
-        version, bins = download_and_add("https://github.com/Jacarte/MEWE/releases/download/binaries/build.macos.llvm12.zip", 12, dst_folder)
+        version, bins = download_and_add("https://github.com/Jacarte/MEWE/releases/download/binaries/build.linux.x64.llvm12.zip", 12, dst_folder)
         result[version] = bins
 
         # Add the other version here
