@@ -9,12 +9,15 @@ import os
 import shutil
 import re
 import argparse
+import time
 from download import download_mewe_binaries
+import signal
 
 __keepfiles__ = True
 __debugprocess__ = True
 __mainreplacename__ = "main2"
 __internalmainnamereplace__ = "internal_main"
+__skipgeneration__ = True
 
 class BinariesRouter:
 
@@ -37,6 +40,15 @@ class BinariesRouter:
 
         return linker
 
+    
+    def get_dockerbin(self):
+        bin_ = os.environ.get("DOCKER", "docker")
+      
+        if __debugprocess__:
+            print(bin_)
+
+        return bin_
+
     def get_fixer(self):
         if self.fixergetter is None:
             linker = os.environ.get("MEWEFIXER", "")
@@ -53,14 +65,23 @@ class BinariesRouter:
         return linker
 
     def run_to_check(self):
+        print("Checking binaries...")
         self.get_mewelinker()
         self.get_fixer()
+
+        self.get_dockerbin()
+        # TODO, check here the availability of the other binaries, such as docker
+
+
 class MEWE:
-    def __init__(self, router, target, include_files=[], template="main.rs"):
+
+
+    def __init__(self, router, target, include_files=[], template="main.rs", exploration_timeout_crow = 1):
         self.target = target
         self.template = template
         self.router = router
         self.include_files = include_files
+        self.exploration_timeout_crow = exploration_timeout_crow
 
     def run(self):
         if not __keepfiles__:
@@ -82,12 +103,115 @@ class MEWE:
 
     def diversify(self, bitcode_file):
 
-        print("TODO callling CROW")
+        CWD = os.getcwd()
+        print(CWD)
+        args = [
+            # Use the default linker if not
+            self.router.get_dockerbin(),
+            "run","-it","--rm","-e", "REDIS_PASS=\"\"",
+            "-v", f"{CWD}/mewe_out/crow_out:/slumps/crow/crow/storage/out",
+            "-v", f"{CWD}/mewe_out/:/workdir",
+            "--entrypoint=/bin/bash",
+            "slumps/crow2:standalone",
+            "launch_standalone_bitcode.sh",
+            f"/workdir/{os.path.basename(bitcode_file)}",
+            f'%DEFAULT.order',
+            "1,2,4,5,5,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21",
+            "%DEFAULT.workers",
+            "1",
+            "%souper.workers",
+            "2",
+            "%DEFAULT.keep-wasm-files",
+            "False",
+            "%DEFAULT.exploration-timeout",
+            f"{self.exploration_timeout_crow}",
+            ]
+        if __debugprocess__:
+            print(args)
 
-        return [bitcode_file]
+        if not __skipgeneration__:
+            if self.exploration_timeout_crow >= 0:
 
-    def link_variants(self, bitcodes):
-        raise Exception("Not implemented")
+                popen = subprocess.Popen(args)    
+
+                time.sleep(self.exploration_timeout_crow + 60)
+                print("Killing process")
+                subprocess.Popen.send_signal(signal.SIGINT)
+                stdout, err = popen.communicate()
+                # the generation + system initialization
+                popen.wait()
+            
+        # Collect the variants bitcodes
+        variants = []
+        for root, _, files in os.walk(f"mewe_out/crow_out"):
+            if root.endswith("variants"):
+                variants += [ f"{root}/{f}" for f in files ]
+
+        if len(variants) > 0:
+            print(f"CROW generated {len(variants)} variants")
+            return variants
+        else:
+            return [bitcode_file]
+
+    def link_variants(self, original, variants):
+        print("Linking variants")
+
+        variants = variants[:10]
+
+        out = f"{original}.multivariant.bc"
+        out_instrumented = f"{original}.multivariant.i.bc"
+
+        linker_args = [
+            "--complete-replace=false","-merge-function-switch-cases", "--replace-all-calls-by-the-discriminator", "-mewe-merge-debug-level=2", "-mewe-merge-skip-on-error"
+        ]
+
+        popen = subprocess.Popen([
+            # Use the default linker if not
+            self.router.get_mewelinker(),
+            original,
+            out,
+            *linker_args,
+            f"-mewe-merge-bitcodes=\"{','.join(variants)}\""
+            ], stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE)        
+
+        stdout, err = popen.communicate()
+        popen.wait()
+
+        if popen.returncode != 0:
+            print("Error creating multivariant")
+            print(err.decode())
+            exit(1)
+
+
+        print(stdout.decode())
+
+        popen = subprocess.Popen([
+            # Use the default linker if not
+            self.router.get_mewelinker(),
+            original,
+            out_instrumented,
+            *linker_args,
+            "--instrument-function",
+            f"-mewe-merge-bitcodes=\"{','.join(variants)}\""
+            ], stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE)        
+
+        stdout, err = popen.communicate()
+
+        if popen.returncode != 0:
+            print("Error creating multivariant instrumented")
+            print(err.decode())
+            exit(1)
+        print(stdout.decode())
+        popen.wait()
+
+        # exit(1)
+        if __debugprocess__:
+            MEWE.generate_ll(out)
+            MEWE.generate_ll(out_instrumented)
+
+        return out, out_instrumented
 
     def tamper_entrypoint(self, mutivariant_bitcodefile):
         print("Tampering entrypoint of the multivariant_bitcode")
@@ -249,7 +373,7 @@ class MEWE:
         if len(variants) > 1:
             # Use the LINKER to create the multivariant
             print("Creating multivariant library")
-            multivariant_bitcode = self.link_variants(variants)
+            multivariant_bitcode, multivariant_bitcode_instrumented = self.link_variants("mewe_out/all.bc", variants)
         else:
             print("No variant could be created")
             multivariant_bitcode = "mewe_out/all.bc"
@@ -318,7 +442,7 @@ if __name__ == "__main__":
                     help='Bitcodes to include in the linking phase')
 
     parser.add_argument('--llvm-version', metavar='l', type=int,      
-                    nargs=1, default=13,
+                    nargs=1, default=[13],
                     help='LLVM version to use in the linking')
 
     parser.add_argument('--download-binaries', metavar='d', type=bool,      
@@ -330,7 +454,8 @@ if __name__ == "__main__":
     if args.download_binaries:
         print("Downloading binaries")
         paths = download_mewe_binaries()
-        bins = paths[args.llvm_version]
+        print(paths, args.llvm_version)
+        bins = paths[args.llvm_version[0]]
         print(bins)
 
         router = BinariesRouter(
@@ -340,6 +465,7 @@ if __name__ == "__main__":
         router = BinariesRouter()
     
     router.run_to_check()
+
     mewe = MEWE(router, target=args.target, template=args.template, include_files=args.include)
 
     mewe.run()
