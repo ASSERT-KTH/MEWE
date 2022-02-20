@@ -7,12 +7,12 @@ import sys
 import subprocess
 import os
 import shutil
-__keepfiles__ = True
+import re
 
+__keepfiles__ = True
 __target__ = "wasm32-wasi" # Infer from project here :)
 __debugprocess__ = True
 __mainreplacename__ = "main2"
-__internalmainname__ = "_ZN4main4main17h85cf907bd6a78b6fE"
 __internalmainnamereplace__ = "internal_main"
 
 class MEWE:
@@ -23,7 +23,7 @@ class MEWE:
                 os.rmdir("mewe_out")
 
         if not os.path.exists("mewe_out"):
-            shutil.rmtree("mewe_out")
+            os.mkdir("mewe_out")
         
 
 
@@ -67,10 +67,20 @@ class MEWE:
             print(err.decode())
             exit(1)
 
-        if __debugprocess__:
-            # Creating the ll
-            MEWE.generate_ll(f"{mutivariant_bitcodefile}.rename.bc")
+        # We need the LL IR to get the main4main internal function
+        MEWE.generate_ll(f"{mutivariant_bitcodefile}.rename.bc")
+        LLCONTENT = open(f"{mutivariant_bitcodefile}.rename.bc.ll",'r').read()
 
+
+        main4main = re.compile(r"@([_a-zA-Z0-9]+main4main[_a-zA-Z0-9]+)\(")
+
+        g = main4main.findall(LLCONTENT)
+        if len(g) == 0:
+            print("Internal name not found !")
+            exit(1)
+
+        print(g)
+        __internalmainname__ = g[0]
         popen = subprocess.Popen([
             # Use the default linker if not
             os.environ["MEWEFIXER"],
@@ -204,7 +214,7 @@ class MEWE:
         self.create_missing_deps_by_using_rustc(name, finalbitcode)
 
         print("Collect your binary at the root folder !!")
-        
+
     def compile_project_and_collect_bc(self):
         os.environ['RUSTFLAGS'] = "--emit=llvm-bc"
         popen = subprocess.Popen([
