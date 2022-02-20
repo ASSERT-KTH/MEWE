@@ -8,14 +8,59 @@ import subprocess
 import os
 import shutil
 import re
+import argparse
+from download import download_mewe_binaries
 
 __keepfiles__ = True
-__target__ = "wasm32-wasi" # Infer from project here :)
 __debugprocess__ = True
 __mainreplacename__ = "main2"
 __internalmainnamereplace__ = "internal_main"
 
+class BinariesRouter:
+
+    def __init__(self, mewelinkergetter = None, fixergetter = None, 
+            version=13):
+        self.mewelinkergetter = mewelinkergetter
+        self.fixergetter = fixergetter
+
+    def get_mewelinker(self):
+        if self.mewelinkergetter is None:
+            linker = os.environ.get("MEWELINKER", "")
+        else:
+            linker = self.mewelinkergetter()
+
+        if __debugprocess__:
+            print(linker)
+        if not os.path.exists(linker):
+            print("Linker binary does not exist.\n Set the env var MEWELINKER or run mewerustc --download-binaries true")
+            exit(1)
+
+        return linker
+
+    def get_fixer(self):
+        if self.fixergetter is None:
+            linker = os.environ.get("MEWEFIXER", "")
+        else:
+           linker = self.fixergetter()
+
+        if __debugprocess__:
+            print(linker)
+
+        if not os.path.exists(linker):
+            print("Fixer binary does not exist.\n Set the env var MEWEFIXER or run mewerustc --download-binaries true")
+            exit(1)
+
+        return linker
+
+    def run_to_check(self):
+        self.get_mewelinker()
+        self.get_fixer()
 class MEWE:
+    def __init__(self, router, target, include_files=[], template="main.rs"):
+        self.target = target
+        self.template = template
+        self.router = router
+        self.include_files = include_files
 
     def run(self):
         if not __keepfiles__:
@@ -49,7 +94,7 @@ class MEWE:
 
         popen = subprocess.Popen([
             # Use the default linker if not
-            os.environ["MEWEFIXER"],
+            self.router.get_fixer(),
             mutivariant_bitcodefile,
             f"{mutivariant_bitcodefile}.rename.bc",
             f'--funcname',
@@ -83,7 +128,7 @@ class MEWE:
         __internalmainname__ = g[0]
         popen = subprocess.Popen([
             # Use the default linker if not
-            os.environ["MEWEFIXER"],
+            self.router.get_fixer(),
             f"{mutivariant_bitcodefile}.rename.bc",
             f"{mutivariant_bitcodefile}.fix.bc",
             f'--funcname',
@@ -129,13 +174,13 @@ class MEWE:
         return f"{mutivariant_bitcodefile}.fix.bc", __internalmainnamereplace__
 
     def create_missing_deps_by_using_rustc(self, mainname, mindep):
-        print("Loading template 'templates/main.rs'")
+        print(f"Loading template 'templates/{self.template}'")
 
-        content = open(os.path.join(os.path.dirname(__file__), "templates/main.rs"), 'r').read()
+        content = open(os.path.join(os.path.dirname(__file__), f"templates/{self.template}"), 'r').read()
         
         content = content.replace("{{name}}", mainname)
 
-        open("mewe_out/main.rs", 'w').write(content)
+        open(f"mewe_out/{self.template}", 'w').write(content)
 
 
         print("Calling rustc")
@@ -144,8 +189,8 @@ class MEWE:
             "rustc",
             "-C",
             f"link-arg={mindep}",
-            f"--target={__target__}",
-            "mewe_out/main.rs",
+            f"--target={self.target}",
+            f"mewe_out/{self.template}",
             ], stderr=subprocess.PIPE,
             stdout=subprocess.PIPE)  
         stdout, err = popen.communicate()
@@ -222,7 +267,7 @@ class MEWE:
             'build',
             '--release',
             '--target',
-            __target__,
+            self.target,
 
             ], stderr=subprocess.PIPE,
             stdout=subprocess.PIPE)
@@ -237,7 +282,16 @@ class MEWE:
 
         bitcodes = []
 
-        bitcodes_root_folder = f"target/{__target__}/release/deps"
+        bitcodes_root_folder = f"target/{self.target}/release/deps"
+
+        # Adding passed included bitcodes
+        for bc in self.include_files:
+            bitcodes.append(bc)
+            if __debugprocess__:
+                shutil.copyfile(bc, f"mewe_out/{os.path.basename(bc)}")
+
+                MEWE.generate_ll(f"mewe_out/{os.path.basename(bc)}")
+
 
         for bc in os.listdir(bitcodes_root_folder):
             if bc.endswith(".bc"):
@@ -250,5 +304,42 @@ class MEWE:
 if __name__ == "__main__":
     print("MEWE !")
 
-    mewe = MEWE()
+    parser = argparse.ArgumentParser(description='MEWE cli tool.')
+    parser.add_argument('--target', metavar='x', type=str,      
+                        nargs=1, default="wasm32-wasi",
+                        help='Compilatio target')
+    parser.add_argument('--template', metavar='t', type=str,      
+                    nargs=1, default="main.rs",
+                    help='Entrypoint tampering template')
+                                        
+
+    parser.add_argument('--include', metavar='i', type=str,      
+                    nargs='+', default=[],
+                    help='Bitcodes to include in the linking phase')
+
+    parser.add_argument('--llvm-version', metavar='l', type=int,      
+                    nargs=1, default=13,
+                    help='LLVM version to use in the linking')
+
+    parser.add_argument('--download-binaries', metavar='d', type=bool,      
+                    nargs=1, default=True,
+                    help='Download precompiled binaries o MEWE for this OS and use them instead of the ones provided in the environment variables')
+
+    args = parser.parse_args()
+
+    if args.download_binaries:
+        print("Downloading binaries")
+        paths = download_mewe_binaries()
+        bins = paths[args.llvm_version]
+        print(bins)
+
+        router = BinariesRouter(
+            mewelinkergetter = bins['mewe_linker'],
+            fixergetter = bins['mewe_fixer'])
+    else:
+        router = BinariesRouter()
+    
+    router.run_to_check()
+    mewe = MEWE(router, target=args.target, template=args.template, include_files=args.include)
+
     mewe.run()
