@@ -1,0 +1,1 @@
+RUSTFLAGS="-C link-arg=$PWD/libs/libsodium.bc" cargo build --release --target=wasm32-wasi

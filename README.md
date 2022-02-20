@@ -26,6 +26,7 @@ The following example generates a multivariant binary that can execute in your l
 
 ```bash
 git clone https://github.com/Jacarte/MEWE
+cd MEWE
 source mewe.sh
 cd examples/simple
 mewerustc  --llvm-version 12 --generation-timeout 3600 --exploration-timeout 120
