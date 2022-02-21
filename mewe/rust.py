@@ -110,10 +110,12 @@ class MEWE:
         args = [
             # Use the default linker if not
             self.router.get_dockerbin(),
-            "run","-it","--rm","-e", "REDIS_PASS=''",
+            "run","-it","--rm","-e", "REDIS_PASS=''","-e", "BROKER_USER='guest'","-e", "BROKER_PASS='guest'",
             "-v", f"{CWD}/mewe_out/crow_out:/slumps/crow/crow/storage/out",
             "-v", f"{CWD}/mewe_out/:/workdir",
             "--entrypoint=/bin/bash",
+            "-p",
+            "8080:15672",
             f"--name={name}",
             "slumps/crow2:standalone",
             "launch_standalone_bitcode.sh",
@@ -128,6 +130,8 @@ class MEWE:
             "False",
             "%DEFAULT.exploration-timeout",
             f"{self.exploration_timeout_crow}",
+            "%souper.souper-debug-level",
+            "1",
             *os.environ.get("CROW_EXTRA_ARGS", "").split(" ")
             ]
         if __debugprocess__:
@@ -136,9 +140,7 @@ class MEWE:
         if not __skipgeneration__:
             if self.exploration_timeout_crow >= 0:
                 try:
-                    popen = subprocess.Popen(args,          
-                            stderr=subprocess.PIPE,
-                            stdout=subprocess.PIPE)    
+                    popen = subprocess.Popen(args)    
 
                     time.sleep(self.exploration_timeout_crow*7 + self.generation_timeout)
                     print("Killing process")
@@ -164,7 +166,7 @@ class MEWE:
         for root, _, files in os.walk(f"mewe_out/crow_out"):
             if root.endswith("variants") and "_" in root:
                 if len(files) > 0:
-                    variants += [ f"{root}/{f}" for f in files ]
+                    variants += [ f"{root}/{f}" for f in files if f.endswith(".bc")]
 
         if len(variants) > 0:
             print(f"CROW generated {len(variants)} variants")
@@ -175,30 +177,28 @@ class MEWE:
     def link_variants(self, original, variants):
         print("Linking variants")
 
-        variants = variants[:10]
-
         out = f"{original}.multivariant.bc"
         out_instrumented = f"{original}.multivariant.i.bc"
 
         linker_args = [
-            "--complete-replace=false","-merge-function-switch-cases", "--replace-all-calls-by-the-discriminator", "-mewe-merge-debug-level=2", "-mewe-merge-skip-on-error"
+            "--override","--complete-replace=false","-merge-function-switch-cases", "--replace-all-calls-by-the-discriminator", "-mewe-merge-debug-level=2", "-mewe-merge-skip-on-error"
         ]
-
-        popen = subprocess.Popen([
-            # Use the default linker if not
+        args = [
             self.router.get_mewelinker(),
             original,
             out,
             *linker_args,
             f"-mewe-merge-bitcodes=\"{','.join(variants)}\""
-            ], stderr=subprocess.PIPE,
+        ]
+        popen = subprocess.Popen(args, stderr=subprocess.PIPE,
             stdout=subprocess.PIPE)        
 
         stdout, err = popen.communicate()
         popen.wait()
 
         if popen.returncode != 0:
-            print("Error creating multivariant")
+            print("Error creating multivariant. Reproduce with")
+            print("\t ", " ".join(args))
             print(err.decode())
             exit(1)
 
@@ -404,7 +404,8 @@ class MEWE:
             print("Creating multivariant library")
             multivariant_bitcode, multivariant_bitcode_instrumented = self.link_variants("mewe_out/all.bc", variants)
             # Change the tempalte to use the dispatcher
-            self.template = "with_dispatcher"
+            if "with_dispatcher" not in self.template:
+                self.template = "with_dispatcher"
         else:
             print("No variant could be created")
             multivariant_bitcode = "mewe_out/all.bc"

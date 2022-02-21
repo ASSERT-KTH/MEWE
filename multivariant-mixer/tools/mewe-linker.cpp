@@ -354,134 +354,138 @@ int main(int argc, const char **argv) {
             continue; // continue since the module does not exist
         }
 
-        auto toMergeModule = parseIRFile(module, error, context);
+        try{ 
+            auto toMergeModule = parseIRFile(module, error, context);
 
 
-        if(!CompleteReplace)
-            deinternalize_module(*toMergeModule);
+            if(!CompleteReplace)
+                deinternalize_module(*toMergeModule);
 
-        std::vector<std::string> toMergeFunctions;
+            std::vector<std::string> toMergeFunctions;
 
 
-        if (!NotLookForFunctions && !FunctionNames.empty()) {
+            if (!NotLookForFunctions && !FunctionNames.empty()) {
 
-            if (DebugLevel > 2)
-                errs() << "Using user defined function variants" << module << "\n";
+                if (DebugLevel > 2)
+                    errs() << "Using user defined function variants" << module << "\n";
 
-            for(auto &fname: FunctionNames)
-                toMergeFunctions.push_back(fname);
-        }
-        else{
-            if (DebugLevel > 2)
-                errs() << "Using all defined functions as variants inside module " << module << "\n";
+                for(auto &fname: FunctionNames)
+                    toMergeFunctions.push_back(fname);
+            }
+            else{
+                if (DebugLevel > 2)
+                    errs() << "Using all defined functions as variants inside module " << module << "\n";
 
-            // Add all functions in new module as probable variant functions
-            for(auto &func: *bitcode)
-                if(!func.isDeclaration()) {
-                    auto fName = func.getName().str();
-                    if(!is_a_variant(fName)) {
+                // Add all functions in new module as probable variant functions
+                for(auto &func: *bitcode)
+                    if(!func.isDeclaration()) {
+                        auto fName = func.getName().str();
+                        if(!is_a_variant(fName)) {
 
-                        if(!fName.empty()) {
-                            toMergeFunctions.push_back(fName);
+                            if(!fName.empty()) {
+                                toMergeFunctions.push_back(fName);
 
-                            if (DebugLevel > 2)
-                                errs() << "\t'" << func.getName() << "\n";
+                                if (DebugLevel > 2)
+                                    errs() << "\t'" << func.getName() << "\n";
+                            }
                         }
                     }
-                }
-        }
-
-
-
-        outs() << " f count " << toMergeFunctions.size() << "                    ";
-        if (DebugLevel > 1)
-            errs() << " Merging module " << module << "\n";
-        for (auto &fname : toMergeFunctions) {
-
-            if (DebugLevel > 2)
-                errs() << "Adding function " << fname << " from module " << module << "\n";
-
-            if (fname.empty())
-                continue;
-
-            if (DebugLevel > 2)
-                errs() << "Getting function object" << "\n";
-
-            auto *fObject = toMergeModule->getFunction(fname);
-
-            if (DebugLevel > 2)
-                errs() << "Checking if it is a function definition" << "\n";
-
-            if (fObject == NULL || fObject->isDeclaration())
-                continue;
-
-            if (DebugLevel > 2)
-                errs() << "\tMerging function " << fname << "\n";
-
-            // replace by variant if signature is the same
-
-            if(CompleteReplace){
-
-                if (DebugLevel > 2)
-                    errs() << "\t Relying on override flag to override original function" << "\n";
-                // check that linker override flag is set
-
-                continue;
             }
 
-            if (InjectOnlyIfDifferent) {
+
+
+            outs() << " f count " << toMergeFunctions.size() << "                    ";
+            if (DebugLevel > 1)
+                errs() << " Merging module " << module << "\n";
+            for (auto &fname : toMergeFunctions) {
 
                 if (DebugLevel > 2)
-                    errs() << "\t Cheking for identical function" << "\n";
+                    errs() << "Adding function " << fname << " from module " << module << "\n";
 
-                if (is_same_func(fname, module)) {
+                if (fname.empty())
+                    continue;
+
+                if (DebugLevel > 2)
+                    errs() << "Getting function object" << "\n";
+
+                auto *fObject = toMergeModule->getFunction(fname);
+
+                if (DebugLevel > 2)
+                    errs() << "Checking if it is a function definition" << "\n";
+
+                if (fObject == NULL || fObject->isDeclaration())
+                    continue;
+
+                if (DebugLevel > 2)
+                    errs() << "\tMerging function " << fname << "\n";
+
+                // replace by variant if signature is the same
+
+                if(CompleteReplace){
 
                     if (DebugLevel > 2)
-                        errs() << "\t Removing identical function " << fname << " in " << module << "\n";
+                        errs() << "\t Relying on override flag to override original function" << "\n";
+                    // check that linker override flag is set
 
                     continue;
                 }
 
+                if (InjectOnlyIfDifferent) {
+
+                    if (DebugLevel > 2)
+                        errs() << "\t Cheking for identical function" << "\n";
+
+                    if (is_same_func(fname, module)) {
+
+                        if (DebugLevel > 2)
+                            errs() << "\t Removing identical function " << fname << " in " << module << "\n";
+
+                        continue;
+                    }
+
+                }
+
+                std::string newName;
+                llvm::raw_string_ostream newNameOutput(newName);
+                newNameOutput << fname << "_" << modulesCount << FuncSufix;
+                newNameOutput.flush();
+
+
+                // Check if the function has a special linkage
+                if (backupLinkage4Functions.count(fObject->getName().str())) // Set the nw function type as the original
+                    backupLinkage4Functions[newName] = backupLinkage4Functions[fObject->getName().str()];
+
+                // Change function name
+                fObject->setName(newNameOutput.str());
+
+                variantsMap4Instrumentation.insert_or_assign(fObject->getName().str(), 1);
+
+                errs() << "Variants count " << variantsMap4Instrumentation.size() << "\n";
+                if(NoInline){
+                    fObject->addFnAttr(Attribute::NoInline);
+                }
+
+                if (DebugLevel > 2)
+                    errs() << "Ready to merge " << newNameOutput.str() << "\n";
+
+                if (DebugLevel > 2)
+                    errs() << newNameOutput.str() << "\n";
+                added++;
+
+                auto original = bitcode->getFunction(fname);
+
+                if (original) {
+                    addVariant(fname, newNameOutput.str());
+                } else {
+                    errs() << "WARNING: " << "original bitcode does not contain the function " << fname << "\n";
+                }
             }
 
-            std::string newName;
-            llvm::raw_string_ostream newNameOutput(newName);
-            newNameOutput << fname << "_" << modulesCount << FuncSufix;
-            newNameOutput.flush();
-
-
-            // Check if the function has a special linkage
-            if (backupLinkage4Functions.count(fObject->getName().str())) // Set the nw function type as the original
-                backupLinkage4Functions[newName] = backupLinkage4Functions[fObject->getName().str()];
-
-            // Change function name
-            fObject->setName(newNameOutput.str());
-
-            variantsMap4Instrumentation.insert_or_assign(fObject->getName().str(), 1);
-
-            errs() << "Variants count " << variantsMap4Instrumentation.size() << "\n";
-            if(NoInline){
-                fObject->addFnAttr(Attribute::NoInline);
-            }
-
-            if (DebugLevel > 2)
-                errs() << "Ready to merge " << newNameOutput.str() << "\n";
-
-            if (DebugLevel > 2)
-                errs() << newNameOutput.str() << "\n";
-            added++;
-
-            auto original = bitcode->getFunction(fname);
-
-            if (original) {
-                addVariant(fname, newNameOutput.str());
-            } else {
-                errs() << "WARNING: " << "original bitcode does not contain the function " << fname << "\n";
-            }
+            linker.linkInModule(std::move(toMergeModule), Flags);
         }
-
-        linker.linkInModule(std::move(toMergeModule), Flags);
-
+        catch(...) {
+            errs() << "Error merging variant \n";
+        }
         modulesCount++;
     }
 
