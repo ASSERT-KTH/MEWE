@@ -47,8 +47,12 @@ Notice that, this approach will work with any diversifier, as soon as it fits wi
 
 # MEWE pipeline
 
-MEWE uses an extended LLVM linker and CROW to build multivariant binaries. In the following diagram, we dissect how it works. It first compiles the cargo based project collecting the intermediate LLVM bitcodes. The collected bitcodes are linker together to build a massive LLVM bitcode containing the cargo application. This LLVM bitcode is them passed to CROW to generate the program variants. The variants are passed to the linker to generate the multivarint LLVM bitcode.
-The generated LLVM bitcode needs to be fixed depending on the target. For example, for was32-wasi, MEWE, tampers the entrypoint of the multivariant LLVM bitcode and creates a new cargo project that calls this new function. Then the regular compiler understand the missing dependencies and creates the final valid binary.
+MEWE uses an extended LLVM linker and CROW to build multivariant binaries. In the following diagram, we dissect how it works. 
+
+MEWE first compiles the cargo based project collecting their intermediate LLVM bitcodes. The collected bitcodes are linked together to build a cumulative LLVM bitcode containing the full cargo application. MEWE then makes a CROW-pass to generate the program variants. 
+The variants are passed to our linker to generate the multivarint LLVM bitcode.
+MEWE fixes the generated LLVM bitcode depending on the compilation target. 
+For example, for was32-wasi target, MEWE, tampers the entrypoint of the multivariant LLVM bitcode and creates a new cargo project that calls this new function. The final stage, is the regular compiler, which understands the missing dependencies and creates the final valid binary.
 
 ![diagram](docs/diagram3.png)
 
