@@ -119,18 +119,18 @@ class MEWE:
             "launch_standalone_bitcode.sh",
             f"/workdir/{os.path.basename(bitcode_file)}",
             f'%DEFAULT.order',
-            "1,2,4,5,5,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21",
+            os.environ.get("CROW_ORDER", "1,2,4,5,5,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21"),
             "%DEFAULT.workers",
-            "3",
+            os.environ.get("CROW_WORKERS", "3"),
             "%souper.workers",
-            "2",
+            os.environ.get("SOUPER_WORKERS", "2"),
             "%DEFAULT.keep-wasm-files",
             "False",
             "%DEFAULT.exploration-timeout",
             f"{self.exploration_timeout_crow}",
             ]
         if __debugprocess__:
-            print(args)
+            print(" ".join(args))
 
         if not __skipgeneration__:
             if self.exploration_timeout_crow >= 0:
@@ -439,7 +439,7 @@ class MEWE:
         bitcodes_root_folder = f"target/{self.target}/release/deps"
 
         if __debugprocess__:
-            print(os.listdir(bitcodes_root_folder))
+            print("\t","\n\t".join(os.listdir(bitcodes_root_folder)))
         # Adding passed included bitcodes
         for bc in self.include_files:
             bitcodes.append(bc)
