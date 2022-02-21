@@ -1,12 +1,8 @@
-myrealpath () (
-    if [[ -d $1 ]]; then
-        OLDPWD=- CDPATH= cd -P -- "$1" && pwd
-    else
-        OLDPWD=- CDPATH= cd -P -- "${1%/*}" && printf '%s/%s\n' "$PWD" "${1##*/}"
-    fi
-)
+abspath() {
+  [[ $1 = /* ]] && printf "%s\n" "$1" || printf "%s\n" "$PWD/$1"
+}
 
-ROOT=$(dirname $(myrealpath  $0))
+ROOT=$(dirname $(abspath  $0))
 
 # env vars
 export LINKER=llvm-link
