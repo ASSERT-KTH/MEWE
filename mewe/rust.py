@@ -128,6 +128,7 @@ class MEWE:
             "False",
             "%DEFAULT.exploration-timeout",
             f"{self.exploration_timeout_crow}",
+            *os.environ.get("CROW_EXTRA_ARGS", "").split(" ")
             ]
         if __debugprocess__:
             print(" ".join(args))
