@@ -463,7 +463,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='MEWE cli tool.')
     parser.add_argument('--target', metavar='x', type=str,      
-                        nargs=1, default="wasm32-wasi",
+                        nargs=1, default=["wasm32-wasi"],
                         help='Compilatio target')
     parser.add_argument('--template', metavar='t', type=str,      
                     nargs=1, default=["regular"],
@@ -505,7 +505,7 @@ if __name__ == "__main__":
     
     router.run_to_check()
 
-    mewe = MEWE(router, target=args.target, 
+    mewe = MEWE(router, target=args.target[0], 
         template=args.template[0], include_files=args.include, 
         generation_timeout=args.generation_timeout[0],
         exploration_timeout_crow=args.exploration_timeout[0])
