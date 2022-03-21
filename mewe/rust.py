@@ -115,23 +115,25 @@ class MEWE:
             "-v", f"{CWD}/mewe_out/:/workdir",
             "--entrypoint=/bin/bash",
             "-p",
-            "8080:15672",
+            "8080:15672", # Set this randomly and show it in the console
             f"--name={name}",
             "slumps/crow2:standalone",
             "launch_standalone_bitcode.sh",
             f"/workdir/{os.path.basename(bitcode_file)}",
             f'%DEFAULT.order',
-            os.environ.get("CROW_ORDER", "1,2,4,5,5,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21"),
+            os.environ.get("CROW_ORDER", "1,2,4,5,5,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22"),
             "%DEFAULT.workers",
             os.environ.get("CROW_WORKERS", "3"),
             "%souper.workers",
-            os.environ.get("SOUPER_WORKERS", "2"),
+            os.environ.get("SOUPER_WORKERS", "3"),
             "%DEFAULT.keep-wasm-files",
             "False",
             "%DEFAULT.exploration-timeout",
             f"{self.exploration_timeout_crow}",
             "%souper.souper-debug-level",
             "1",
+            "%DEFAULT.prune-equal",
+            "True",
             *os.environ.get("CROW_EXTRA_ARGS", "").split(" ")
             ]
         if __debugprocess__:
@@ -443,6 +445,7 @@ class MEWE:
         if __debugprocess__:
             print("\t","\n\t".join(os.listdir(bitcodes_root_folder)))
         # Adding passed included bitcodes
+        print("Including", self.include_files)
         for bc in self.include_files:
             bitcodes.append(bc)
             if __debugprocess__:

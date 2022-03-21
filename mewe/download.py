@@ -8,23 +8,28 @@ import stat
 
 def download_file(url, dst):
     local_filename = dst
-    # NOTE the stream=True parameter
-    r = requests.get(url, stream=True)
-    with open(local_filename, 'wb') as f:
-        for chunk in r.iter_content(chunk_size=1024): 
-            if chunk: # filter out keep-alive new chunks
-                f.write(chunk)
-                #f.flush() commented by recommendation from J.F.Sebastian
+    try:
+        # NOTE the stream=True parameter
+        r = requests.get(url, stream=True)
+        with open(local_filename, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=1024): 
+                if chunk: # filter out keep-alive new chunks
+                    f.write(chunk)
+                    #f.flush() commented by recommendation from J.F.Sebastian
+    except:
+        pass
     return local_filename
 
 def download_and_add(url, version, dst_folder):
     dst_bin = download_file(url, f"{dst_folder}/build.{version}.zip")
 
-    with zipfile.ZipFile(dst_bin, 'r') as zip_ref:
-        zip_ref.extractall(f"{dst_folder}/build_llvm{version}")
+    try:
+        with zipfile.ZipFile(dst_bin, 'r') as zip_ref:
+            zip_ref.extractall(f"{dst_folder}/build_llvm{version}")
 
-    os.remove(f"{dst_folder}/build.{version}.zip")
-
+        os.remove(f"{dst_folder}/build.{version}.zip")
+    except:
+        pass
     # Set executable permissions
 
     try:

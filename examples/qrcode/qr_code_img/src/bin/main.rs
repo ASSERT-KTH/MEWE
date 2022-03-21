@@ -3,7 +3,7 @@ use std::path::Path;
 extern crate lodepng;
 
 pub fn main() {
-    let (img, output_size) = unsafe { qrcode_simple_png_img::run_qr(String::from("Hello world form MEWE !")) };
+    let (img, output_size) = unsafe { qrcode_simple_png_img::run_qr(String::from("Hello world from MEWE !")) };
     
     let path = &Path::new("write_test.png");
 
