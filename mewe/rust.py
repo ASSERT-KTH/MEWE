@@ -130,8 +130,10 @@ class MEWE:
             "False",
             "%DEFAULT.exploration-timeout",
             f"{self.exploration_timeout_crow}",
+            "%DEFAULT.split-module-in",
+            f"100",
             "%souper.souper-debug-level",
-            "1",
+            "2",
             "%DEFAULT.prune-equal",
             "True",
             *os.environ.get("CROW_EXTRA_ARGS", "").split(" ")
