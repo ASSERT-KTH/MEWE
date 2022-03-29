@@ -114,18 +114,18 @@ class MEWE:
             "-v", f"{CWD}/mewe_out/crow_out:/slumps/crow/crow/storage/out",
             "-v", f"{CWD}/mewe_out/:/workdir",
             "--entrypoint=/bin/bash",
-            "-p",
-            "8080:15672", # Set this randomly and show it in the console
+            #"-p",
+            #"8088:15672", # Set this randomly and show it in the console
             f"--name={name}",
             "slumps/crow2:standalone",
             "launch_standalone_bitcode.sh",
             f"/workdir/{os.path.basename(bitcode_file)}",
             f'%DEFAULT.order',
-            os.environ.get("CROW_ORDER", "1,2,4,5,5,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22"),
+            os.environ.get("CROW_ORDER", "19,20,21,22"),
             "%DEFAULT.workers",
-            os.environ.get("CROW_WORKERS", "3"),
+            os.environ.get("CROW_WORKERS", "2"),
             "%souper.workers",
-            os.environ.get("SOUPER_WORKERS", "3"),
+            os.environ.get("SOUPER_WORKERS", "2"),
             "%DEFAULT.keep-wasm-files",
             "False",
             "%DEFAULT.exploration-timeout",
@@ -295,25 +295,25 @@ class MEWE:
 
         # TODO, ideally this fix should come from the LLVM tool itself
         # This is a patch, we convert to LL and we remove the "internal" attribte from the function signature
-        #MEWE.generate_ll(f"{mutivariant_bitcodefile}.fix.bc",)
-        #LLCONTENT = open(f"{mutivariant_bitcodefile}.fix.bc.ll", 'r').read()
-        #LLCONTENT = LLCONTENT.replace(f"internal void @{__internalmainnamereplace__}", f"void @{__internalmainnamereplace__}")
-        #open(f"{mutivariant_bitcodefile}.fix.bc.ll", 'w').write(LLCONTENT)
-        #popen_llvm_as = subprocess.Popen([
+        MEWE.generate_ll(f"{mutivariant_bitcodefile}.fix.bc",)
+        LLCONTENT = open(f"{mutivariant_bitcodefile}.fix.bc.ll", 'r').read()
+        LLCONTENT = LLCONTENT.replace(f"internal void @{__internalmainnamereplace__}", f"void @{__internalmainnamereplace__}")
+        open(f"{mutivariant_bitcodefile}.fix.bc.ll", 'w').write(LLCONTENT)
+        popen_llvm_as = subprocess.Popen([
             # Use the default linker if not
-        #    os.environ.get("LLVMAS", "llvm-as"),
-        #    f"{mutivariant_bitcodefile}.fix.bc.ll",
-        #    f"-o",
-        #    f"{mutivariant_bitcodefile}.fix.bc"
-        #    ], stderr=subprocess.PIPE,
-        #    stdout=subprocess.PIPE)        
+            os.environ.get("LLVMAS", "llvm-as"),
+            f"{mutivariant_bitcodefile}.fix.bc.ll",
+            f"-o",
+            f"{mutivariant_bitcodefile}.fix.bc"
+            ], stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE)        
 
-        #stdout, err = popen_llvm_as.communicate()
-        #popen_llvm_as.wait()
-        #if popen_llvm_as.returncode != 0:
-        #    print("Error")
-        #    print(err.decode())
-        #    exit(1)
+        stdout, err = popen_llvm_as.communicate()
+        popen_llvm_as.wait()
+        if popen_llvm_as.returncode != 0:
+            print("Error")
+            print(err.decode())
+            exit(1)
 
         if __debugprocess__:
             # Creating the ll
