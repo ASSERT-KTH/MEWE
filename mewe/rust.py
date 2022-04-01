@@ -113,6 +113,7 @@ class MEWE:
             "run","-it","--rm","-e", "REDIS_PASS=''","-e", "BROKER_USER='guest'","-e", "BROKER_PASS='guest'",
             "-v", f"{CWD}/mewe_out/crow_out:/slumps/crow/crow/storage/out",
             "-v", f"{CWD}/mewe_out/:/workdir",
+            "--ulimit", "nofile=5000:5000",
             "--entrypoint=/bin/bash",
             #"-p",
             #"8088:15672", # Set this randomly and show it in the console
@@ -121,13 +122,13 @@ class MEWE:
             "launch_standalone_bitcode.sh",
             f"/workdir/{os.path.basename(bitcode_file)}",
             f'%DEFAULT.order',
-            os.environ.get("CROW_ORDER", "19,20,21,22"),
+            os.environ.get("CROW_ORDER", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22"),
             "%DEFAULT.workers",
-            os.environ.get("CROW_WORKERS", "2"),
+            os.environ.get("CROW_WORKERS", "3"),
             "%souper.workers",
-            os.environ.get("SOUPER_WORKERS", "2"),
+            os.environ.get("SOUPER_WORKERS", "3"),
             "%DEFAULT.keep-wasm-files",
-            "False",
+            "True",
             "%DEFAULT.exploration-timeout",
             f"{self.exploration_timeout_crow}",
             "%DEFAULT.split-module-in",
@@ -237,7 +238,7 @@ class MEWE:
         return out, out_instrumented
 
     def tamper_entrypoint(self, mutivariant_bitcodefile):
-        print("Tampering entrypoint of the multivariant_bitcode")
+        print("Tampering entrypoint of the multivariant_bitcode", mutivariant_bitcodefile)
 
         popen = subprocess.Popen([
             # Use the default linker if not

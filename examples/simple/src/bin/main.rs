@@ -1,3 +1,4 @@
+use std::env;
 
 #[no_mangle]
 pub fn func(cond: bool, z: i32) -> i32 {
@@ -15,6 +16,7 @@ pub fn func(cond: bool, z: i32) -> i32 {
 }
 
 pub fn main() {
-    
-    println!("Result {}", func(true, 190));
+   let args: Vec<String> = env::args().collect();
+
+   println!("Result {}", func(args[1].parse::<bool>().unwrap(), args[2].parse::<i32>().unwrap()));
 }
