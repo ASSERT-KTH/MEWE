@@ -76,13 +76,14 @@ class BinariesRouter:
 class MEWE:
 
 
-    def __init__(self, router, target, include_files=[], template="main.rs", exploration_timeout_crow = 1, generation_timeout=300):
+    def __init__(self, router, target, include_files=[], template="main.rs", exploration_timeout_crow = 1, generation_timeout=300, filter="*"):
         self.target = target
         self.template = template
         self.router = router
         self.include_files = include_files
         self.generation_timeout = generation_timeout
         self.exploration_timeout_crow = exploration_timeout_crow
+        self.filter = filter
 
     def run(self):
         if not __keepfiles__:
@@ -110,11 +111,14 @@ class MEWE:
         args = [
             # Use the default linker if not
             self.router.get_dockerbin(),
-            "run","-it","--rm","-e", "REDIS_PASS=''","-e", "BROKER_USER='guest'","-e", "BROKER_PASS='guest'",
+            "run","-it","--rm","-e", "REDIS_PASS=''","-e", "BROKER_USER=admin","-e", "BROKER_PASS=admin123",
             "-v", f"{CWD}/mewe_out/crow_out:/slumps/crow/crow/storage/out",
             "-v", f"{CWD}/mewe_out/:/workdir",
             "--ulimit", "nofile=5000:5000",
             "--entrypoint=/bin/bash",
+            "-p","5672:5672",
+            "-p","9898:9898",
+
             #"-p",
             #"8088:15672", # Set this randomly and show it in the console
             f"--name={name}",
@@ -129,6 +133,8 @@ class MEWE:
             os.environ.get("SOUPER_WORKERS", "3"),
             "%DEFAULT.keep-wasm-files",
             "True",
+            "%extract.filter",
+            self.filter,
             "%DEFAULT.exploration-timeout",
             f"{self.exploration_timeout_crow}",
             "%DEFAULT.split-module-in",
@@ -471,7 +477,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='MEWE cli tool.')
     parser.add_argument('--target', metavar='x', type=str,      
                         nargs=1, default=["wasm32-wasi"],
-                        help='Compilatio target')
+                        help='Compilation target')
+    
+    parser.add_argument('--filter', metavar='f', type=str,      
+                        nargs=1, default=["*"],
+                        help='Filter functions and diversify only the ones, whose names match the Re (python based)')
+
     parser.add_argument('--template', metavar='t', type=str,      
                     nargs=1, default=["regular"],
                     help='Entrypoint tampering template')
@@ -480,6 +491,7 @@ if __name__ == "__main__":
     parser.add_argument('--include', metavar='i', type=str,      
                     nargs='+', default=[],
                     help='Bitcodes to include in the linking phase')
+
 
     parser.add_argument('--llvm-version', metavar='l', type=int,      
                     nargs=1, default=[13],
@@ -515,6 +527,8 @@ if __name__ == "__main__":
     mewe = MEWE(router, target=args.target[0], 
         template=args.template[0], include_files=args.include, 
         generation_timeout=args.generation_timeout[0],
-        exploration_timeout_crow=args.exploration_timeout[0])
+        exploration_timeout_crow=args.exploration_timeout[0],
+        filter = args.filter[0]
+        )
 
     mewe.run()
