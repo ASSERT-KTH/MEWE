@@ -76,7 +76,7 @@ class BinariesRouter:
 class MEWE:
 
 
-    def __init__(self, router, target, include_files=[], template="main.rs", exploration_timeout_crow = 1, generation_timeout=300, filter="*"):
+    def __init__(self, router, target, include_files=[], template="main.rs", exploration_timeout_crow = 1, generation_timeout=300, filter=None):
         self.target = target
         self.template = template
         self.router = router
@@ -121,6 +121,10 @@ class MEWE:
 
             #"-p",
             #"8088:15672", # Set this randomly and show it in the console
+            ]
+
+        args = args + [
+
             f"--name={name}",
             "slumps/crow2:standalone",
             "launch_standalone_bitcode.sh",
@@ -132,9 +136,17 @@ class MEWE:
             "%souper.workers",
             os.environ.get("SOUPER_WORKERS", "3"),
             "%DEFAULT.keep-wasm-files",
-            "True",
-            "%extract.filter",
-            self.filter,
+            "True"
+        ]
+
+        if self.filter:
+            args = args + [
+                "%extract.filter",
+                self.filter
+            ]
+
+        args= args + [
+
             "%DEFAULT.exploration-timeout",
             f"{self.exploration_timeout_crow}",
             "%DEFAULT.split-module-in",
@@ -142,9 +154,12 @@ class MEWE:
             "%souper.souper-debug-level",
             "1",
             "%DEFAULT.prune-equal",
-            "True",
+            "True"
+        ]
+
+        args = args + [
             *os.environ.get("CROW_EXTRA_ARGS", "").split(" ")
-            ]
+        ]
         if __debugprocess__:
             print(" ".join(args))
 
@@ -480,7 +495,7 @@ if __name__ == "__main__":
                         help='Compilation target')
     
     parser.add_argument('--filter', metavar='f', type=str,      
-                        nargs=1, default=["*"],
+                        nargs=1, default=[None],
                         help='Filter functions and diversify only the ones, whose names match the Re (python based)')
 
     parser.add_argument('--template', metavar='t', type=str,      
