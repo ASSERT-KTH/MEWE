@@ -106,8 +106,11 @@ class MEWE:
     def diversify(self, bitcode_file):
 
         CWD = os.getcwd()
-        print(CWD)
         name = f"CROW-worker{time.time()}"
+
+        print(f"CROW running under container name: {name}")
+        print(f"Wait for 5 seconds and access the dashboard at http://0.0.0.0:8050 with user: admin, pass: admin123")
+
         args = [
             # Use the default linker if not
             self.router.get_dockerbin(),
@@ -118,13 +121,11 @@ class MEWE:
             "--entrypoint=/bin/bash",
             "-p","5672:5672",
             "-p","9898:9898",
-
-            #"-p",
-            #"8088:15672", # Set this randomly and show it in the console
+            "-p",
+            "8050:8050", # Set this randomly and show it in the console
             ]
 
         args = args + [
-
             f"--name={name}",
             "slumps/crow2:standalone",
             "launch_standalone_bitcode.sh",
@@ -166,7 +167,8 @@ class MEWE:
         if not __skipgeneration__:
             if self.exploration_timeout_crow >= 0:
                 try:
-                    popen = subprocess.Popen(args)    
+                    devnull = open(os.devnull, 'wb')
+                    popen = subprocess.Popen(args) #, stdout=devnull, stderr=devnull)    
 
                     time.sleep(self.exploration_timeout_crow*7 + self.generation_timeout)
                     print("Killing process")
