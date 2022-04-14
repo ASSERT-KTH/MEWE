@@ -177,7 +177,7 @@ class MEWE:
             if self.exploration_timeout_crow >= 0:
                 try:
                     devnull = open(os.devnull, 'wb')
-                    popen = subprocess.Popen(args)#, stdout=devnull, stderr=devnull)    
+                    popen = subprocess.Popen(args, stdout=devnull, stderr=devnull)    
 
                     time.sleep(self.exploration_timeout_crow*7 + self.generation_timeout)
                     print("Killing process")
