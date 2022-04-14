@@ -9,9 +9,11 @@ import os
 import shutil
 import re
 import argparse
+import threading
 import time
 from download import download_mewe_binaries
 import signal
+
 
 __keepfiles__ = True
 __debugprocess__ = True
@@ -109,7 +111,16 @@ class MEWE:
         name = f"CROW-worker{time.time()}"
 
         print(f"CROW running under container name: {name}")
-        print(f"Wait for 5 seconds and access the dashboard at http://0.0.0.0:8050 with user: admin, pass: admin123")
+
+        def wait_and_print():
+            time.sleep(120)
+            print(f"Access the dashboard at http://0.0.0.0:8050/ with user: admin, pass: admin123")
+            
+            try:
+                subprocess.check_output(["open", "http://0.0.0.0:8050/"])
+            except:
+                pass
+        threading.Thread(target=wait_and_print).start()
 
         args = [
             # Use the default linker if not
@@ -133,7 +144,7 @@ class MEWE:
             f'%DEFAULT.order',
             os.environ.get("CROW_ORDER", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22"),
             "%DEFAULT.workers",
-            os.environ.get("CROW_WORKERS", "3"),
+            os.environ.get("CROW_WORKERS", "4"),
             "%souper.workers",
             os.environ.get("SOUPER_WORKERS", "3"),
             "%DEFAULT.keep-wasm-files",
@@ -161,14 +172,12 @@ class MEWE:
         args = args + [
             *os.environ.get("CROW_EXTRA_ARGS", "").split(" ")
         ]
-        if __debugprocess__:
-            print(" ".join(args))
-
+        
         if not __skipgeneration__:
             if self.exploration_timeout_crow >= 0:
                 try:
                     devnull = open(os.devnull, 'wb')
-                    popen = subprocess.Popen(args) #, stdout=devnull, stderr=devnull)    
+                    popen = subprocess.Popen(args)#, stdout=devnull, stderr=devnull)    
 
                     time.sleep(self.exploration_timeout_crow*7 + self.generation_timeout)
                     print("Killing process")

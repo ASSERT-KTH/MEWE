@@ -2,7 +2,7 @@ abspath() {
   [[ $1 = /* ]] && printf "%s\n" "$1" || printf "%s\n" "$PWD/$1"
 }
 
-ROOT=$(dirname $(abspath  $0))
+ROOT=$(abspath  $1)
 
 # env vars
 export LINKER=llvm-link
