@@ -4,12 +4,27 @@ MEWE is a toolset and methodology tailored to provide multivariant execution.
 
 
 ```bibtex
-@article{arteaga2021multi,
-  title={Multi-Variant Execution at the Edge},
-  author={Arteaga, Javier Cabrera and Laperdrix, Pierre and Monperrus, Martin and Baudry, Benoit},
-  journal={arXiv preprint arXiv:2108.08125},
-  year={2021}
+@inproceedings{10.1145/3560828.3564007,
+  author = {Cabrera Arteaga, Javier and Laperdrix, Pierre and Monperrus, Martin and Baudry, Benoit},
+  title = {Multi-Variant Execution at the Edge},
+  year = {2022},
+  isbn = {9781450398787},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/3560828.3564007},
+  doi = {10.1145/3560828.3564007},
+  abstract = {Edge-Cloud computing offloads parts of the computations that traditionally occurs in the cloud to edge nodes. The binary format WebAssembly is increasingly used to distribute and deploy services on such platforms. Edge-Cloud computing providers let their clients deploy stateless services in the form of WebAssembly binaries, which are then translated to machine code, sandboxed and executed at the edge. In this context, we propose a technique that (i) automatically diversifies WebAssembly binaries that are deployed to the edge and (ii) randomizes execution paths at runtime. Thus, an attacker cannot exploit all edge nodes with the same payload. Given a service, we automatically synthesize functionally equivalent variants for the functions providing the service. All the variants are then wrapped into a single multivariant WebAssembly binary. When the service endpoint is executed, every time a function is invoked, one of its variants is randomly selected. We implement this technique in the MEWE tool and we validate it with 7 services for which MEWE generates multivariant binaries that embed hundreds of function variants. We execute the multivariant binaries on the world-wide edge platform provided by Fastly, as part as a research collaboration. We show that multivariant binaries exhibit a real diversity of execution traces across the whole edge platform distributed around the globe.},
+  booktitle = {Proceedings of the 9th ACM Workshop on Moving Target Defense},
+  pages = {11–22},
+  numpages = {12},
+  keywords = {moving target defense, multivariant execution, edge-cloud computing, webassembly, diversification},
+  location = {Los Angeles, CA, USA},
+  series = {MTD'22}
 }
+
+  
+
+
 ```
 
 ## Requirements
